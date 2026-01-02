@@ -32,7 +32,10 @@ export default function AttendanceInfoQueryScreen() {
 
     const [quickLoginShow, setQuickLoginShow] = useState(false);
 
-    async function init() {}
+    async function init() {
+        const calender = await attendanceSystemApi.calenderData.getBySchoolTerm(year, term);
+        setCalender(calender);
+    }
 
     async function testToken() {
         const testRes = await attendanceSystemApi.testTokenExpired();
@@ -52,12 +55,12 @@ export default function AttendanceInfoQueryScreen() {
     }, [quickLoginShow]);
 
     useEffect(() => {
-        attendanceSystemApi.calenderData.getBySchoolTerm(year, term).then(setCalender);
+        init();
     }, [year, term]);
 
     return (
         <>
-            <AttendanceQuickLogin visible={quickLoginShow} onClose={() => setQuickLoginShow(false)} />
+            <AttendanceQuickLogin visible={quickLoginShow} onClose={() => setQuickLoginShow(false)} onSucceed={init} />
             <UnTermSelector year={year} term={term} onChange={setBoth} />
             <Button
                 onPress={() =>
@@ -98,7 +101,9 @@ interface ScreenType {
 }
 
 function TableScreen(props: ScreenType) {
-    const [week, setWeek] = useState(1);
+    const [week, setWeek] = useState(
+        +moment.duration(moment().diff(props.calender?.firstWeekBegin)).asWeeks().toFixed() + 1 ?? 1,
+    );
     const [attendanceData, setAttendanceData] = useState<AttendanceDataClass>();
     const [courseList, setCourseList] = useState<AttendanceCourseClass[]>([]);
 
@@ -123,9 +128,16 @@ function TableScreen(props: ScreenType) {
         const testToken = await props.onTestToken();
         if (testToken) {
             await getData();
+            await getAttendanceData();
         }
         setRefreshing(false);
     }
+
+    useEffect(() => {
+        const currentWeek = +moment.duration(moment().diff(props.calender?.firstWeekBegin)).asWeeks().toFixed() + 1;
+        if (currentWeek <= (props.calender?.weekTotal ?? 20) && currentWeek > 0) setWeek(currentWeek);
+        else setWeek(1);
+    }, [props.calender]);
 
     useEffect(() => {
         getData();
@@ -202,7 +214,7 @@ function RecordScreen(props: ScreenType) {
                 record.atdTime ?? "-",
                 `第${
                     +moment.duration(moment(record.day).diff(props.calender?.firstWeekBegin)).asWeeks().toFixed() + 1
-                }周${moment(record.day).format("ddd")}`,
+                }周${moment(record.day).format("dddd")}`,
                 record.roomName!,
                 record.periodConnect!,
             ]);

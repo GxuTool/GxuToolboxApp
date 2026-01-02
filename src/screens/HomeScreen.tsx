@@ -1,10 +1,7 @@
 import {GestureResponderEvent, PanResponder, PanResponderGestureState, ScrollView, View} from "react-native";
 import {ScheduleCard} from "@/components/app/ScheduleCard.tsx";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useRef, useState} from "react";
 import {UpdateCard} from "@/components/UpdateCard.tsx";
-import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
-import {init} from "@react-native-community/cli/build/tools/packageManager";
-import {CanvasSchedule} from "@/components/tool/infoQuery/courseSchedule/CanvasSchedule.tsx";
 
 export function HomeScreen() {
     // 滚动相关状态和引用
@@ -84,7 +81,6 @@ export function HomeScreen() {
                 contentContainerStyle={{
                     paddingVertical: 0,
                 }}>
-                <CanvasSchedule />
                 <UpdateCard />
                 {/*<ComingExamCard />*/}
                 <ScheduleCard />
