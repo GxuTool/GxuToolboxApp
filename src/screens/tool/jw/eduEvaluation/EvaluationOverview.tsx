@@ -1,4 +1,4 @@
-import {useCallback, useState} from "react";
+import {useCallback, useMemo, useState} from "react";
 import {ScrollView, StyleSheet} from "react-native";
 import {Row, Table} from "react-native-reanimated-table";
 import {useFocusEffect, useNavigation} from "@react-navigation/native";
@@ -9,6 +9,7 @@ import {EvaluationRow} from "@/components/tool/eduEvaluation/EvaluationRow.tsx";
 import {evaluationApi} from "@/js/jw/evaluation.ts";
 import {Evaluation} from "@/type/eduEvaluation/evaluation.type.ts";
 import {useWebView} from "@/hooks/app.ts";
+import {EvaluationComment} from "@/screens/tool/jw/eduEvaluation/EvaluationComment.tsx";
 
 export function EvaluationOverview() {
     const {theme} = useTheme();
@@ -24,32 +25,37 @@ export function EvaluationOverview() {
         Color(theme.colors.background),
         theme.mode === "dark" ? 0.1 : 0.4,
     ).setAlpha(theme.mode === "dark" ? 0.3 : 0.8).rgbaString;
-    const styles = StyleSheet.create({
-        container: {
-            paddingHorizontal: 10,
-            paddingVertical: 15,
-        },
-        header: {
-            height: 50,
-            backgroundColor: defaultColor,
-        },
-        headerText: {
-            textAlign: "center",
-            fontWeight: "bold",
-            color: theme.colors.black,
-            fontSize: 16,
-        },
-        row: {
-            height: 45,
-            borderBottomWidth: 1,
-            borderBottomColor: Color(theme.colors.primary).setAlpha(0.3).rgbaString,
-            alignItems: "center",
-        },
-        rowText: {
-            textAlign: "center",
-            fontSize: 14,
-        },
-    });
+
+    const styles = useMemo(
+        () =>
+            StyleSheet.create({
+                container: {
+                    paddingHorizontal: 10,
+                    paddingVertical: 15,
+                },
+                header: {
+                    height: 50,
+                    backgroundColor: defaultColor,
+                },
+                headerText: {
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    color: theme.colors.black,
+                    fontSize: 16,
+                },
+                row: {
+                    height: 45,
+                    borderBottomWidth: 1,
+                    borderBottomColor: Color(theme.colors.primary).setAlpha(0.3).rgbaString,
+                    alignItems: "center",
+                },
+                rowText: {
+                    textAlign: "center",
+                    fontSize: 14,
+                },
+            }),
+        [theme],
+    );
 
     const colorMap: Record<string, string> = {
         已评完: theme.colors.success,
@@ -57,6 +63,16 @@ export function EvaluationOverview() {
         未评: theme.colors.error,
     };
     const statusList = Object.keys(colorMap);
+
+    const statusCounts = useMemo(() => {
+        const cnt = {已评完: 0, 未评完: 0, 未评: 0};
+        evaList.forEach(item => {
+            if (cnt[item.tjztmc] !== undefined) {
+                cnt[item.tjztmc]++;
+            }
+        });
+        return cnt;
+    }, [evaList]);
 
     async function init() {
         const res = await evaluationApi.getEvaluationList();
@@ -76,9 +92,9 @@ export function EvaluationOverview() {
                 <Text style={{fontSize: 14}}>请点击下方评价列表中的元素，进入详情页评价</Text>
                 <Text style={{fontSize: 14}}>当前共有 {evaList.length} 项评价</Text>
                 <Text style={{fontSize: 14}}>
-                    其中 {evaList.filter(eva => eva.tjztmc === statusList[0]).length} 项已评完，
-                    {evaList.filter(eva => eva.tjztmc === statusList[1]).length} 项未评完，
-                    {evaList.filter(eva => eva.tjztmc === statusList[2]).length} 项未评
+                    其中 {statusCounts["已评完"]} 项已评完，
+                    {statusCounts["未评完"]} 项未评完，
+                    {statusCounts["未评"]} 项未评
                 </Text>
                 <Button
                     containerStyle={{width: "100%"}}
@@ -86,6 +102,13 @@ export function EvaluationOverview() {
                         openInJw("/xspjgl/xspj_cxXspjIndex.html?doType=details&gnmkdm=N401605&layout=default");
                     }}>
                     前往教务查看
+                </Button>
+                <Button
+                    containerStyle={{width: "100%"}}
+                    onPress={() => {
+                        navigation.navigate("EvaluationTemplate");
+                    }}>
+                    自定义评价模板
                 </Button>
                 <Table style={{width: "100%"}}>
                     <Row

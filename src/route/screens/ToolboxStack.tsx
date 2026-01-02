@@ -22,6 +22,7 @@ import {TimeShiftScreen} from "@/screens/tool/jw/notification/TimeShiftScreen.ts
 import AttendanceInfoQueryScreen from "@/screens/tool/auth/attendanceSystem/AttendanceInfoQueryScreen.tsx";
 import WebViewScreen from "@/screens/WebViewScreen.tsx";
 import {useWebView} from "@/hooks/app.ts";
+import {EvaluationTemplate} from "@/screens/tool/jw/eduEvaluation/EvaluationTemplate.tsx";
 
 const Stack = createNativeStackNavigator();
 
@@ -111,6 +112,7 @@ export function ToolboxStack() {
             <Stack.Screen name="EvaluationOverview" component={EvaluationOverview} options={{title: "期末学生评价"}} />
             <Stack.Screen name="EvaluationDetail" component={EvaluationDetail} options={{title: "学生评价细节"}} />
             <Stack.Screen name="EvaluationComment" component={EvaluationComment} options={{title: "填写评语"}} />
+            <Stack.Screen name="EvaluationTemplate" component={EvaluationTemplate} options={{title:"评价模板"}} />
 
             <Stack.Screen name="PositionListScreen" component={BuildingListScreen} options={{title: "地图导航"}} />
             <Stack.Screen name="WidgetPreviewScreen" component={WidgetPreviewScreen} options={{title: "小部件预览"}} />
