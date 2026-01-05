@@ -7,6 +7,7 @@ import {EvaCategory} from "@/components/tool/eduEvaluation/EvaCategory.tsx";
 import {EvaluationRequest} from "@/type/eduEvaluation/evaluation.type.ts";
 import {evaluationApi} from "@/js/jw/evaluation.ts";
 import {evaluationReducer, initialState} from "@/reducer/EvaReducer.ts";
+import {createDefaultReq, fillReq} from "@/js/jw/evaReq.ts";
 
 export function EvaluationDetail({navigation, route}) {
     const scrollViewRef = useRef<ScrollView>(null);
@@ -20,14 +21,14 @@ export function EvaluationDetail({navigation, route}) {
         dispatch({type: "SELECT_OPTION", payload: {catIdx, itIdx, optIdx}});
     }, []);
 
-    useEffect(() => {
-        let count = 0;
-        if (selected) {
-            for (const cat_key in selected[0]) {
-                count += Object.values(selected[0][cat_key]).length;
-            }
-        }
-    }, [selected]);
+    // useEffect(() => {
+    //     let count = 0;
+    //     if (selected) {
+    //         for (const cat_key in selected[0]) {
+    //             count += Object.values(selected[0][cat_key]).length;
+    //         }
+    //     }
+    // }, [selected]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -120,45 +121,12 @@ export function EvaluationDetail({navigation, route}) {
     const handleSave = async (submitSelected = selected, submitComment: string = comment) => {
         console.log("start-saving");
 
-        const reqToSend: EvaluationRequest = JSON.parse(JSON.stringify(defaultReq));
+        const reqToSend = fillReq(defaultReq, submitSelected, submitComment, ids);
 
         if (reqToSend.modelList[0]) {
             reqToSend.modelList[0].py = submitComment;
         }
 
-        // 判断状态：已评完 或 未评完
-        let count: number = 0;
-        if (selected) {
-            for (const cat_key in submitSelected[0]) {
-                count += Object.values(submitSelected[0][cat_key]).length;
-            }
-        }
-        if (count === 16) {
-            reqToSend.modelList[0].pjzt = "1";
-        } else {
-            reqToSend.modelList[0].pjzt = "0";
-        }
-
-        // 填充pfdjdmxmb_id
-        for (const teacherIdx in submitSelected) {
-            for (const categoryIdx in submitSelected[teacherIdx]) {
-                for (const itemIdx in submitSelected[teacherIdx][categoryIdx]) {
-                    const optionIdx = submitSelected[teacherIdx][categoryIdx][itemIdx];
-                    const categoryIndex = Number(categoryIdx);
-                    const itemIndex = Number(itemIdx);
-
-                    const targetQuestion =
-                        reqToSend.modelList?.[0]?.xspjList?.[categoryIndex]?.childXspjList?.[itemIndex];
-                    const optionId = ids!.sections?.[categoryIndex]?.questions?.[itemIndex]?.optionIds?.[optionIdx];
-
-                    if (targetQuestion && optionId) {
-                        targetQuestion.pfdjdmxmb_id = optionId;
-                    } else {
-                        console.warn(`无法为[${categoryIndex}-${itemIndex}]找到对应的请求路径或选项ID`);
-                    }
-                }
-            }
-        }
         const res = await evaluationApi.handleEvaResult(defaultReq, reqToSend);
         console.log(res);
         ToastAndroid.showWithGravity(res, ToastAndroid.SHORT, 5);
@@ -178,136 +146,12 @@ export function EvaluationDetail({navigation, route}) {
                 evaluationItem.pjmbmcb_id,
             );
             const {idObj, teachers, selected} = parseEvaluationHTML(HtmlText);
-            const k: EvaluationRequest = {
-                jgh_id: evaluationItem.jgh_id,
-                jxb_id: evaluationItem.jxb_id,
-                kch_id: evaluationItem.kch_id,
-                modelList: [
-                    {
-                        pjmbmcb_id: idObj.panelId,
-                        // ↓这里写死才能向“未评”的提交评价
-                        pjdxdm: "01",
-                        xspfb_id: idObj.formId,
-                        fxzgf: null,
-                        pjzt: "0",
-                        py: "",
-                        xspjList: [
-                            {
-                                pjzbxm_id: idObj.sections[0].sectionId,
-                                childXspjList: [
-                                    {
-                                        zsmbmcb_id: idObj.sections[0].questions[0].zsId,
-                                        pjzbxm_id: idObj.sections[0].questions[0].pjId,
-                                        pfdjdmb_id: idObj.sections[0].questions[0].pfId,
-                                    },
-                                    {
-                                        zsmbmcb_id: idObj.sections[0].questions[1].zsId,
-                                        pjzbxm_id: idObj.sections[0].questions[1].pjId,
-                                        pfdjdmb_id: idObj.sections[0].questions[1].pfId,
-                                    },
-                                    {
-                                        pfdjdmb_id: idObj.sections[0].questions[2].pfId,
-                                        pjzbxm_id: idObj.sections[0].questions[2].pjId,
-                                        zsmbmcb_id: idObj.sections[0].questions[2].zsId,
-                                    },
-                                    {
-                                        zsmbmcb_id: idObj.sections[0].questions[3].zsId,
-                                        pjzbxm_id: idObj.sections[0].questions[3].pjId,
-                                        pfdjdmb_id: idObj.sections[0].questions[3].pfId,
-                                    },
-                                ],
-                            },
-                            {
-                                pjzbxm_id: idObj.sections[1].sectionId,
-                                childXspjList: [
-                                    {
-                                        zsmbmcb_id: idObj.sections[1].questions[0].zsId,
-                                        pjzbxm_id: idObj.sections[1].questions[0].pjId,
-                                        pfdjdmb_id: idObj.sections[1].questions[0].pfId,
-                                    },
-                                    {
-                                        zsmbmcb_id: idObj.sections[1].questions[1].zsId,
-                                        pjzbxm_id: idObj.sections[1].questions[1].pjId,
-                                        pfdjdmb_id: idObj.sections[1].questions[1].pfId,
-                                    },
-                                    {
-                                        pfdjdmb_id: idObj.sections[1].questions[2].pfId,
-                                        pjzbxm_id: idObj.sections[1].questions[2].pjId,
-                                        zsmbmcb_id: idObj.sections[1].questions[2].zsId,
-                                    },
-                                ],
-                            },
-                            {
-                                pjzbxm_id: idObj.sections[2].sectionId,
-                                childXspjList: [
-                                    {
-                                        zsmbmcb_id: idObj.sections[2].questions[0].zsId,
-                                        pjzbxm_id: idObj.sections[2].questions[0].pjId,
-                                        pfdjdmb_id: idObj.sections[2].questions[0].pfId,
-                                    },
-                                    {
-                                        zsmbmcb_id: idObj.sections[2].questions[1].zsId,
-                                        pjzbxm_id: idObj.sections[2].questions[1].pjId,
-                                        pfdjdmb_id: idObj.sections[2].questions[1].pfId,
-                                    },
-                                    {
-                                        pfdjdmb_id: idObj.sections[2].questions[2].pfId,
-                                        pjzbxm_id: idObj.sections[2].questions[2].pjId,
-                                        zsmbmcb_id: idObj.sections[2].questions[2].zsId,
-                                    },
-                                ],
-                            },
-                            {
-                                pjzbxm_id: idObj.sections[3].sectionId,
-                                childXspjList: [
-                                    {
-                                        zsmbmcb_id: idObj.sections[3].questions[0].zsId,
-                                        pjzbxm_id: idObj.sections[3].questions[0].pjId,
-                                        pfdjdmb_id: idObj.sections[3].questions[0].pfId,
-                                    },
-                                    {
-                                        zsmbmcb_id: idObj.sections[3].questions[1].zsId,
-                                        pjzbxm_id: idObj.sections[3].questions[1].pjId,
-                                        pfdjdmb_id: idObj.sections[3].questions[1].pfId,
-                                    },
-                                    {
-                                        pfdjdmb_id: idObj.sections[3].questions[2].pfId,
-                                        pjzbxm_id: idObj.sections[3].questions[2].pjId,
-                                        zsmbmcb_id: idObj.sections[3].questions[2].zsId,
-                                    },
-                                ],
-                            },
-                            {
-                                pjzbxm_id: idObj.sections[4].sectionId,
-                                childXspjList: [
-                                    {
-                                        zsmbmcb_id: idObj.sections[4].questions[0].zsId,
-                                        pjzbxm_id: idObj.sections[4].questions[0].pjId,
-                                        pfdjdmb_id: idObj.sections[4].questions[0].pfId,
-                                    },
-                                    {
-                                        zsmbmcb_id: idObj.sections[4].questions[1].zsId,
-                                        pjzbxm_id: idObj.sections[4].questions[1].pjId,
-                                        pfdjdmb_id: idObj.sections[4].questions[1].pfId,
-                                    },
-                                    {
-                                        pfdjdmb_id: idObj.sections[4].questions[2].pfId,
-                                        pjzbxm_id: idObj.sections[4].questions[2].pjId,
-                                        zsmbmcb_id: idObj.sections[4].questions[2].zsId,
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-                xsdm: "01",
-                ztpjbl: 100,
-            };
-            console.log(teachers[0].comment);
+
+            const defReq = createDefaultReq(evaluationItem, idObj);
 
             dispatch({
                 type: "FETCH_SUCCESS",
-                payload: {teachers, selected: selected || {}, ids: idObj, defaultReq: k},
+                payload: {teachers, selected: selected || {}, ids: idObj, defaultReq: defReq},
             });
         } catch (e: any) {
             dispatch({type: "FETCH_ERROR", payload: e.message});
