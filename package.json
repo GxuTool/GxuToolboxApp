@@ -1,7 +1,7 @@
 {
     "name": "gxu_tool_app",
-    "version": "1.6.2 beta",
-    "versionCode": 10602,
+    "version": "1.6.3 beta",
+    "versionCode": 10603,
     "private": true,
     "scripts": {
         "android": "react-native run-android",

@@ -28,8 +28,6 @@ export const jwxt = {
     login: async (
         username: string,
         password: string,
-        public_key: string,
-        public_length: string,
     ): Promise<AxiosResponse> => {
         return new Promise(resolve => {
             http.post(
@@ -39,7 +37,7 @@ export const jwxt = {
                 {
                     language: "zh_CN",
                     yhm: username,
-                    mm: getEncryptedPassword(password, public_key, public_length),
+                    mm: password,
                     yzm: "",
                 },
             ).then(res => {
