@@ -8,9 +8,6 @@ import {ToastAndroid} from "react-native";
 import {UserInfo} from "@/type/infoQuery/base.ts";
 import {store} from "@/js/store.ts";
 import moment from "moment/moment";
-import {WebViewSource} from "react-native-webview/lib/WebViewTypes";
-import type {NavigationProp} from "@react-navigation/core/src/types.tsx";
-import type {NavigationState} from "@react-navigation/routers";
 
 export const jwxt = {
     getPublicKey: (): Promise<{modulus: string; exponent: string}> => {
@@ -28,6 +25,8 @@ export const jwxt = {
     login: async (
         username: string,
         password: string,
+        public_key: string,
+        public_length: string,
     ): Promise<AxiosResponse> => {
         return new Promise(resolve => {
             http.post(
@@ -37,7 +36,7 @@ export const jwxt = {
                 {
                     language: "zh_CN",
                     yhm: username,
-                    mm: password,
+                    mm: getEncryptedPassword(password, public_key, public_length),
                     yzm: "",
                 },
             ).then(res => {

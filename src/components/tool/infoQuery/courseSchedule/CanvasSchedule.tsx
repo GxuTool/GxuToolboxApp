@@ -1,9 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from "react";
-import {View, Dimensions, StyleSheet, ToastAndroid} from "react-native";
+import {Dimensions, StyleSheet, ToastAndroid, View} from "react-native";
 import Canvas, {CanvasRenderingContext2D} from "react-native-canvas";
 import {Color} from "@/js/color.ts";
-import {Image, useTheme} from "@rneui/themed";
-import {Button} from "@rneui/themed";
+import {Button, useTheme} from "@rneui/themed";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {CourseScheduleContext, CourseScheduleData} from "@/js/jw/course.ts";
 import moment from "moment/moment";
@@ -12,7 +11,7 @@ import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/js/store.ts";
 import {http} from "@/js/http.ts";
 import {Flex} from "@/components/un-ui";
-import RNFS, {exists} from "react-native-fs";
+import RNFS from "react-native-fs";
 import Share, {ShareOptions} from "react-native-share";
 import {CameraRoll} from "@react-native-camera-roll/camera-roll";
 
@@ -69,7 +68,7 @@ export function CanvasSchedule() {
      * 调课信息
      */
     async function getTimeShift() {
-        const {data} = await http.get("https://acm.gxu.edu.cn/mirror/gxujwtapp/data.json");
+        const {data} = await http.get("https://file.unde.site/GxuToolApp/data.json");
         if (data) setTimeShift(data.timeShift);
     }
 

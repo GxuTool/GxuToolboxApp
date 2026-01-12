@@ -52,7 +52,9 @@ export function UpdateCard() {
     });
 
     async function init() {
-        const {data} = await axios.get<VersionRes>("https://acm.gxu.edu.cn/mirror/gxujwtapp/version.json");
+        const {data} = await axios.get<VersionRes>(
+            "https://file.unde.site/GxuToolApp/version.json",
+        );
         const newVersion = data[channel].find(version => version.versionCode > PackageJSON.versionCode);
         if (newVersion) {
             setVisible(true);
@@ -104,7 +106,7 @@ export function UpdateCard() {
                     <Button
                         loading={downloading}
                         disabled={downloading}
-                        onPress={() => handleUpdate(version?.ori.acm!)}>
+                        onPress={() => handleUpdate(version?.ori.official!)}>
                         {downloading ? `下载中 ${progress.toFixed(1)}%` : "获取更新"}
                     </Button>
                     {/*<Button type="clear" onPress={() => setVisible(false)} disabled={downloading}>*/}
