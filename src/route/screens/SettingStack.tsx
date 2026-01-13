@@ -12,7 +12,6 @@ import {useNavigation} from "@react-navigation/native";
 import {jwxt} from "@/js/jw/jwxt.ts";
 import {AuthAccountScreen} from "@/screens/setting/account/AuthAccountScreen.tsx";
 import {AttendanceSystemAccountScreen} from "@/screens/setting/account/AttendanceSystemAccountScreen.tsx";
-import {useWebView} from "@/hooks/app.ts";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,7 +19,6 @@ export function SettingStack() {
     const {theme} = useTheme();
     const {userConfig} = useContext(UserConfigContext);
     const navigation = useNavigation();
-    const {openInJw} = useWebView();
     const headerRightEle = () => {
         return (
             <Button

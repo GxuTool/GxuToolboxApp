@@ -31,7 +31,7 @@ const EvaluationRowComponent = ({item, onPress, colWidths, colorMap}: Evaluation
         <TouchableOpacity onPress={() => onPress(item)}>
             <Row
                 cellTextStyle={cell => ({color: colorMap[cell] ?? theme.colors.black})}
-                data={[item.kcmc, item.jzgmc, item.tjztmc]}
+                data={[`${item.kcmc} - ${item.xsmc}`, item.jzgmc, item.tjztmc]}
                 style={styles.row}
                 flexArr={colWidths}
                 textStyle={styles.rowText}

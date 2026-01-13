@@ -308,6 +308,7 @@ export function CanvasSchedule() {
             const filePath = await getImagePath();
             await CameraRoll.saveToCameraRoll(filePath, "photo");
             ToastAndroid.show("已保存至相册", ToastAndroid.SHORT);
+            await clearDebugImage();
         } catch (e) {
             console.error(e);
         }
@@ -325,6 +326,21 @@ export function CanvasSchedule() {
         };
         await Share.open(shareOptions);
         ToastAndroid.show("已发送", ToastAndroid.SHORT);
+    };
+
+    /**
+     * 清除临时目录的文件，可在调试用
+     */
+    const clearDebugImage = async ()=>{
+        const filePath = await getImagePath();
+        try {
+            if (await RNFS.exists(filePath)){
+                await RNFS.unlink(filePath);
+                // ToastAndroid.show("已清除预览图", ToastAndroid.SHORT);
+            }
+        } catch (e){
+            console.log(e);
+        }
     };
 
     return (

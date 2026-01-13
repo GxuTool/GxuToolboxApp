@@ -23,32 +23,76 @@ const EVALUATION_ITEMS: string[] = [
     "本课程选用的教材、任课教师推荐的课程资源对我的学习有帮助。",
     "任课教师对我的思想言行和成长产生了积极影响，引导我树立正确的历史观、民族观、国家观、文化观和人生观。",
 ];
+const CATEGORY_STRUCTURE = [
+    [4, 3, 3, 3, 3], // 老师0: 第0类有4题, 第1类有3题, ...
+];
+
+// 新增：定义新的模板数据类型
+export interface EvaluationTemplate {
+    // 嵌套结构，键为教师索引 -> 类别索引 -> 题目索引，值为选项索引
+    selected: Record<number, Record<number, Record<number, number>>>;
+    comment: string;
+}
+
 const INIT_ANS = Object.fromEntries(EVALUATION_ITEMS.map((_, i) => [i, "满意"]));
 
 // --- Storage Logic ---
 const STORAGE_KEY = "@EvaluationTemplate";
-
-interface EvaluationTemplateData {
-    answers: Record<number, LevelType>;
-    comment: string;
-}
-
-async function saveTemplate(data: EvaluationTemplateData): Promise<void> {
+async function saveTemplate(answers: Record<number, LevelType>, comment: string): Promise<void> {
     try {
+        const selected: EvaluationTemplate["selected"] = {};
+        let itemCounter = 0;
+
+        CATEGORY_STRUCTURE.forEach((teacherCategories, teacherIdx) => {
+            selected[teacherIdx] = {};
+            teacherCategories.forEach((itemCount, categoryIdx) => {
+                selected[teacherIdx][categoryIdx] = {};
+                for (let i = 0; i < itemCount; i++) {
+                    const itemIdx = itemCounter;
+                    const answerText = answers[itemIdx];
+                    const optionIdx = LEVELS.indexOf(answerText);
+                    if (optionIdx !== -1) {
+                        selected[teacherIdx][categoryIdx][i] = optionIdx;
+                    }
+                    itemCounter++;
+                }
+            });
+        });
+
+        const data: EvaluationTemplate = { selected, comment };
         const jsonValue = JSON.stringify(data);
         await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
     } catch (e) {
-        console.error("Failed to save evaluation template", e);
-        Alert.alert("错误", "保存模板失败");
+        // ... 错误处理 ...
     }
 }
 
-async function loadTemplate(): Promise<EvaluationTemplateData | null> {
+async function loadTemplate(): Promise<{ answers: Record<number, LevelType>, comment: string } | null> {
     try {
         const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-        return jsonValue != null ? (JSON.parse(jsonValue) as EvaluationTemplateData) : null;
+        if (jsonValue === null) return null;
+
+        const storedData: EvaluationTemplate = JSON.parse(jsonValue);
+        const answers: Record<number, LevelType> = {};
+        let itemCounter = 0;
+
+        CATEGORY_STRUCTURE.forEach((teacherCategories, teacherIdx) => {
+            teacherCategories.forEach((itemCount, categoryIdx) => {
+                for (let i = 0; i < itemCount; i++) {
+                    const optionIdx = storedData.selected?.[teacherIdx]?.[categoryIdx]?.[i];
+                    if (optionIdx !== undefined && LEVELS[optionIdx]) {
+                        answers[itemCounter] = LEVELS[optionIdx];
+                    } else {
+                        answers[itemCounter] = "满意"; // Fallback
+                    }
+                    itemCounter++;
+                }
+            });
+        });
+
+        return { answers, comment: storedData.comment || "" };
     } catch (e) {
-        console.error("Failed to load evaluation template", e);
+        // ... 错误处理 ...
         return null;
     }
 }
@@ -61,23 +105,24 @@ export function EvaluationTemplate() {
 
     useEffect(() => {
         const loadData = async () => {
-            const storedData = await loadTemplate();
+            const storedData = await loadTemplate(); // loadTemplate 现在返回扁平结构
             if (storedData) {
-                if (storedData.answers) setAnswers(storedData.answers);
-                if (storedData.comment) setComment(storedData.comment);
+                setAnswers(storedData.answers);
+                setComment(storedData.comment);
             }
         };
         loadData();
-    }, []); // Run only once on mount
+    }, []);
 
     const handleAnswerChange = useCallback((index: number, val: LevelType) => {
         setAnswers(prev => ({...prev, [index]: val}));
     }, []);
 
     const handleSave = async () => {
-        await saveTemplate({answers, comment});
+        await saveTemplate(answers, comment);
         Alert.alert("成功", "模板已保存");
     };
+
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -179,11 +224,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         padding: 20,
         marginBottom: 16,
-        borderRadius: 8,
         shadowColor: "#000",
         shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.05,
-        shadowRadius: 6,
     },
     cardTitle: {
         fontSize: 15,

@@ -21,15 +21,6 @@ export function EvaluationDetail({navigation, route}) {
         dispatch({type: "SELECT_OPTION", payload: {catIdx, itIdx, optIdx}});
     }, []);
 
-    // useEffect(() => {
-    //     let count = 0;
-    //     if (selected) {
-    //         for (const cat_key in selected[0]) {
-    //             count += Object.values(selected[0][cat_key]).length;
-    //         }
-    //     }
-    // }, [selected]);
-
     useLayoutEffect(() => {
         navigation.setOptions({
             title: `学生评价细节 - ${evaluationItem.jzgmc}（${evaluationItem.kcmc}）`,

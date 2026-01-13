@@ -18,6 +18,8 @@ export interface Evaluation {
     jzgmc: string;
     /** 课程名称 */
     kcmc: string;
+
+    xsmc: string;
 }
 
 // 评价ID（传上教务系统的）

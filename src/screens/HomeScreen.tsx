@@ -2,7 +2,6 @@ import {GestureResponderEvent, PanResponder, PanResponderGestureState, ScrollVie
 import {ScheduleCard} from "@/components/app/ScheduleCard.tsx";
 import React, {useRef, useState} from "react";
 import {UpdateCard} from "@/components/UpdateCard.tsx";
-import {CanvasSchedule} from "@/components/tool/infoQuery/courseSchedule/CanvasSchedule.tsx";
 
 export function HomeScreen() {
     // 滚动相关状态和引用
@@ -83,7 +82,6 @@ export function HomeScreen() {
                     paddingVertical: 0,
                 }}>
                 <UpdateCard />
-                {/*<CanvasSchedule />*/}
                 {/*<ComingExamCard />*/}
                 <ScheduleCard />
             </ScrollView>

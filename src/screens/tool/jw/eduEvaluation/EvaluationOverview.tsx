@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useState} from "react";
-import {ScrollView, StyleSheet} from "react-native";
+import {ScrollView, StyleSheet, ToastAndroid} from "react-native";
 import {Row, Table} from "react-native-reanimated-table";
 import {useFocusEffect, useNavigation} from "@react-navigation/native";
 import {Color} from "@/js/color.ts";
@@ -10,12 +10,16 @@ import {evaluationApi} from "@/js/jw/evaluation.ts";
 import {Evaluation} from "@/type/eduEvaluation/evaluation.type.ts";
 import {useWebView} from "@/hooks/app.ts";
 import {EvaluationComment} from "@/screens/tool/jw/eduEvaluation/EvaluationComment.tsx";
+import {Icon} from "@/components/un-ui";
+import {parseEvaluationHTML} from "@/js/jw/evaParser.ts";
+import {createDefaultReq, fillReq} from "@/js/jw/evaReq.ts";
+import {loadTemplate} from "@/screens/tool/jw/eduEvaluation/EvaluationTemplate.tsx";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export function EvaluationOverview() {
     const {theme} = useTheme();
     const [evaList, setEvaList] = useState<Evaluation[]>([]);
     const navigation = useNavigation();
-    const {openInJw} = useWebView();
     const colWidths = [9, 6, 5];
     const handleRowPress = (item: Evaluation) => {
         navigation.navigate("EvaluationDetail", {evaluationItem: item});
@@ -74,6 +78,33 @@ export function EvaluationOverview() {
         return cnt;
     }, [evaList]);
 
+    const oneKey = async () => {
+        let temp = await AsyncStorage.getItem("@EvaluationTemplate");
+        temp = JSON.parse(typeof temp === "string" ? temp : "" as string);
+        console.log(temp);
+        for (const evaluationItem of evaList) {
+            ToastAndroid.showWithGravity(`评教：${evaluationItem.kcmc}-${evaluationItem.xsmc}-${evaluationItem.jzgmc}`,ToastAndroid.SHORT,1);
+            const HtmlText = await evaluationApi.getEvaluationDetail(
+                evaluationItem.jgh_id,
+                evaluationItem.jxb_id,
+                evaluationItem.kch_id,
+                evaluationItem.xsdm,
+                evaluationItem.pjmbmcb_id,
+            );
+            const {idObj, teachers, selected} = parseEvaluationHTML(HtmlText);
+
+            const defReq = createDefaultReq(evaluationItem, idObj);
+            const reqToSend = fillReq(defReq, temp.selected, temp.comment, idObj);
+
+            const res = await evaluationApi.handleEvaResult(defReq, reqToSend);
+            console.log(res);
+            ToastAndroid.showWithGravity(res, ToastAndroid.SHORT, 5);
+            await init();
+            //
+            // break;
+        }
+    };
+
     async function init() {
         const res = await evaluationApi.getEvaluationList();
         res.items.sort((a, b) => statusList.indexOf(b.tjztmc) - statusList.indexOf(a.tjztmc));
@@ -89,26 +120,25 @@ export function EvaluationOverview() {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Flex direction="column" gap={10}>
-                <Text style={{fontSize: 14}}>请点击下方评价列表中的元素，进入详情页评价</Text>
-                <Text style={{fontSize: 14}}>当前共有 {evaList.length} 项评价</Text>
-                <Text style={{fontSize: 14}}>
-                    其中 {statusCounts["已评完"]} 项已评完，
-                    {statusCounts["未评完"]} 项未评完，
-                    {statusCounts["未评"]} 项未评
-                </Text>
+                <Flex direction="row" justify="space-between" gap={20}>
+                    <Text style={{fontSize: 16}}>
+                        总计 {evaList.length} ~ 已评完 {statusCounts["已评完"]} ~ 未评 {statusCounts["未评"]} ~ 未评完{" "}
+                        {statusCounts["未评完"]}{" "}
+                    </Text>
+                    <Button
+                        containerStyle={{width: "10%"}}
+                        onPress={() => {
+                            navigation.navigate("EvaluationTemplate");
+                        }}>
+                        <Icon name={"cog"} size={20} color={"white"} />
+                    </Button>
+                </Flex>
                 <Button
                     containerStyle={{width: "100%"}}
                     onPress={() => {
-                        openInJw("/xspjgl/xspj_cxXspjIndex.html?doType=details&gnmkdm=N401605&layout=default");
+                        oneKey();
                     }}>
-                    前往教务查看
-                </Button>
-                <Button
-                    containerStyle={{width: "100%"}}
-                    onPress={() => {
-                        navigation.navigate("EvaluationTemplate");
-                    }}>
-                    自定义评价模板
+                    应用自定义模板一键评教
                 </Button>
                 <Table style={{width: "100%"}}>
                     <Row
