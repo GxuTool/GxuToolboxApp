@@ -274,3 +274,86 @@ export interface PhyExp {
     /** 实验室名称 */
     sysmc: string;
 }
+
+/** 选课分页类型 */
+export enum CourseListTypeId {
+    Major = "01",
+    Optional = "10",
+    PE = "05",
+    Special = "09",
+    Other = "11",
+}
+export interface CourseSelectionListItem {
+    /** 保留原因人数 */
+    blyxrs: string;
+    /** 比例占用率 */
+    blzyl: string;
+    /** 重修班级标识 */
+    cxbj: string;
+    /** 中文格式日期 */
+    date: string;
+    /** 数字格式日期 */
+    dateDigit: string;
+    /** 分隔符格式日期 */
+    dateDigitSeparator: string;
+    /** 日 */
+    day: string;
+    /** 方向班级标识 */
+    fxbj: string;
+    /** 机构排选制度 */
+    jgpxzd: string;
+    /** 教学班ID */
+    jxb_id: string;
+    /** 教学班名称 */
+    jxbmc: string;
+    /** 教学班学分 */
+    jxbxf: string;
+    /** 教学班总人数 */
+    jxbzls: string;
+    /** 课程号 */
+    kch: string;
+    /** 课程号ID */
+    kch_id: string;
+    /** 课程类型名称 */
+    kclxmc: string;
+    /** 课程名称 */
+    kcmc: string;
+    /** 课程行 */
+    kcrow: string;
+    /** 课程类型代码 */
+    kklxdm: CourseListTypeId;
+    /** 课程种类名称 */
+    kzmc: string;
+    /** 列表导航 */
+    listnav: string;
+    /** 本地化键 */
+    localeKey: string;
+    /** 月份 */
+    month: string;
+    /** 总页数 */
+    pageTotal: number;
+    /** 是否可分页 */
+    pageable: boolean;
+    /** 查询模型 */
+    queryModel: QueryModel;
+    /** 是否可范围选择 */
+    rangeable: boolean;
+    /** 任务总学时 */
+    rwzxs: string;
+    /** 总结果数 */
+    totalResult: string;
+    /** 用户模型 */
+    userModel: UserModel;
+    /** 学分 */
+    xf: string;
+    /** 选修课班级 */
+    xxkbj: string;
+    /** 年份 */
+    year: string;
+    /** 已选人数 */
+    yxzrs: string;
+    /** 主从跟班标识 */
+    zcongbj: string;
+};
+
+

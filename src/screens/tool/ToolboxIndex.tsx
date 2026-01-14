@@ -40,34 +40,40 @@ export function ToolboxIndex() {
             title: "信息查询",
             data: [
                 {
-                    label: "课表查询",
+                    label: "课表",
                     icon: <Icon name="calendar-month" size={iconSize} />,
                     type: "navigation",
                     navigation: "courseScheduleQuery",
                 },
                 {
-                    label: "班级课表查询",
+                    label: "班级课表",
                     icon: <Icon name="calendar-month-outline" size={iconSize} />,
                     type: "navigation",
                     navigation: "classCourseSchedule",
                 },
                 {
-                    label: "考试信息查询",
+                    label: "考试信息",
                     icon: <Icon name="information-box-outline" size={iconSize} />,
                     type: "navigation",
                     navigation: "examInfo",
                 },
                 {
-                    label: "考试成绩查询",
+                    label: "考试成绩",
                     icon: <Icon name="chart-box" size={iconSize} />,
                     type: "navigation",
                     navigation: "examScore",
                 },
                 {
-                    label: "考勤信息查询",
+                    label: "考勤信息",
                     icon: <Icon name="clock" size={iconSize} />,
                     type: "navigation",
                     navigation: "AttendanceInfoQueryScreen",
+                },
+                {
+                    label: "选课课程列表",
+                    icon: <Icon name="list-box" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "courseSelectionList",
                 },
                 // {
                 //     label: "自主选课",
@@ -80,13 +86,13 @@ export function ToolboxIndex() {
             title: "实践课",
             data: [
                 {
-                    label: "物理实验课查询",
+                    label: "物理实验课",
                     icon: <Icon name="flask" size={iconSize} />,
                     type: "navigation",
                     navigation: "phyExpScreen",
                 },
                 {
-                    label: "金工实训查询",
+                    label: "金工实训",
                     icon: <Icon name="tools" size={iconSize} />,
                     type: "navigation",
                     navigation: "engTrainingScheduleScreen",
@@ -97,13 +103,13 @@ export function ToolboxIndex() {
             title: "通知",
             data: [
                 {
-                    label: "调课信息查询",
+                    label: "调课信息",
                     icon: <Icon name="clock-star-four-points-outline" size={iconSize} />,
                     type: "navigation",
                     navigation: "reschedulingNews",
                 },
                 {
-                    label: "调休信息查询",
+                    label: "调休信息",
                     icon: <Icon name="calendar-clock" size={iconSize} />,
                     type: "navigation",
                     navigation: "timeShiftScreen",

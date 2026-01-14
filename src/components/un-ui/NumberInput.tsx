@@ -91,6 +91,9 @@ export function NumberInput(props: NumberInputProps) {
                 <TextInput
                     blurOnSubmit={true}
                     onSubmitEditing={v => {
+                        if (v.nativeEvent.text === "") {
+                            props.onSubmit?.(props.min ?? 0);
+                        }
                         const num = parseFloat(v.nativeEvent.text);
                         if (!isNaN(num)) {
                             props.onSubmit?.(num);
@@ -102,6 +105,9 @@ export function NumberInput(props: NumberInputProps) {
                     autoFocus={props.autoFocus}
                     onBlur={props.onBlur}
                     onChangeText={v => {
+                        if (v === "") {
+                            props.onChange?.(props.min ?? 0);
+                        }
                         const num = parseFloat(v.replace(/[^0-9-.]/g, ""));
                         props.onChange?.(num);
                     }}

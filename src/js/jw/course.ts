@@ -7,13 +7,14 @@ import {SchoolTerms, SchoolTermValue, SchoolValue, SchoolYears, SchoolYearValue}
 import {
     ClassScheduleQueryRes,
     CourseScheduleQueryRes,
+    CourseSelectionListRes,
     GetCourseScheduleListRes,
     PhyExpQueryRes,
 } from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {jwxt} from "@/js/jw/jwxt.ts";
 import {http, objectToFormUrlEncoded} from "@/js/http.ts";
 import {defaultYear} from "@/js/jw/infoQuery.ts";
-import {Course, PhyExp, PracticalCourse} from "@/type/infoQuery/course/course.ts";
+import {Course, CourseListTypeId, PhyExp, PracticalCourse} from "@/type/infoQuery/course/course.ts";
 import {authApi} from "@/js/auth/auth.ts";
 import axios from "axios";
 import {EngTrainingScheduleRes} from "@/type/api/infoQuery/EngTraining.ts";
@@ -312,6 +313,35 @@ export const courseApi = {
             item => Object.fromEntries(Object.entries(item).map(([key, _]) => [key.toLowerCase(), _])) as PhyExp,
         );
         return data;
+    },
+
+    // 选课相关
+    courseSelection: {
+        getList: async (
+            year: SchoolYearValue,
+            term: SchoolTermValue,
+            type: CourseListTypeId,
+            page: number = 1,
+            pageSize: number = 20,
+            keyword?: string,
+        ) => {
+            const reqBody = objectToFormUrlEncoded({
+                xkxnm: year,
+                xkxqm: term,
+                kklxdm: type,
+                kspage: page,
+                jspage: pageSize,
+                xkkz_id: "47F02D572DC2768EE063020410AC6B75", // TODO换成自动获取方式
+                filter_list: [keyword],
+            });
+            const res = await http.post<CourseSelectionListRes>("/xsxk/zzxkyzb_cxZzxkYzbPartDisplay.html", reqBody);
+            if (typeof res.data === "object") {
+                return res.data;
+            } else {
+                ToastAndroid.show("获取选课列表信息失败", ToastAndroid.SHORT);
+                return null;
+            }
+        },
     },
 
     // 工程训练中心课表相关（金工实训），Engineering training
