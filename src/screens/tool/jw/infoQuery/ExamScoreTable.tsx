@@ -145,20 +145,20 @@ export function ExamScoreTable(props: Props) {
 
                             {expandedId === item.jxb_id && (
                                 <View style={styles.detailContainer}>
-                                    {usualScore[item.jxb_id]?.items?.map((score, index) => {
+                                    {usualScore[item.jxb_id]?.map((score, index) => {
                                         return (
                                             <Flex
                                                 key={`index${index}`}
                                                 justify="space-between"
                                                 style={styles.detailItem}>
-                                                <View style={{width: "50%"}}>
+                                                <View style={{width: "55%"}}>
                                                     <Text style={styles.detailItemLabel} numberOfLines={1}>
-                                                        {score.xmblmc || "暂无"}
+                                                        {score.name || "暂无"}{score.ratio !== "N/A" && `（${score.ratio} %）`}
                                                     </Text>
                                                 </View>
                                                 <View>
                                                     <Text style={styles.detailItemLabel} numberOfLines={1}>
-                                                        {score.xmcj || "暂无"}
+                                                        {score.score || "暂无"}
                                                     </Text>
                                                 </View>
                                             </Flex>

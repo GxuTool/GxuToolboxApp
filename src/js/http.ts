@@ -52,7 +52,7 @@ http.interceptors.response.use(
             "color: unset",
         );
         console.groupCollapsed("response");
-        console.log(response);
+        console.log(response.data);
         console.groupEnd();
         return response;
     },

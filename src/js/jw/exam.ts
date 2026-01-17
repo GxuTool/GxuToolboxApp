@@ -4,6 +4,7 @@ import {jwxt} from "@/js/jw/jwxt.ts";
 import {http, objectToFormUrlEncoded} from "@/js/http.ts";
 import {ToastAndroid} from "react-native";
 import {defaultYear} from "@/js/jw/infoQuery.ts";
+import {usualScoreParser} from "@/js/jw/usualScoreParser.ts";
 
 export const examApi = {
     getExamInfo: async (year: number, term: SchoolTermValue, page: number = 1): Promise<ExamInfoQueryRes | null> => {
@@ -65,10 +66,10 @@ export const examApi = {
                 xqm: term ?? SchoolTerms[0][0],
                 jxb_id: id,
             });
-            const res = await http.post("/cjcx/cjcx_cxXsXmcjList.html?doType=query", reqBody);
-            if (typeof res.data === "object") {
-                console.log(reqBody);
-                resolve(res.data);
+            const res = await http.post("/cjcx/cjcx_cxCjxqGjh.html?gnmkdm=N305005", reqBody);
+            if (res) {
+                const i = usualScoreParser(res.data);
+                resolve(i);
             } else {
                 ToastAndroid.show("获取平时成绩信息失败", ToastAndroid.SHORT);
                 reject(res);
