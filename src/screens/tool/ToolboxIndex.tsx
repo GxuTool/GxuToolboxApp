@@ -75,6 +75,12 @@ export function ToolboxIndex() {
                     type: "navigation",
                     navigation: "courseSelectionList",
                 },
+                {
+                    label: "校选课查漏",
+                    icon: <Icon name="clock" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "ElectiveCourse",
+                },
                 // {
                 //     label: "自主选课",
                 //     icon: <Icon name="barschart" size={iconSize} />,

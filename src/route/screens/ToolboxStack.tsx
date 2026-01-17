@@ -99,6 +99,11 @@ export function ToolboxStack() {
                 component={lazy(() => import("@/screens/tool/jw/courseSelection/CourseSelectionList.tsx"))}
                 options={{title: "选课课程列表查询"}}
             />
+            <Stack.Screen
+                name="ElectiveCourse"
+                component={lazy(() => import("@/screens/tool/jw/ElectiveCourse/ElectiveCourse.tsx"))}
+                options={{title: "校选课查漏"}}
+            />
 
             <Stack.Screen name="phyExpScreen" component={PhyExpScreen} options={{title: "物理实验课查询"}} />
             <Stack.Screen
