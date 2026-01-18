@@ -1,8 +1,8 @@
-import React, {useContext, useEffect, useRef, useState} from "react";
-import {Dimensions, StyleSheet, ToastAndroid, View} from "react-native";
+import React, {useContext, useEffect, useState} from "react";
+import {Dimensions, StyleSheet,View} from "react-native";
 import Canvas, {CanvasRenderingContext2D} from "react-native-canvas";
 import {Color} from "@/js/color.ts";
-import {Button, useTheme} from "@rneui/themed";
+import {useTheme} from "@rneui/themed";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {CourseScheduleContext, CourseScheduleData} from "@/js/jw/course.ts";
 import moment from "moment/moment";
@@ -10,12 +10,12 @@ import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/js/store.ts";
 import {http} from "@/js/http.ts";
-import {Flex} from "@/components/un-ui";
-import RNFS from "react-native-fs";
-import Share, {ShareOptions} from "react-native-share";
-import {CameraRoll} from "@react-native-camera-roll/camera-roll";
 
-export function CanvasSchedule() {
+type Props = {
+    week: number,
+    canvasRef: React.RefObject<Canvas | null>,
+}
+export function CanvasSchedule(props: Props) {
     const {theme} = useTheme();
     const {userConfig} = useContext(UserConfigContext);
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
@@ -24,21 +24,19 @@ export function CanvasSchedule() {
 
     const {width: screenWidth} = Dimensions.get("window");
     const startDay = moment(userConfig.jw.startDay);
-    const currentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
+    const currentWeek = props.week;
     const styles = StyleSheet.create({
         container: {
             display: "flex",
             gap: 10,
         },
         canvas: {
-            width: screenWidth,
+            width: screenWidth * 0.9,
             height:
                 userConfig.theme.course.timeSpanHeight > 40
                     ? userConfig.theme.course.timeSpanHeight * 14 + 49
                     : userConfig.theme.course.timeSpanHeight * 2 * 8 + 34,
-            backgroundColor: Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
-                0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
-            ).rgbaString,
+            backgroundColor: theme.colors.background,
         },
         button: {
             display: "flex",
@@ -256,21 +254,21 @@ export function CanvasSchedule() {
         });
     }
 
-    const canvasRef = useRef<Canvas | null>(null);
-
     const handleCanvas = (canvas: Canvas | null) => {
-        canvasRef.current = canvas;
+        props.canvasRef.current = canvas;
     };
 
     /**
      * 绘制主函数
      */
     const drawSchedule = () => {
-        const canvas = canvasRef.current;
+        const canvas = props.canvasRef.current;
         if (!canvas) return;
         canvas.width = styles.canvas.width;
         canvas.height = styles.canvas.height;
         const ctx = canvas.getContext("2d");
+        ctx.fillStyle = theme.colors.background;
+        ctx.fillRect(0,0,10000,10000);
         fontStyle(ctx);
         drawWeekHeader(ctx);
         drawTimeSpansRects(ctx);
@@ -281,115 +279,9 @@ export function CanvasSchedule() {
     useEffect(() => {
         drawSchedule();
     }, [courseSchedule, userConfig.theme.course.timeSpanHeight]);
-
-    /**
-     * 每次调用生成图片并写入临时目录，返回图片路径
-     */
-    const getImagePath = async (): Promise<string> => {
-        const canvas = canvasRef.current;
-        if (!canvas) return "";
-        const base64 = await canvas.toDataURL();
-        const fileName = `week_${currentWeek}_${moment().format("YYYY_MMDD_HHmmss_SSS")}_gxu_tool_app`;
-        const filePath = `${RNFS.TemporaryDirectoryPath}/${fileName}.png`;
-        //把base64字符串解码成二进制
-        await RNFS.writeFile(
-            filePath,
-            base64.replace("data:image/png;base64,", ""),
-            "base64"
-        );
-        return filePath;
-    };
-
-    /**
-     * 生成png类型图片写入系统相册
-     */
-    const saveToLocal = async () => {
-        try {
-            const filePath = await getImagePath();
-            await CameraRoll.saveToCameraRoll(filePath, "photo");
-            ToastAndroid.show("已保存至相册", ToastAndroid.SHORT);
-            await clearDebugImage();
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    /**
-     * 分享图片
-     */
-    const shareSchedule = async ()=>{
-        const filePath = await getImagePath();
-        const shareOptions:ShareOptions = {
-            url: "file://" + filePath,
-            type: "image/png",
-            message: "分享课表",
-        };
-        await Share.open(shareOptions);
-        ToastAndroid.show("已发送", ToastAndroid.SHORT);
-    };
-
-    /**
-     * 清除临时目录的文件，可在调试用
-     */
-    const clearDebugImage = async ()=>{
-        const filePath = await getImagePath();
-        try {
-            if (await RNFS.exists(filePath)){
-                await RNFS.unlink(filePath);
-                // ToastAndroid.show("已清除预览图", ToastAndroid.SHORT);
-            }
-        } catch (e){
-            console.log(e);
-        }
-    };
-
     return (
         <View style={styles.container}>
             <Canvas ref={handleCanvas} style={styles.canvas} />
-            <Flex gap={10} style={{marginHorizontal: 10}}>
-                <Button
-                    title="保存"
-                    onPress={async ()=>{
-                        try {
-                            await saveToLocal();
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    }}
-                    containerStyle={
-                        styles.button
-                    }
-                />
-                <Button
-                    title="分享课表"
-                    onPress={async ()=>{
-                        try {
-                            await shareSchedule();
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    }}
-                    containerStyle={
-                        styles.button
-                    }
-                />
-            </Flex>
-            <Flex style={{marginHorizontal: 10}}>
-                <Button
-                    title="刷新"
-                    onPress={async ()=>{
-                        try {
-                            await getCoursesData();
-                            ToastAndroid.show("刷新成功",ToastAndroid.SHORT);
-                        } catch (e){
-                            console.log(e);
-                        }
-                    }}
-                    containerStyle={{
-                        flex: 1,
-                    }}
-                />
-            </Flex>
         </View>
     );
 }

@@ -34,6 +34,7 @@ import {http} from "@/js/http.ts";
 import {EngTrainingItem} from "@/components/tool/infoQuery/EngTraining/EngTrainingItem.tsx";
 import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
+import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 
 export function ScheduleCard() {
     const {userConfig, updateUserConfig} = useContext(UserConfigContext);
@@ -49,6 +50,7 @@ export function ScheduleCard() {
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
     const [courseScheduleSettingVisible, setCourseScheduleSettingVisible] = useState(false);
+    const [scheduleShareVisible, setScheduleShareVisible] = useState(false);
 
     const style = StyleSheet.create({
         card: {
@@ -82,6 +84,7 @@ export function ScheduleCard() {
 
     // 获取考试
     const [examList, setExamList] = useState<ExamInfo[]>([]);
+
     async function getExamList() {
         const data = await examApi.getExamInfo(year, term);
         if (data?.items) {
@@ -95,6 +98,7 @@ export function ScheduleCard() {
 
     // 获取自定义事件
     const [activityList, setActivityList] = useState<IActivity[]>([]);
+
     function getActivityList() {
         console.log(userConfig);
         const activityDataIndex = userConfig.activity.data.findIndex(item => +item.year === year && item.term === term);
@@ -112,6 +116,7 @@ export function ScheduleCard() {
             setCourseSchedule(new CourseScheduleClass(courseSchedule));
         }
     }, [attendanceData]);
+
     async function getAttendanceData() {
         const calender = await attendanceSystemApi.calenderData.get(userConfig.jw.startDay);
         const attendanceDataRes = await attendanceSystemApi.getPersonalData(calender?.calendarId, {page_size: 1000});
@@ -119,6 +124,7 @@ export function ScheduleCard() {
             setAttendanceData(new AttendanceDataClass(attendanceDataRes.data.records, calender));
         }
     }
+
     // 获取课表
     async function getCourseSchedule() {
         const data = await courseApi.getCourseSchedule(year, term);
@@ -168,6 +174,7 @@ export function ScheduleCard() {
 
     // 物理实验
     const [phyExpList, setPhyExpList] = useState<PhyExp[]>([]);
+
     async function getPhyExp() {
         const {data} = await courseApi.getPhyExpList();
         setPhyExpList(data);
@@ -187,6 +194,7 @@ export function ScheduleCard() {
         type: "engTrainingExp";
     };
     const [engTrainingExpList, setEngTrainingExpList] = useState<EngTrainingExp[]>([]);
+
     async function getEngTrainingSchedule() {
         const {datas} = await courseApi.engTraining.getPersonalExpList();
         const dateList = datas[0].filter(item => item.startRow === 2);
@@ -217,6 +225,7 @@ export function ScheduleCard() {
 
     // 调休信息
     const [timeShift, setTimeShift] = useState<[string, string][]>([]);
+
     async function getTimeShift() {
         const {data} = await http.get("https://file.unde.site/GxuToolApp/data.json");
         if (data) setTimeShift(data.timeShift);
@@ -335,6 +344,12 @@ export function ScheduleCard() {
                         </Pressable>
                         <Pressable
                             android_ripple={userConfig.theme.ripple}
+                            onPress={() => setScheduleShareVisible(true)
+                            }>
+                            <Icon type="antdesign" name="share-alt" size={24} />
+                        </Pressable>
+                        <Pressable
+                            android_ripple={userConfig.theme.ripple}
                             onPress={() => setCourseScheduleSettingVisible(true)}>
                             <Icon name="cog" size={24} />
                         </Pressable>
@@ -382,6 +397,14 @@ export function ScheduleCard() {
                     pageViewRest={rest}
                     onYearChange={setYear}
                     onTermChange={setTerm}
+                />
+            </BottomSheet>
+            <BottomSheet
+                isVisible={scheduleShareVisible}
+                onBackdropPress={()=> setScheduleShareVisible(false)}>
+                <ScheduleShareSheet
+                    week={rest.activePage + 1}
+                    onClose={()=>setScheduleShareVisible(false)}
                 />
             </BottomSheet>
         </Card>
