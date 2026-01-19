@@ -21,7 +21,12 @@ export function UnTermSelector(props: UnTermSelectorProps) {
             Array.from(SchoolTerms)
                 .reverse()
                 .forEach((term, index) => {
-                    if (!props.thirdTerm && index === 0) return;
+                    if (
+                        (!props.thirdTerm && index === 0) ||
+                        Number(schoolYear[0]) < Number(userConfig.jw.year) - 5 ||
+                        Number(schoolYear[0]) > Number(userConfig.jw.year)
+                    )
+                        return;
                     newOptionList.push({
                         label: `${schoolYear[1]}学年${term[1]}`,
                         value: `${schoolYear[0]}-${term[0]}`,
