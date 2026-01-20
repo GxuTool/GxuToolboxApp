@@ -19,8 +19,8 @@ async function getToken(username: string, password: string) {
             ToastAndroid.show("获取成功，尝试获取用户基础信息", ToastAndroid.SHORT);
             if ((await jwxt.getInfo()) !== undefined) {
                 ToastAndroid.show("获取基础信息成功", ToastAndroid.SHORT);
-                const res = await beQuery.postLog(username);
-                console.log("记录", res.data);
+                // const res = await beQuery.postLog(username);
+                // console.log("记录", res.data);
             } else {
                 ToastAndroid.show("获取基础信息失败", ToastAndroid.SHORT);
             }

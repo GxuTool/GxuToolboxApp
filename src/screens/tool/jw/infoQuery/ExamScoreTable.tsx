@@ -5,7 +5,6 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {ExamScore} from "@/type/infoQuery/exam/examScore.ts";
 import {SchoolTermValue, SchoolYearValue} from "@/type/global.ts";
 import {examApi} from "@/js/jw/exam.ts";
-
 interface Props {
     data: ExamScore[];
     year: SchoolYearValue;
