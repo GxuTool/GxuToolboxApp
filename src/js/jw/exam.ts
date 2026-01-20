@@ -5,6 +5,7 @@ import {http, objectToFormUrlEncoded} from "@/js/http.ts";
 import {ToastAndroid} from "react-native";
 import {defaultYear} from "@/js/jw/infoQuery.ts";
 import {usualScoreParser} from "@/js/jw/usualScoreParser.ts";
+import {washExamScore} from "@/api/schema/examScoreSchema.ts";
 
 export const examApi = {
     getExamInfo: async (year: number, term: SchoolTermValue, page: number = 1): Promise<ExamInfoQueryRes | null> => {
@@ -47,6 +48,7 @@ export const examApi = {
         });
         const res = await http.post("/cjcx/cjcx_cxXsgrcj.html?doType=query", reqBody);
         if (typeof res.data === "object") {
+            // console.log(washExamScore(res.data.items));
             return res.data;
         } else {
             ToastAndroid.show("获取考试成绩信息失败", ToastAndroid.SHORT);

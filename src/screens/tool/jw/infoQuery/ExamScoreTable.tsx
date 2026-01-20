@@ -2,11 +2,11 @@ import React, {useMemo, useState} from "react";
 import {LayoutAnimation, Platform, ScrollView, StyleSheet, TouchableOpacity, UIManager, View} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {ExamScore} from "@/type/infoQuery/exam/examScore.ts";
+import {OldExamScore} from "@/type/infoQuery/exam/oldExamScore.ts";
 import {SchoolTermValue, SchoolYearValue} from "@/type/global.ts";
 import {examApi} from "@/js/jw/exam.ts";
 interface Props {
-    data: ExamScore[];
+    data: OldExamScore[];
     year: SchoolYearValue;
     term: SchoolTermValue;
 }
@@ -19,7 +19,7 @@ interface DetailState {
 
 interface ScoreDetailRow {
     label: string;
-    key: keyof ExamScore;
+    key: keyof OldExamScore;
 }
 
 const scoreDetailRows: ScoreDetailRow[] = [
@@ -41,18 +41,12 @@ const scoreDetailRows: ScoreDetailRow[] = [
     },
 ];
 
-if (Platform.OS === "android") {
-    if (UIManager.setLayoutAnimationEnabledExperimental) {
-        UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-} // 添加动画，但是好像没用
 
 export function ExamScoreTable(props: Props) {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [details, setDetails] = useState<Record<string, DetailState>>({});
     const {theme} = useTheme();
-    const handlePressRow = async (item: ExamScore) => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const handlePressRow = async (item: OldExamScore) => {
         const newExpandedId = expandedId === item.jxb_id ? null : item.jxb_id;
         setExpandedId(newExpandedId);
 

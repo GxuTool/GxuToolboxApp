@@ -1,4 +1,4 @@
-export interface ExamScore {
+export interface OldExamScore {
 	//日期
 	date: string;
 	//日期数字格式
@@ -90,7 +90,7 @@ export interface QueryModel {
 	pageNo: number;
 	pageSize: number;
 	showCount: number;
-	sorts: ExamScore[];
+	sorts: OldExamScore[];
 	totalCount: number;
 	totalPage: number;
 	totalResult: number;

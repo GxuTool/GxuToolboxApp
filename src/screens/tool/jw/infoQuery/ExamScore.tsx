@@ -2,7 +2,7 @@ import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import {Button, Divider, Text, useTheme} from "@rneui/themed";
 import React, {useContext, useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {SchoolTerms, SchoolTermValue, SchoolYears} from "@/type/global.ts";
+import {SchoolTermValue} from "@/type/global.ts";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 import {ExamScoreQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
 import {store} from "@/js/store.ts";
