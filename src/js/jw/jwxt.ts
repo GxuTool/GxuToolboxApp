@@ -47,8 +47,13 @@ export const jwxt = {
     },
 
     refreshToken: async (): Promise<AxiosResponse | void> => {
-        const {username, password} = await userMgr.getJWAccount();
-        userMgr.storeJWAccount(username, password);
+        const account = await userMgr.jw.getAccount();
+        if (!account) {
+            ToastAndroid.show("请更新账号信息",ToastAndroid.SHORT);
+            return;
+        }
+        const {username, password} = account;
+        await userMgr.jw.storeAccount(username, password);
         const keys = await jwxt.getPublicKey();
         if (keys.exponent) {
             return await jwxt.login(username, password, keys.modulus, keys.exponent);
