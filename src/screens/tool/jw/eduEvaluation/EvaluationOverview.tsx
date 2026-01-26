@@ -1,26 +1,38 @@
-import {useCallback, useMemo, useState} from "react";
-import {ScrollView, StyleSheet, ToastAndroid} from "react-native";
+import {useCallback, useMemo, useState, useRef} from "react";
+import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import {Row, Table} from "react-native-reanimated-table";
 import {useFocusEffect, useNavigation} from "@react-navigation/native";
 import {Color} from "@/js/color.ts";
-import {Button, Text, useTheme} from "@rneui/themed";
+import {Button, Text, useTheme, Dialog, LinearProgress} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {EvaluationRow} from "@/components/tool/eduEvaluation/EvaluationRow.tsx";
 import {evaluationApi} from "@/js/jw/evaluation.ts";
 import {Evaluation} from "@/type/eduEvaluation/evaluation.type.ts";
-import {useWebView} from "@/hooks/app.ts";
-import {EvaluationComment} from "@/screens/tool/jw/eduEvaluation/EvaluationComment.tsx";
 import {Icon} from "@/components/un-ui";
 import {parseEvaluationHTML} from "@/js/jw/evaParser.ts";
 import {createDefaultReq, fillReq} from "@/js/jw/evaReq.ts";
-import {loadTemplate} from "@/screens/tool/jw/eduEvaluation/EvaluationTemplate.tsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+
+const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
+    const progressPercent = Math.round(progress * 100);
+    return (
+        <View style={{height: 4, backgroundColor: "#e0e0e0", borderRadius: 2}}>
+            <View style={{height: "100%", width: `${progressPercent}%`, backgroundColor: color, borderRadius: 2}} />
+        </View>
+    );
+};
 export function EvaluationOverview() {
     const {theme} = useTheme();
     const [evaList, setEvaList] = useState<Evaluation[]>([]);
     const navigation = useNavigation();
     const colWidths = [9, 6, 5];
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [progressText, setProgressText] = useState("");
+    const isCancelled = useRef(false);
+
     const handleRowPress = (item: Evaluation) => {
         navigation.navigate("EvaluationDetail", {evaluationItem: item});
     };
@@ -79,11 +91,78 @@ export function EvaluationOverview() {
     }, [evaList]);
 
     const oneKey = async () => {
-        let temp = await AsyncStorage.getItem("@EvaluationTemplate");
-        temp = JSON.parse(typeof temp === "string" ? temp : "" as string);
-        console.log(temp);
-        for (const evaluationItem of evaList) {
-            ToastAndroid.showWithGravity(`评教：${evaluationItem.kcmc}-${evaluationItem.xsmc}-${evaluationItem.jzgmc}`,ToastAndroid.SHORT,1);
+        const unEvaluatedList = evaList.filter(item => item.tjztmc !== "已评完");
+        if (unEvaluatedList.length === 0) {
+            ToastAndroid.show("所有项目均已评教，无需操作。", ToastAndroid.SHORT);
+            return;
+        }
+
+        let temp;
+        try {
+            const storedTemp = await AsyncStorage.getItem("@EvaluationTemplate");
+            if (!storedTemp) throw new Error("未找到评教模板");
+            temp = JSON.parse(storedTemp);
+        } catch (e) {
+            ToastAndroid.show("加载评教模板失败，请先设置模板。", ToastAndroid.LONG);
+            navigation.navigate("EvaluationTemplate");
+            return;
+        }
+
+        isCancelled.current = false;
+        setIsModalVisible(true);
+        setProgress(0);
+        setProgressText("准备开始...");
+
+        try {
+            for (let i = 0; i < unEvaluatedList.length; i++) {
+                if (isCancelled.current) {
+                    ToastAndroid.show("操作已取消", ToastAndroid.SHORT);
+                    break;
+                }
+
+                const evaluationItem = unEvaluatedList[i];
+                const currentProgressText = `(${i + 1}/${unEvaluatedList.length}) ${evaluationItem.kcmc} - ${
+                    evaluationItem.jzgmc
+                }`;
+                setProgressText(currentProgressText);
+
+                const HtmlText = await evaluationApi.getEvaluationDetail(
+                    evaluationItem.jgh_id,
+                    evaluationItem.jxb_id,
+                    evaluationItem.kch_id,
+                    evaluationItem.xsdm,
+                    evaluationItem.pjmbmcb_id,
+                );
+                const {idObj} = parseEvaluationHTML(HtmlText);
+                const defReq = createDefaultReq(evaluationItem, idObj);
+                const reqToSend = fillReq(defReq, temp.selected, temp.comment, idObj);
+                await evaluationApi.handleEvaResult(defReq, reqToSend);
+
+                const cur = (i + 1) / unEvaluatedList.length;
+                setProgress(Math.round(cur * 100) / 100);
+            }
+        } catch (error) {
+            console.error("一键评教时发生错误:", error);
+            ToastAndroid.show(`发生错误: ${error.message}`, ToastAndroid.LONG);
+        } finally {
+            setIsModalVisible(false);
+            await init(); // 无论如何都刷新列表
+        }
+    };
+
+    const zero = async () => {
+        setProgress(0);
+        setProgressText("");
+        for (let i = 0; i < evaList.length; i++) {
+            if (isCancelled.current) {
+                ToastAndroid.show("操作已取消", ToastAndroid.SHORT);
+                break;
+            }
+
+            const evaluationItem = evaList[i];
+            const currentProgressText = `(${i + 1}/${evaList.length}) ${evaluationItem.kcmc} - ${evaluationItem.jzgmc}`;
+            setProgressText(currentProgressText);
+
             const HtmlText = await evaluationApi.getEvaluationDetail(
                 evaluationItem.jgh_id,
                 evaluationItem.jxb_id,
@@ -91,24 +170,25 @@ export function EvaluationOverview() {
                 evaluationItem.xsdm,
                 evaluationItem.pjmbmcb_id,
             );
-            const {idObj, teachers, selected} = parseEvaluationHTML(HtmlText);
-
+            const {idObj} = parseEvaluationHTML(HtmlText);
             const defReq = createDefaultReq(evaluationItem, idObj);
-            const reqToSend = fillReq(defReq, temp.selected, temp.comment, idObj);
+            await evaluationApi.handleEvaResult(defReq);
 
-            const res = await evaluationApi.handleEvaResult(defReq, reqToSend);
-            console.log(res);
-            ToastAndroid.showWithGravity(res, ToastAndroid.SHORT, 5);
+            setProgress((i + 1) / evaList.length);
+
             await init();
-            //
-            // break;
         }
     };
 
     async function init() {
-        const res = await evaluationApi.getEvaluationList();
-        res.items.sort((a, b) => statusList.indexOf(b.tjztmc) - statusList.indexOf(a.tjztmc));
-        setEvaList(res.items);
+        try {
+            const res = await evaluationApi.getEvaluationList();
+            res.items.sort((a, b) => statusList.indexOf(a.tjztmc) - statusList.indexOf(b.tjztmc));
+            setEvaList(res.items);
+        } catch (e) {
+            console.error("获取评教列表失败:", e);
+            ToastAndroid.show("获取评教列表失败", ToastAndroid.SHORT);
+        }
     }
 
     useFocusEffect(
@@ -119,6 +199,18 @@ export function EvaluationOverview() {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
+            {/* --- 进度弹窗 --- */}
+            <Dialog isVisible={isModalVisible} overlayStyle={{borderRadius: 8}}>
+                <Dialog.Title title="正在一键评教..." />
+                <View style={{paddingHorizontal: 10, paddingVertical: 20}}>
+                    <Text style={{fontSize: 16, marginBottom: 10}}>{progressText}</Text>
+                    <ProgressBar progress={progress} color={theme.colors.primary} />
+                </View>
+                <Dialog.Actions>
+                    <Button title="取消" type="clear" onPress={() => (isCancelled.current = true)} />
+                </Dialog.Actions>
+            </Dialog>
+
             <Flex direction="column" gap={10}>
                 <Flex direction="row" justify="space-between" gap={20}>
                     <Text style={{fontSize: 16}}>
@@ -133,13 +225,18 @@ export function EvaluationOverview() {
                         <Icon name={"cog"} size={20} color={"white"} />
                     </Button>
                 </Flex>
-                <Button
-                    containerStyle={{width: "100%"}}
-                    onPress={() => {
-                        oneKey();
-                    }}>
-                    应用自定义模板一键评教
-                </Button>
+                <Flex>
+                    <Button containerStyle={{width: "65%", paddingRight: 10}} onPress={oneKey}>
+                        应用自定义模板一键评价
+                    </Button>
+                    <Button
+                        containerStyle={{width: "25%"}}
+                        onPress={() => {
+                            zero();
+                        }}>
+                        清空评价
+                    </Button>
+                </Flex>
                 <Table style={{width: "100%"}}>
                     <Row
                         data={["课程", "教师", "状态"]}

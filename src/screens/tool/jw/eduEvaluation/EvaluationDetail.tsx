@@ -120,7 +120,7 @@ export function EvaluationDetail({navigation, route}) {
 
         const res = await evaluationApi.handleEvaResult(defaultReq, reqToSend);
         console.log(res);
-        ToastAndroid.showWithGravity(res, ToastAndroid.SHORT, 5);
+        // ToastAndroid.showWithGravity(res, ToastAndroid.SHORT, 5);
         dispatch({type: "SET_SELECTED", payload: submitSelected});
         init();
     };

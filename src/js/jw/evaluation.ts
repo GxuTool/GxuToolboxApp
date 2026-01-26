@@ -72,7 +72,7 @@ export const evaluationApi = {
             console.log(reqBody.replaceAll("&", "\n",));
             const res = await http.post("/xspjgl/xspj_bcXspj.html?gnmkdm=N401605", reqBody);
             if (typeof res.data === "string") {
-                ToastAndroid.show(res.data, ToastAndroid.SHORT);
+                // ToastAndroid.show(res.data, ToastAndroid.SHORT);
                 resolve(res.data);
             } else {
                 ToastAndroid.show("保存失败", ToastAndroid.SHORT);
