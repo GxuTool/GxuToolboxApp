@@ -1,6 +1,6 @@
 import {EvaListQueryRes} from "@/type/api/eduEvaluataion/studentEvaluationAPI.ts";
 import {jwxt} from "@/js/jw/jwxt.ts";
-import {http, objectToFormUrlEncoded} from "@/js/http.ts";
+import {http, objectToFormUrlEncoded} from "@/core/http.ts";
 import {ToastAndroid} from "react-native";
 
 export const evaluationApi = {
@@ -73,6 +73,29 @@ export const evaluationApi = {
             const res = await http.post("/xspjgl/xspj_bcXspj.html?gnmkdm=N401605", reqBody);
             if (typeof res.data === "string") {
                 // ToastAndroid.show(res.data, ToastAndroid.SHORT);
+                resolve(res.data);
+            } else {
+                ToastAndroid.show("保存失败", ToastAndroid.SHORT);
+                reject(res);
+            }
+        });
+    },
+    submitEvaResult: (Params1: any, Params2?: any): Promise<string> => {
+        return new Promise(async (resolve, reject) => {
+            if (!(await jwxt.testToken())) {
+                reject();
+                return;
+            }
+            // 这两个参数在提交时必填。。。
+            const Params3 = {
+                jszdpjbl: "0",
+                xykzpjbl: "0",
+            };
+            const reqBody = objectToFormUrlEncoded({...Params1,...Params2,...Params3});
+            console.log(reqBody.replaceAll("&", "\n",));
+            const res = await http.post("/xspjgl/xspj_tjXspj.html?gnmkdm=N401605", reqBody);
+            if (typeof res.data === "string") {
+                ToastAndroid.show(res.data, ToastAndroid.SHORT);
                 resolve(res.data);
             } else {
                 ToastAndroid.show("保存失败", ToastAndroid.SHORT);

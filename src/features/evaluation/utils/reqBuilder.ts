@@ -1,4 +1,4 @@
-import {Evaluation, EvaluationRequest} from "@/type/eduEvaluation/evaluation.type.ts";
+import {Evaluation, EvaluationRequest} from "@/features/evaluation/types/evaluation.type.ts";
 
 export function createDefaultReq(
     evaluationItem: Evaluation,
@@ -16,7 +16,7 @@ export function createDefaultReq(
                 fxzgf: null,
                 pjzt: "0",
                 py: "",
-                // 使用 map 基于解析出的数据动态生成列表，而不是硬编码
+                // 使用 map 基于解析出的数据动态生成列表
                 xspjList: idObj.sections.map(section => ({
                     pjzbxm_id: section.sectionId,
                     childXspjList: section.questions.map(question => ({

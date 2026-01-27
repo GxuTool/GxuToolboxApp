@@ -1,18 +1,17 @@
-import {useCallback, useMemo, useState, useRef} from "react";
+import {useCallback, useMemo, useRef, useState} from "react";
 import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import {Row, Table} from "react-native-reanimated-table";
 import {useFocusEffect, useNavigation} from "@react-navigation/native";
-import {Color} from "@/js/color.ts";
-import {Button, Text, useTheme, Dialog, LinearProgress} from "@rneui/themed";
+import {Color} from "@/shared/color.ts";
+import {Button, Dialog, Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {EvaluationRow} from "@/components/tool/eduEvaluation/EvaluationRow.tsx";
-import {evaluationApi} from "@/js/jw/evaluation.ts";
-import {Evaluation} from "@/type/eduEvaluation/evaluation.type.ts";
+import {EvaluationRow} from "@/features/evaluation/components/EvaluationRow.tsx";
+import {evaluationApi} from "@/features/evaluation/api";
+import {Evaluation} from "@/features/evaluation/types/evaluation.type.ts";
 import {Icon} from "@/components/un-ui";
-import {parseEvaluationHTML} from "@/js/jw/evaParser.ts";
-import {createDefaultReq, fillReq} from "@/js/jw/evaReq.ts";
+import {parseEvaluationHTML} from "@/features/evaluation/utils/parser.ts";
+import {createDefaultReq, fillReq} from "@/features/evaluation/utils/reqBuilder.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
     const progressPercent = Math.round(progress * 100);
@@ -22,6 +21,7 @@ const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
         </View>
     );
 };
+
 export function EvaluationOverview() {
     const {theme} = useTheme();
     const [evaList, setEvaList] = useState<Evaluation[]>([]);
@@ -180,6 +180,21 @@ export function EvaluationOverview() {
         }
     };
 
+    const submit = async () => {
+        const evaluationItem = evaList[0];
+        const HtmlText = await evaluationApi.getEvaluationDetail(
+            evaluationItem.jgh_id,
+            evaluationItem.jxb_id,
+            evaluationItem.kch_id,
+            evaluationItem.xsdm,
+            evaluationItem.pjmbmcb_id,
+        );
+        const {idObj, teachers, selected} = parseEvaluationHTML(HtmlText);
+        const defReq = createDefaultReq(evaluationItem, idObj);
+        const reqToSend = fillReq(defReq, selected, "", idObj);
+        await evaluationApi.submitEvaResult(defReq, reqToSend);
+    };
+
     async function init() {
         try {
             const res = await evaluationApi.getEvaluationList();
@@ -226,9 +241,15 @@ export function EvaluationOverview() {
                     </Button>
                 </Flex>
                 <Flex>
-                    <Button containerStyle={{width: "65%", paddingRight: 10}} onPress={oneKey}>
-                        应用自定义模板一键评价
-                    </Button>
+                    {statusCounts["已评完"] === evaList.length ? (
+                        <Button containerStyle={{ width: "65%", paddingRight: 10 }} onPress={submit}>
+                            提交（可清空评价反悔）
+                        </Button>
+                    ) : (
+                        <Button containerStyle={{ width: "65%", paddingRight: 10 }} onPress={oneKey}>
+                            应用自定义模板一键评价
+                        </Button>
+                    )}
                     <Button
                         containerStyle={{width: "25%"}}
                         onPress={() => {
