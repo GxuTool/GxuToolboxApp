@@ -2,7 +2,7 @@ import {PressableAndroidRippleConfig} from "react-native";
 import {SchoolTerms, SchoolTermValue, SchoolYearValue} from "@/type/global.ts";
 import {Course} from "@/type/infoQuery/course/course.ts";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
-import {DefaultUserTheme} from "@/js/theme.ts";
+import {DefaultUserTheme} from "@/shared/theme.ts";
 import moment from "moment";
 import {IUserActivity} from "@/type/app/activity.ts";
 

@@ -2,7 +2,7 @@ import {SliderProps} from "@rneui/base";
 import {Slider, Text, useTheme} from "@rneui/themed";
 import {StyleProp, StyleSheet, View, ViewStyle} from "react-native";
 import Flex from "./Flex.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {useState} from "react";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 

@@ -1,7 +1,7 @@
 import {SchoolTerms, SchoolTermValue, SchoolYears} from "@/type/global.ts";
 import {ExamInfoQueryRes, ExamScoreQueryRes, UsualScoreQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
 import {jwxt} from "@/js/jw/jwxt.ts";
-import {http, objectToFormUrlEncoded} from "@/js/http.ts";
+import {http, objectToFormUrlEncoded} from "@/core/http.ts";
 import {ToastAndroid} from "react-native";
 import {defaultYear} from "@/js/jw/infoQuery.ts";
 import {usualScoreParser} from "@/js/jw/usualScoreParser.ts";

@@ -6,7 +6,7 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
 import React, {useContext} from "react";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {Pos} from "@/js/pos.ts";
 
 interface Props extends ViewProps {

@@ -1,12 +1,12 @@
-import {http, urlWithParams} from "@/js/http.ts";
-import {getEncryptedPassword} from "@/js/rasPassword";
+import {http, urlWithParams} from "@/core/http.ts";
+import {getEncryptedPassword} from "@/shared/rasPassword";
 import CookieManager from "@react-native-cookies/cookies";
 import {AxiosResponse} from "axios";
 import {userMgr} from "@/js/mgr/user.ts";
 import {SchoolTerms} from "@/type/global.ts";
 import {ToastAndroid} from "react-native";
 import {UserInfo} from "@/type/infoQuery/base.ts";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import moment from "moment/moment";
 import {personalInfoParser} from "@/js/HTMLparser/personalInfoParser.ts";
 

@@ -2,13 +2,13 @@ import {KeyboardAvoidingView, ScrollView, StyleSheet, TextInput, View} from "rea
 import {Button, Divider, Text, useTheme} from "@rneui/themed";
 import {useContext, useEffect, useState} from "react";
 import {Course} from "@/type/infoQuery/course/course.ts";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {UnPicker} from "@/components/un-ui/UnPicker.tsx";
 import {Picker} from "@react-native-picker/picker";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {Row, Rows, Table} from "react-native-reanimated-table";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {defaultUserConfig} from "@/type/IUserConfig.ts";
 
 type CourseKeysType = keyof Omit<Course, "queryModel" | "userModel">;

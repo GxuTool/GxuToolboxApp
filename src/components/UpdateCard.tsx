@@ -3,7 +3,7 @@ import {Button, Card, Text, useTheme} from "@rneui/themed";
 import axios from "axios";
 import {Linking, PermissionsAndroid, StyleSheet} from "react-native";
 import Flex from "./un-ui/Flex";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import PackageJSON from "@/../package.json";
 

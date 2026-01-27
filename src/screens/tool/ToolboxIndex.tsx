@@ -1,6 +1,6 @@
 import {Pressable, PressableAndroidRippleConfig, ScrollView, StyleSheet, View} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import React, {useContext} from "react";

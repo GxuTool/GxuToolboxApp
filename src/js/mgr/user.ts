@@ -1,4 +1,4 @@
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 
 export const userMgr = {

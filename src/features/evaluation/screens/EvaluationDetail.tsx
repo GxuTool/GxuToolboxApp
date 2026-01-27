@@ -1,13 +1,12 @@
-import {ActivityIndicator, ScrollView, StyleSheet, ToastAndroid, TouchableOpacity, View} from "react-native";
+import {ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
 import {Button, Text, useTheme} from "@rneui/themed";
 import {useCallback, useEffect, useLayoutEffect, useReducer, useRef} from "react";
-import {Color} from "@/js/color.ts";
-import {parseEvaluationHTML} from "@/js/jw/evaParser.ts";
-import {EvaCategory} from "@/components/tool/eduEvaluation/EvaCategory.tsx";
-import {EvaluationRequest} from "@/type/eduEvaluation/evaluation.type.ts";
-import {evaluationApi} from "@/js/jw/evaluation.ts";
-import {evaluationReducer, initialState} from "@/reducer/EvaReducer.ts";
-import {createDefaultReq, fillReq} from "@/js/jw/evaReq.ts";
+import {Color} from "@/shared/color.ts";
+import {parseEvaluationHTML} from "@/features/evaluation/utils/parser.ts";
+import {EvaCategory} from "@/features/evaluation/components/EvaCategory.tsx";
+import {evaluationApi} from "@/features/evaluation/api";
+import {evaluationReducer, initialState} from "@/features/evaluation/store/EvaReducer.ts";
+import {createDefaultReq, fillReq} from "@/features/evaluation/utils/reqBuilder.ts";
 
 export function EvaluationDetail({navigation, route}) {
     const scrollViewRef = useRef<ScrollView>(null);

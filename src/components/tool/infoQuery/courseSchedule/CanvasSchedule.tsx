@@ -1,15 +1,15 @@
 import React, {useContext, useEffect, useState} from "react";
 import {Dimensions, StyleSheet,View} from "react-native";
 import Canvas, {CanvasRenderingContext2D} from "react-native-canvas";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {useTheme} from "@rneui/themed";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {CourseScheduleContext, CourseScheduleData} from "@/js/jw/course.ts";
 import moment from "moment/moment";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
-import {store} from "@/js/store.ts";
-import {http} from "@/js/http.ts";
+import {store} from "@/core/store.ts";
+import {http} from "@/core/http.ts";
 
 type Props = {
     week: number,

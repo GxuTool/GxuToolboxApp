@@ -1,6 +1,6 @@
 import {Pressable, StyleSheet} from "react-native";
 import {Dialog, Text, useTheme} from "@rneui/themed";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import React, {useContext, useState} from "react";
 import DateTimePicker, {useDefaultStyles} from "react-native-ui-datepicker";
 import moment from "moment/moment";

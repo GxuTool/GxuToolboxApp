@@ -1,6 +1,6 @@
 import {Linking, Pressable, SectionList, SectionListProps, StyleSheet, ToastAndroid, View} from "react-native";
 import Clipboard from "@react-native-clipboard/clipboard";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Text, useTheme} from "@rneui/themed";
 import {useContext} from "react";

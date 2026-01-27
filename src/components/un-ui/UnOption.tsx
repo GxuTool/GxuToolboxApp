@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {Text, useTheme} from "@rneui/themed";
 import {StyleSheet, TouchableOpacity, View, ViewProps} from "react-native";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 
 interface Props {
     options: Option[];

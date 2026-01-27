@@ -2,7 +2,7 @@ import React, {useContext} from "react";
 import {SettingIndex} from "@/screens/setting/SettingIndex.tsx";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {JWAccountScreen} from "@/screens/setting/account/JWAccountScreen.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {Button, useTheme} from "@rneui/themed";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {UserPreferenceSettingIndex} from "@/screens/setting/account/preference/UserPreferenceSettingIndex.tsx";

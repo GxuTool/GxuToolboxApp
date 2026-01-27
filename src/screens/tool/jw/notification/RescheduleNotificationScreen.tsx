@@ -3,7 +3,7 @@ import {useEffect, useMemo, useState} from "react";
 import {jwxt} from "@/js/jw/jwxt.ts";
 import {ButtonGroup, ListItem, Switch, Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 
 interface Notification {
     course: string;

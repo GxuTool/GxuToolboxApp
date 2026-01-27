@@ -1,5 +1,5 @@
 import cheerio from "react-native-cheerio";
-import {EvaluationIds, SelectedMap} from "@/type/eduEvaluation/evaluation.type.ts";
+import {EvaluationIds, SelectedMap} from "@/features/evaluation/types/evaluation.type.ts";
 
 interface Category {
     name: string; // 大指标名，如“师德表现”

@@ -2,7 +2,7 @@ import {Dimensions, Pressable, ScrollView, StyleProp, StyleSheet, ToastAndroid, 
 import {Flex, Icon} from "@/components/un-ui";
 import {Button, Text, useTheme} from "@rneui/themed";
 import React, {useContext, useRef} from "react";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {CanvasSchedule} from "@/components/tool/infoQuery/courseSchedule/CanvasSchedule.tsx";
 import moment from "moment";

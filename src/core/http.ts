@@ -1,5 +1,5 @@
 import axios, {AxiosError, AxiosRequestConfig} from "axios";
-import {userMgr} from "./mgr/user.ts";
+import {userMgr} from "../js/mgr/user.ts";
 import {ToastAndroid} from "react-native";
 import moment from "moment/moment";
 

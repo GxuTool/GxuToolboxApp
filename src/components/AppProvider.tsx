@@ -1,8 +1,8 @@
 import {createContext, ProviderProps, useEffect, useMemo, useState} from "react";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {defaultUserConfig, IUserConfig} from "@/type/IUserConfig.ts";
 import {createTheme, useTheme} from "@rneui/themed";
-import {generateUiTheme} from "@/js/theme.ts";
+import {generateUiTheme} from "@/shared/theme.ts";
 import {useColorScheme} from "react-native";
 import {deepMerge} from "@/utils/objectUtils.ts";
 import {cowsay} from "@/js/cowsay.ts";

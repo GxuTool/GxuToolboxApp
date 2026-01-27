@@ -1,6 +1,6 @@
 import {BottomSheet, Card, Text, useTheme} from "@rneui/themed";
 import {Pressable, StyleSheet, ToastAndroid} from "react-native";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {useCallback, useContext, useEffect, useState} from "react";
 import {PracticalCourseList} from "../tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
@@ -8,7 +8,7 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import moment from "moment";
 import {Schools, SchoolTermValue} from "@/type/global.ts";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {usePagerView} from "react-native-pager-view";
 import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/CourseCardSetting.tsx";
 import {
@@ -30,7 +30,7 @@ import {IActivity} from "@/type/app/activity.ts";
 import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
 import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
 import {PhyExp} from "@/type/infoQuery/course/course.ts";
-import {http} from "@/js/http.ts";
+import {http} from "@/core/http.ts";
 import {EngTrainingItem} from "@/components/tool/infoQuery/EngTraining/EngTrainingItem.tsx";
 import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";

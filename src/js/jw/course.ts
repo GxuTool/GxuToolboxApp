@@ -1,7 +1,7 @@
-import {BaseColor, Color} from "@/js/color.ts";
+import {BaseColor, Color} from "@/shared/color.ts";
 import {createContext, useCallback, useEffect, useState} from "react";
 import {StyleSheet, ToastAndroid} from "react-native";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {defaultUserConfig, IUserConfig} from "@/type/IUserConfig.ts";
 import {SchoolTerms, SchoolTermValue, SchoolValue, SchoolYears, SchoolYearValue} from "@/type/global.ts";
 import {
@@ -12,7 +12,7 @@ import {
     PhyExpQueryRes,
 } from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {jwxt} from "@/js/jw/jwxt.ts";
-import {http, objectToFormUrlEncoded} from "@/js/http.ts";
+import {http, objectToFormUrlEncoded} from "@/core/http.ts";
 import {defaultYear} from "@/js/jw/infoQuery.ts";
 import {Course, CourseListTypeId, PhyExp, PracticalCourse} from "@/type/infoQuery/course/course.ts";
 import {authApi} from "@/js/auth/auth.ts";

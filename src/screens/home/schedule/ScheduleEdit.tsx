@@ -11,7 +11,7 @@ import {usePagerView} from "react-native-pager-view";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {IActivity} from "@/type/app/activity.ts";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 import {Picker} from "@react-native-picker/picker";

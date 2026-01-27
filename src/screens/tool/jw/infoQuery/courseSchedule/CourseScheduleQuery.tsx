@@ -1,7 +1,7 @@
 import {Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import React, {useContext, useEffect, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UserConfigContext} from "@/components/AppProvider.tsx";

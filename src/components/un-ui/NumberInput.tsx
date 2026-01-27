@@ -1,7 +1,7 @@
 import {Pressable, StyleSheet, TextInput, View} from "react-native";
 import Flex from "./Flex.tsx";
 import {Icon} from "./Icon.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {useContext, useRef} from "react";
 import {useTheme} from "@rneui/themed";
 import {UserConfigContext} from "@/components/AppProvider.tsx";

@@ -1,9 +1,9 @@
 import {ScrollView, StyleSheet} from "react-native";
 import React, {useEffect, useState} from "react";
 import {useTheme} from "@rneui/themed";
-import {http} from "@/js/http.ts";
+import {http} from "@/core/http.ts";
 import {Row, Rows, Table} from "react-native-reanimated-table";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import moment from "moment/moment";
 import "moment/locale/zh-cn";
 

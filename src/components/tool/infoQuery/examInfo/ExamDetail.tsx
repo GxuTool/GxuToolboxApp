@@ -7,7 +7,7 @@ import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import React, {useContext} from "react";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {Pos} from "@/js/pos.ts";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 
 interface Props extends ViewProps {
     examInfo: ExamInfo;

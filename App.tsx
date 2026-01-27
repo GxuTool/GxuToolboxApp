@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo} from "react";
 import {ThemeProvider} from "@rneui/themed";
-import {theme} from "@/js/theme.ts";
+import {theme} from "@/shared/theme.ts";
 import {Root} from "./src/screens/Root.tsx";
 import {useColorScheme} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";

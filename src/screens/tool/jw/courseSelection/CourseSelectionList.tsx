@@ -8,7 +8,7 @@ import {courseApi} from "@/js/jw/course.ts";
 import Flex from "../../../../components/un-ui/Flex.tsx";
 import {UnText} from "@/components/un-ui";
 import {SchoolTerms} from "@/type/global.ts";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 
 const listTypeMap: Record<CourseListTypeId, string> = {
     "01": "主修课程",

@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import {CourseScheduleTable} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {Flex, NumberInput, UnRefreshControl, UnTermSelector, UnText, vw} from "@/components/un-ui";
 import {AttendanceQuickLogin} from "@/components/tool/auth/AttendanceQuickLogin.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {Row, Rows, Table} from "react-native-reanimated-table";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";

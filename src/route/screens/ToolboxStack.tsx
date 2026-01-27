@@ -3,13 +3,13 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {ToolboxIndex} from "@/screens/tool/ToolboxIndex.tsx";
 import {ExamInfo} from "@/screens/tool/jw/infoQuery/ExamInfo.tsx";
 import {ExamScore} from "@/screens/tool/jw/infoQuery/ExamScore.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {ClassCourseSchedule} from "@/screens/tool/jw/infoQuery/courseSchedule/ClassCourseSchedule.tsx";
-import {EvaluationOverview} from "@/screens/tool/jw/eduEvaluation/EvaluationOverview.tsx";
-import {EvaluationDetail} from "@/screens/tool/jw/eduEvaluation/EvaluationDetail.tsx";
+import {EvaluationOverview} from "@/features/evaluation/screens/EvaluationOverview.tsx";
+import {EvaluationDetail} from "@/features/evaluation/screens/EvaluationDetail.tsx";
 import {Button, useTheme} from "@rneui/themed";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
-import {EvaluationComment} from "@/screens/tool/jw/eduEvaluation/EvaluationComment.tsx";
+import {EvaluationComment} from "@/features/evaluation/screens/EvaluationComment.tsx";
 import {BuildingListScreen} from "@/screens/tool/other/mapNavigation/BuildingListScreen.tsx";
 import {CourseScheduleQuery} from "@/screens/tool/jw/infoQuery/courseSchedule/CourseScheduleQuery.tsx";
 import {WidgetPreviewScreen} from "@/screens/tool/other/widgetPreview/WidgetPreviewScreen.tsx";
@@ -22,7 +22,7 @@ import {TimeShiftScreen} from "@/screens/tool/jw/notification/TimeShiftScreen.ts
 import AttendanceInfoQueryScreen from "@/screens/tool/auth/attendanceSystem/AttendanceInfoQueryScreen.tsx";
 import WebViewScreen from "@/screens/WebViewScreen.tsx";
 import {useWebView} from "@/hooks/app.ts";
-import {EvaluationTemplate} from "@/screens/tool/jw/eduEvaluation/EvaluationTemplate.tsx";
+import {EvaluationTemplate} from "@/features/evaluation/screens/EvaluationTemplate.tsx";
 
 const Stack = createNativeStackNavigator();
 

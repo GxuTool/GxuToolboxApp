@@ -1,4 +1,4 @@
-import {http, urlWithParams} from "@/js/http.ts";
+import {http, urlWithParams} from "@/core/http.ts";
 import RSAUtils from "@/js/authRSA.ts";
 import cheerio from "react-native-cheerio";
 import {userMgr} from "@/js/mgr/user.ts";

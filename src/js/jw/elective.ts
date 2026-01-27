@@ -1,4 +1,4 @@
-import {http} from "@/js/http.ts";
+import {http} from "@/core/http.ts";
 
 export const electiveAPI = {
     getCourses: async () => {

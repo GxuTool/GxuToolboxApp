@@ -1,5 +1,5 @@
-import {EvaluationIds, EvaluationRequest} from "@/type/eduEvaluation/evaluation.type.ts";
-import {Category, Teacher} from "@/type/eduEvaluation/evaDetail.ts";
+import {EvaluationIds, EvaluationRequest} from "@/features/evaluation/types/evaluation.type.ts";
+import {Category, Teacher} from "@/features/evaluation/types/evaDetail.ts";
 
 export type SelectedMap = Record<number, Record<number, Record<number, number>>>;
 

@@ -1,5 +1,5 @@
 import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {useState} from "react";
 import {useTheme} from "@rneui/themed";
 

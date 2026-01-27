@@ -1,4 +1,4 @@
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import moment from "moment/moment";
 

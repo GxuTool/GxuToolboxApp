@@ -1,7 +1,7 @@
 import {Course, PhyExp} from "@/type/infoQuery/course/course.ts";
 import {StyleProp, StyleSheet, TextStyle, View, ViewStyle} from "react-native";
 import moment from "moment/moment";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {Text, useTheme} from "@rneui/themed";
 import {ReactNode, useContext, useEffect, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";

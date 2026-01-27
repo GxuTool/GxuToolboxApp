@@ -3,7 +3,7 @@ import {FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "re
 import {BuildingList} from "@/type/pos.ts";
 import {useState} from "react";
 import {useTheme} from "@rneui/themed";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 
 const buildingTypes = ["全部", ...new Set(BuildingList.map(item => item.type))];
 

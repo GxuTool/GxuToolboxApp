@@ -2,7 +2,7 @@ import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {SettingStack} from "@/route/screens/SettingStack.tsx";
 import {ToolboxStack} from "@/route/screens/ToolboxStack.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {Button, useTheme} from "@rneui/themed";
 import {useContext} from "react";
 import {UserConfigContext} from "@/components/AppProvider.tsx";

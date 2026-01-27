@@ -3,7 +3,7 @@ import {Button, Image, Input, Text} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
 import {Icon} from "@/components/un-ui";
 import {authApi} from "@/js/auth/auth.ts";
-import {http} from "@/js/http.ts";
+import {http} from "@/core/http.ts";
 import {userMgr} from "@/js/mgr/user.ts";
 import {useWebView} from "@/hooks/app.ts";
 

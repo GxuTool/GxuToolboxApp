@@ -4,7 +4,7 @@ import React, {useContext, useMemo} from "react";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {Text, useTheme} from "@rneui/themed";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 
 interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ripple"> {

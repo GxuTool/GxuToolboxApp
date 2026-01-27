@@ -1,6 +1,6 @@
 import React, {useContext} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {Button, useTheme} from "@rneui/themed";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {HomeScreen} from "@/screens/HomeScreen.tsx";

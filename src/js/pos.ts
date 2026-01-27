@@ -1,6 +1,6 @@
 import {BuildingList, IPos} from "@/type/pos.ts";
 import {Linking, ToastAndroid} from "react-native";
-import {urlWithParams} from "@/js/http.ts";
+import {urlWithParams} from "@/core/http.ts";
 
 const sourceApplication = "gxujwt";
 
