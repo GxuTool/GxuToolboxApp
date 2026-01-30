@@ -46,7 +46,7 @@ export const examApi = {
                 sortOrder: "desc",
             },
         });
-        const res = await http.post("/cjcx/cjcx_cxXsgrcj.html?doType=query", reqBody);
+        const res = await http.post("/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=N305005", reqBody);
         if (typeof res.data === "object") {
             // console.log(washExamScore(res.data.items));
             return res.data;

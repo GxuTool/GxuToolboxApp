@@ -52,7 +52,7 @@ export function ToolboxIndex() {
                     navigation: "classCourseSchedule",
                 },
                 {
-                    label: "考试信息",
+                    label: "考试考场",
                     icon: <Icon name="information-box-outline" size={iconSize} />,
                     type: "navigation",
                     navigation: "examInfo",

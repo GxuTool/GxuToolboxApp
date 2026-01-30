@@ -1,7 +1,7 @@
 import React, {lazy, useContext} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {ToolboxIndex} from "@/screens/tool/ToolboxIndex.tsx";
-import {ExamInfo} from "@/screens/tool/jw/infoQuery/ExamInfo.tsx";
+import {ExamInfo} from "@/features/examInfo/screens/ExamInfo.tsx";
 import {ExamScore} from "@/screens/tool/jw/infoQuery/ExamScore.tsx";
 import {Color} from "@/shared/color.ts";
 import {ClassCourseSchedule} from "@/screens/tool/jw/infoQuery/courseSchedule/ClassCourseSchedule.tsx";

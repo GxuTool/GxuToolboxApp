@@ -12,6 +12,7 @@ import {Icon} from "@/components/un-ui";
 import {parseEvaluationHTML} from "@/features/evaluation/utils/parser.ts";
 import {createDefaultReq, fillReq} from "@/features/evaluation/utils/reqBuilder.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useBatchProcessor} from "@/features/evaluation/hook/useBatchProcessor.ts";
 
 const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
     const progressPercent = Math.round(progress * 100);
@@ -29,8 +30,6 @@ export function EvaluationOverview() {
     const colWidths = [9, 6, 5];
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [progressText, setProgressText] = useState("");
     const isCancelled = useRef(false);
 
     const handleRowPress = (item: Evaluation) => {
@@ -90,14 +89,17 @@ export function EvaluationOverview() {
         return cnt;
     }, [evaList]);
 
-    const oneKey = async () => {
+    const {isRunning, progress, progressText, setProgress, setProgressText, run, cancel} =
+        useBatchProcessor<Evaluation>();
+
+    const handleOneKey = async () => {
         const unEvaluatedList = evaList.filter(item => item.tjztmc !== "已评完");
         if (unEvaluatedList.length === 0) {
             ToastAndroid.show("所有项目均已评教，无需操作。", ToastAndroid.SHORT);
             return;
         }
 
-        let temp;
+        let temp: {selected: Record<string, Record<string, Record<string, number>>>; comment: string};
         try {
             const storedTemp = await AsyncStorage.getItem("@EvaluationTemplate");
             if (!storedTemp) throw new Error("未找到评教模板");
@@ -108,76 +110,50 @@ export function EvaluationOverview() {
             return;
         }
 
-        isCancelled.current = false;
-        setIsModalVisible(true);
-        setProgress(0);
-        setProgressText("准备开始...");
-
-        try {
-            for (let i = 0; i < unEvaluatedList.length; i++) {
-                if (isCancelled.current) {
-                    ToastAndroid.show("操作已取消", ToastAndroid.SHORT);
-                    break;
-                }
-
-                const evaluationItem = unEvaluatedList[i];
-                const currentProgressText = `(${i + 1}/${unEvaluatedList.length}) ${evaluationItem.kcmc} - ${
-                    evaluationItem.jzgmc
-                }`;
-                setProgressText(currentProgressText);
-
-                const HtmlText = await evaluationApi.getEvaluationDetail(
-                    evaluationItem.jgh_id,
-                    evaluationItem.jxb_id,
-                    evaluationItem.kch_id,
-                    evaluationItem.xsdm,
-                    evaluationItem.pjmbmcb_id,
-                );
-                const {idObj} = parseEvaluationHTML(HtmlText);
-                const defReq = createDefaultReq(evaluationItem, idObj);
-                const reqToSend = fillReq(defReq, temp.selected, temp.comment, idObj);
-                await evaluationApi.handleEvaResult(defReq, reqToSend);
-
-                const cur = (i + 1) / unEvaluatedList.length;
-                setProgress(Math.round(cur * 100) / 100);
-            }
-        } catch (error) {
-            console.error("一键评教时发生错误:", error);
-            ToastAndroid.show(`发生错误: ${error.message}`, ToastAndroid.LONG);
-        } finally {
-            setIsModalVisible(false);
-            await init(); // 无论如何都刷新列表
-        }
-    };
-
-    const zero = async () => {
-        setProgress(0);
-        setProgressText("");
-        for (let i = 0; i < evaList.length; i++) {
-            if (isCancelled.current) {
-                ToastAndroid.show("操作已取消", ToastAndroid.SHORT);
-                break;
-            }
-
-            const evaluationItem = evaList[i];
-            const currentProgressText = `(${i + 1}/${evaList.length}) ${evaluationItem.kcmc} - ${evaluationItem.jzgmc}`;
-            setProgressText(currentProgressText);
-
+        const task = async (item: Evaluation, index: number, total: number) => {
+            setProgressText(`(${index + 1}/${total}) ${item.kcmc} - ${item.jzgmc}`);
+            setIsModalVisible(true);
             const HtmlText = await evaluationApi.getEvaluationDetail(
-                evaluationItem.jgh_id,
-                evaluationItem.jxb_id,
-                evaluationItem.kch_id,
-                evaluationItem.xsdm,
-                evaluationItem.pjmbmcb_id,
+                item.jgh_id,
+                item.jxb_id,
+                item.kch_id,
+                item.xsdm,
+                item.pjmbmcb_id,
             );
             const {idObj} = parseEvaluationHTML(HtmlText);
-            const defReq = createDefaultReq(evaluationItem, idObj);
-            await evaluationApi.handleEvaResult(defReq);
+            const defReq = createDefaultReq(item, idObj);
+            const reqToSend = fillReq(defReq, temp.selected, temp.comment, idObj);
+            await evaluationApi.handleEvaResult(defReq, reqToSend);
 
-            setProgress((i + 1) / evaList.length);
+            setProgress((index + 1) / total);
+        };
 
-            await init();
-        }
+        await run(unEvaluatedList, task);
+        setIsModalVisible(false);
+        await init();
+    };
+
+    const handleClear = async () => {
+        const task = async (item: Evaluation, index: number, total: number) => {
+            setProgressText(`(${index + 1}/${total}) 清空: ${item.kcmc}`);
+            setIsModalVisible(true);
+            const HtmlText = await evaluationApi.getEvaluationDetail(
+                item.jgh_id,
+                item.jxb_id,
+                item.kch_id,
+                item.xsdm,
+                item.pjmbmcb_id,
+            );
+            const {idObj} = parseEvaluationHTML(HtmlText);
+            const defReq = createDefaultReq(item, idObj);
+            await evaluationApi.handleEvaResult(defReq); // 假设这是清空的API调用
+
+            setProgress((index + 1) / total);
+        };
+
+        await run(evaList, task);
+        setIsModalVisible(false);
+        await init();
     };
 
     const submit = async () => {
@@ -189,7 +165,7 @@ export function EvaluationOverview() {
             evaluationItem.xsdm,
             evaluationItem.pjmbmcb_id,
         );
-        const {idObj, teachers, selected} = parseEvaluationHTML(HtmlText);
+        const {idObj, selected} = parseEvaluationHTML(HtmlText);
         const defReq = createDefaultReq(evaluationItem, idObj);
         const reqToSend = fillReq(defReq, selected, "", idObj);
         await evaluationApi.submitEvaResult(defReq, reqToSend);
@@ -241,19 +217,19 @@ export function EvaluationOverview() {
                     </Button>
                 </Flex>
                 <Flex>
-                    {statusCounts["已评完"] === evaList.length ? (
-                        <Button containerStyle={{ width: "65%", paddingRight: 10 }} onPress={submit}>
+                    {statusCounts["已评完"] === evaList.length || evaList.length === 0 ? (
+                        <Button containerStyle={{width: "65%", paddingRight: 10}} onPress={submit}>
                             提交（可清空评价反悔）
                         </Button>
                     ) : (
-                        <Button containerStyle={{ width: "65%", paddingRight: 10 }} onPress={oneKey}>
+                        <Button containerStyle={{width: "65%", paddingRight: 10}} onPress={handleOneKey}>
                             应用自定义模板一键评价
                         </Button>
                     )}
                     <Button
                         containerStyle={{width: "25%"}}
                         onPress={() => {
-                            zero();
+                            handleClear();
                         }}>
                         清空评价
                     </Button>

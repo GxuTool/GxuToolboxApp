@@ -30,7 +30,7 @@ http.interceptors.request.use(config => {
     // 在请求发送前记录开始时间
     requestStartTimes.set(config, Date.now());
     // 只打印简洁的请求信息
-    console.log(`[HTTP] --> ${config.method?.toUpperCase()} ${config.url}`);
+    // console.log(`[HTTP] --> ${config.method?.toUpperCase()} ${config.url}`);
     return config;
 });
 

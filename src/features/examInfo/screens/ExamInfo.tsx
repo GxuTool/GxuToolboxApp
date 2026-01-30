@@ -1,36 +1,32 @@
-import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {ScrollView, StyleSheet, View} from "react-native";
 import {Button, Divider, Text, useTheme} from "@rneui/themed";
 import React, {useContext, useEffect, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {SchoolTerms, SchoolTermValue, SchoolYears} from "@/type/global.ts";
+import {SchoolTermValue} from "@/type/global.ts";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
-import {Row, Rows, Table} from "react-native-reanimated-table";
-import {ExamInfoQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
 import {store} from "@/core/store.ts";
 import {Color} from "@/shared/color.ts";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
-import {examApi} from "@/js/jw/exam.ts";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useWebView} from "@/hooks/app.ts";
+import {getExamInfo} from "@/features/examInfo/api";
+import {ExamInfoCard} from "@/features/examInfo/components/ExamInfoCard.tsx";
+import {ExamInfoApiResponse} from "@/features/examInfo/type/exam.types.ts";
 
+const initRes: ExamInfoApiResponse = {
+    currentPage: 1,
+    totalPage: 1,
+    totalCount: 0,
+    items: [],
+};
 export function ExamInfo() {
     const {theme} = useTheme();
     const {userConfig} = useContext(UserConfigContext);
     const {openInJw} = useWebView();
-    const [apiRes, setApiRes] = useState<ExamInfoQueryRes>({} as ExamInfoQueryRes);
+    const [apiRes, setApiRes] = useState<ExamInfoApiResponse>(initRes as ExamInfoApiResponse);
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
     const [page, setPage] = useState(1);
-    const [tableData, setTableData] = useState({
-        header: ["课程名称", "考试时间", "考试校区", "考试地点", "考试座号", "学年", "学期", "教学班", "考试名称"],
-        width: [170, 200, 80, 100, 80, 100, 70, 190, 300],
-        body: [] as string[][],
-    });
-
-    const data = {
-        schoolYear: [["", "全部"], ...SchoolYears],
-        schoolTerm: [["", "全部"], ...SchoolTerms],
-    };
 
     const style = StyleSheet.create({
         container: {
@@ -64,31 +60,39 @@ export function ExamInfo() {
     }
 
     async function query() {
-        const res = await examApi.getExamInfo(year, term, page);
-        if (res) {
-            const tableBody = res.items.map(item => [
-                item.kcmc,
-                item.kssj,
-                item.cdxqmc,
-                item.cdmc,
-                item.zwh,
-                item.xnmc,
-                item.xqmmc,
-                item.jxbmc,
-                item.ksmc,
-            ]);
-            ToastAndroid.show("获取考试信息成功", ToastAndroid.SHORT);
-            setTableData({
-                ...tableData,
-                body: tableBody,
-            });
-            setApiRes(res);
-            await store.save({key: "examInfo", data: res});
-        }
+        const res = await getExamInfo(year, term, page);
+        if (!res) return;
+
+        res.items.sort((a, b) => {
+            // 1. 定义 status 优先级：upcoming(0) > tbd(1) > past(2)
+            const statusOrder: Record<string, number> = {
+                upcoming: 0,
+                tbd: 1,
+                past: 2,
+            };
+
+            const orderA = statusOrder[a.status] ?? 3;
+            const orderB = statusOrder[b.status] ?? 3;
+
+            if (orderA !== orderB) {
+                return orderA - orderB;
+            }
+
+            // upcoming 升序，其他状态降序
+            const sortDirection = orderA === 0 ? 1 : -1;
+            return (a.examDate - b.examDate) * sortDirection;
+        });
+
+        console.log(res);
+        setApiRes(res);
+        await store.save({key: "examInfo", data: res});
     }
 
     useEffect(() => {
         init();
+    }, []);
+
+    useEffect(() => {
         query();
     }, [year, term, page]);
 
@@ -137,30 +141,22 @@ export function ExamInfo() {
                         </Flex>
                         <Text>每页15条记录</Text>
                     </Flex>
-                    <ScrollView horizontal>
-                        <Table borderStyle={style.tableBorder}>
-                            <Row
-                                data={tableData.header}
-                                widthArr={tableData.width}
-                                textStyle={style.tableText}
-                                style={style.tableHeader}
-                                height={50}
-                            />
-                            <Rows
-                                heightArr={new Array(tableData.body.length).fill(50)}
-                                data={tableData.body}
-                                widthArr={tableData.width}
-                                textStyle={style.tableText}
-                            />
-                        </Table>
-                    </ScrollView>
-                    <Flex gap={10}>
-                        <Text>页数</Text>
-                        <Flex inline>
-                            <NumberInput value={page} onChange={setPage} min={1} max={apiRes.totalPage ?? 1} />
+
+                    <View style={{width: "100%", gap: 15}}>
+                        {apiRes.items.map((item, index) => (
+                            <ExamInfoCard key={item.courseId + index} item={item} />
+                        ))}
+                    </View>
+
+                    {apiRes.items.length > 5 && (
+                        <Flex gap={10}>
+                            <Text>页数</Text>
+                            <Flex inline>
+                                <NumberInput value={page} onChange={setPage} min={1} max={apiRes.totalPage ?? 1} />
+                            </Flex>
+                            <Text>每页15条记录</Text>
                         </Flex>
-                        <Text>每页15条记录</Text>
-                    </Flex>
+                    )}
                 </Flex>
             </View>
         </ScrollView>
