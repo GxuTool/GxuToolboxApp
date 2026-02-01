@@ -31,14 +31,18 @@ export const examApi = {
             return null;
         }
     },
-    getExamScore: async (year: number, term: SchoolTermValue, page: number = 1, limit: number = 15): Promise<ExamScoreQueryRes | null> => {
-        const yearIndex = SchoolYears.findIndex(v => +v[0] === year);
+    getExamScore: async (
+        year: number | "" = "",
+        term: SchoolTermValue | "" = "",
+        page: number = 1,
+        limit: number = 15,
+    ): Promise<ExamScoreQueryRes | null> => {
         if (!(await jwxt.testToken())) {
             return null;
         }
         const reqBody = objectToFormUrlEncoded({
-            xnm: SchoolYears[yearIndex ?? SchoolYears.findIndex(v => +v[0] === defaultYear)][0],
-            xqm: term ?? SchoolTerms[0][0],
+            xnm: year === "" ? "" : SchoolYears.find(v => +v[0] === year)?.[0] ?? defaultYear,
+            xqm: term === "" ? "" : term ?? SchoolTerms[0][0],
             queryModel: {
                 showCount: limit,
                 currentPage: page > 0 ? page : 1,
@@ -48,7 +52,6 @@ export const examApi = {
         });
         const res = await http.post("/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=N305005", reqBody);
         if (typeof res.data === "object") {
-            // console.log(washExamScore(res.data.items));
             return res.data;
         } else {
             ToastAndroid.show("获取考试成绩信息失败", ToastAndroid.SHORT);

@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
-import {electiveAPI} from "@/js/jw/elective.ts";
+import {electiveAPI} from "@/features/courseSelectionList/api";
 import {Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Flex, Icon} from "@/components/un-ui";
 import {useTheme} from "@rneui/themed";

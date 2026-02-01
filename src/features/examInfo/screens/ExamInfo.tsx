@@ -12,6 +12,8 @@ import {useWebView} from "@/hooks/app.ts";
 import {getExamInfo} from "@/features/examInfo/api";
 import {ExamInfoCard} from "@/features/examInfo/components/ExamInfoCard.tsx";
 import {ExamInfoApiResponse} from "@/features/examInfo/type/exam.types.ts";
+import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
+import {examApi} from "@/js/jw/exam.ts";
 
 const initRes: ExamInfoApiResponse = {
     currentPage: 1,
@@ -19,6 +21,7 @@ const initRes: ExamInfoApiResponse = {
     totalCount: 0,
     items: [],
 };
+
 export function ExamInfo() {
     const {theme} = useTheme();
     const {userConfig} = useContext(UserConfigContext);
@@ -31,6 +34,7 @@ export function ExamInfo() {
     const style = StyleSheet.create({
         container: {
             padding: "5%",
+            paddingTop: 0,
         },
         tableText: {
             color: theme.colors.black,
@@ -98,34 +102,42 @@ export function ExamInfo() {
 
     return (
         <ScrollView>
+            <ChooseTerm
+                onTermSelect={(Year, Term) => {
+                    setYear(Year);
+                    setTerm(Term);
+                }}
+                includeWholeLife={false}
+                includeWholeYear={false}
+            />
             <View style={style.container}>
-                <Flex gap={10} direction="column" align="flex-start">
-                    <Text h4>查询参数</Text>
-                    <Flex gap={10}>
-                        <Text>学期</Text>
-                        <View style={{flex: 1}}>
-                            <UnTermSelector
-                                year={year}
-                                term={term}
-                                onChange={(year, term) => {
-                                    setYear(+year);
-                                    setTerm(term);
-                                }}
-                            />
-                        </View>
-                    </Flex>
-                    <Flex gap={10}>
-                        <Button containerStyle={{flex: 1}} onPress={query}>
-                            查询
-                        </Button>
-                        <Button
-                            onPress={() => {
-                                openInJw("/kwgl/kscx_cxXsksxxIndex.html?gnmkdm=N358105&layout=default");
-                            }}>
-                            前往教务查询
-                        </Button>
-                    </Flex>
-                </Flex>
+                {/*<Flex gap={10} direction="column" align="flex-start">*/}
+                {/*    <Text h4>查询参数</Text>*/}
+                {/*    <Flex gap={10}>*/}
+                {/*        <Text>学期</Text>*/}
+                {/*        <View style={{flex: 1}}>*/}
+                {/*            <UnTermSelector*/}
+                {/*                year={year}*/}
+                {/*                term={term}*/}
+                {/*                onChange={(year, term) => {*/}
+                {/*                    setYear(+year);*/}
+                {/*                    setTerm(term);*/}
+                {/*                }}*/}
+                {/*            />*/}
+                {/*        </View>*/}
+                {/*    </Flex>*/}
+                {/*    <Flex gap={10}>*/}
+                {/*        <Button containerStyle={{flex: 1}} onPress={query}>*/}
+                {/*            查询*/}
+                {/*        </Button>*/}
+                {/*        <Button*/}
+                {/*            onPress={() => {*/}
+                {/*                openInJw("/kwgl/kscx_cxXsksxxIndex.html?gnmkdm=N358105&layout=default");*/}
+                {/*            }}>*/}
+                {/*            前往教务查询*/}
+                {/*        </Button>*/}
+                {/*    </Flex>*/}
+                {/*</Flex>*/}
                 <Divider />
                 <Flex direction="column" gap={15} align="flex-start">
                     <Flex align="flex-end" gap={5}>

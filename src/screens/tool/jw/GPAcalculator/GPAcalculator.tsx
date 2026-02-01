@@ -5,7 +5,6 @@ import {Text, useTheme} from "@rneui/themed";
 import {useState} from "react";
 import {ExamScoreQueryRes} from "@/type/exam.ts";
 import {useGpa} from "@/hooks/useGpa.ts";
-import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 
 export function GPAcalculator() {
@@ -129,7 +128,6 @@ export function GPAcalculator() {
             <ChooseTerm
                 onTermSelect={async (year, term) => {
                     const res = await examApi.getExamScore(year, term, 1, 100);
-                    console.log(res.items);
                     setScore(res);
                 }}
             />
@@ -138,9 +136,11 @@ export function GPAcalculator() {
             </View>
             <View style={[styles.listTitle, {flexDirection: "row", alignItems: "center"}]}>
                 <Text style={{fontSize: 18, marginRight: 5}}>计算方法</Text>
-                <TouchableOpacity onPress={() => {setShowModal(true);}}>
-                    <Icon type={"fontawesome"} name={"question-circle"} color={theme.colors.primary}
-                                        size={18} />
+                <TouchableOpacity
+                    onPress={() => {
+                        setShowModal(true);
+                    }}>
+                    <Icon type={"fontawesome"} name={"question-circle"} color={theme.colors.primary} size={18} />
                 </TouchableOpacity>
             </View>
             <ScrollView style={styles.listContainer}>
@@ -165,18 +165,24 @@ export function GPAcalculator() {
                         <Text style={styles.modalTitle}>计算方法</Text>
                         <ScrollView>
                             <Text style={styles.modalContent}>
-                            文本来源：《广西大学普通本科学生课程修读、考核及成绩管理办法（2019年修订）》{"\n"}
-                            为了检查学生学习质量，学校采用课程学分绩点、平均学分绩点、加权平均成绩来衡量学生学习的质量。{"\n"}
-                            （一）课程学分绩点按以下简化公式计算：
-                            课程的学分绩点＝[（课程考核成绩÷课程考核满分值）×100]/10－5{"\n"}
-                            其中，考核不合格未取得学分的课程，其学分绩点为零。{"\n"}
-                            （二）平均学分绩点按下式计算：
-                            平均学分绩点＝∑（课程学分绩点×取得的课程学分×K）/ ∑ 修读课程学分{"\n"}
-                            其中，取得的课程学分，指修读课程中已及格课程所对应的学分；课程考核总评成绩（或折算成绩）达到合格标准（即百分制60分及以上或五级制及格及以上）的即取得学分；K为课程系数，没有特别说明时，K取值为1。{"\n"}
-                            （三）加权平均成绩按下式计算：
-                            加权平均成绩＝∑[（课程考核成绩÷课程考核满分值）×100×修读课程学分×K] / ∑ 修读课程学分{"\n"}
-                            （四）平均学分绩点按学期计算的为学期平均学分绩点，按学年计算的为学年平均学分绩点，从入学后不分学期累计计算的为累计平均学分绩点，按入学后至毕业计算的为毕业平均学分绩点。加权平均成绩的计算方法与上述方法一致。{"\n"}
-                            （五）原则上计算学生课程学分绩点、平均学分绩点、加权平均成绩时，计算结果一般按四舍五入法保留至小数后两位。</Text></ScrollView>
+                                文本来源：《广西大学普通本科学生课程修读、考核及成绩管理办法（2019年修订）》{"\n"}
+                                为了检查学生学习质量，学校采用课程学分绩点、平均学分绩点、加权平均成绩来衡量学生学习的质量。
+                                {"\n"}
+                                （一）课程学分绩点按以下简化公式计算：
+                                课程的学分绩点＝[（课程考核成绩÷课程考核满分值）×100]/10－5{"\n"}
+                                其中，考核不合格未取得学分的课程，其学分绩点为零。{"\n"}
+                                （二）平均学分绩点按下式计算： 平均学分绩点＝∑（课程学分绩点×取得的课程学分×K）/ ∑
+                                修读课程学分{"\n"}
+                                其中，取得的课程学分，指修读课程中已及格课程所对应的学分；课程考核总评成绩（或折算成绩）达到合格标准（即百分制60分及以上或五级制及格及以上）的即取得学分；K为课程系数，没有特别说明时，K取值为1。
+                                {"\n"}
+                                （三）加权平均成绩按下式计算：
+                                加权平均成绩＝∑[（课程考核成绩÷课程考核满分值）×100×修读课程学分×K] / ∑ 修读课程学分
+                                {"\n"}
+                                （四）平均学分绩点按学期计算的为学期平均学分绩点，按学年计算的为学年平均学分绩点，从入学后不分学期累计计算的为累计平均学分绩点，按入学后至毕业计算的为毕业平均学分绩点。加权平均成绩的计算方法与上述方法一致。
+                                {"\n"}
+                                （五）原则上计算学生课程学分绩点、平均学分绩点、加权平均成绩时，计算结果一般按四舍五入法保留至小数后两位。
+                            </Text>
+                        </ScrollView>
                         <TouchableOpacity onPress={() => setShowModal(false)}>
                             <Text style={styles.modalCloseButton}>关闭</Text>
                         </TouchableOpacity>
