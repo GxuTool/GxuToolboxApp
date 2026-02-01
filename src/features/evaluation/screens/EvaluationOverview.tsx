@@ -13,6 +13,7 @@ import {parseEvaluationHTML} from "@/features/evaluation/utils/parser.ts";
 import {createDefaultReq, fillReq} from "@/features/evaluation/utils/reqBuilder.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useBatchProcessor} from "@/features/evaluation/hook/useBatchProcessor.ts";
+import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
 
 const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
     const progressPercent = Math.round(progress * 100);
@@ -25,16 +26,17 @@ const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
 
 export function EvaluationOverview() {
     const {theme} = useTheme();
-    const [evaList, setEvaList] = useState<Evaluation[]>([]);
+    const [evaList, setEvaList] = useState<EvaTeacherList[]>([]);
     const navigation = useNavigation();
     const colWidths = [9, 6, 5];
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const isCancelled = useRef(false);
 
-    const handleRowPress = (item: Evaluation) => {
+    const handleRowPress = (item: EvaTeacherList) => {
         navigation.navigate("EvaluationDetail", {evaluationItem: item});
     };
+
     const defaultColor = Color.mix(
         Color(theme.colors.primary),
         Color(theme.colors.background),
@@ -82,8 +84,8 @@ export function EvaluationOverview() {
     const statusCounts = useMemo(() => {
         const cnt = {已评完: 0, 未评完: 0, 未评: 0};
         evaList.forEach(item => {
-            if (cnt[item.tjztmc] !== undefined) {
-                cnt[item.tjztmc]++;
+            if (cnt[item.submitStatus] !== undefined) {
+                cnt[item.submitStatus]++;
             }
         });
         return cnt;
@@ -93,7 +95,7 @@ export function EvaluationOverview() {
         useBatchProcessor<Evaluation>();
 
     const handleOneKey = async () => {
-        const unEvaluatedList = evaList.filter(item => item.tjztmc !== "已评完");
+        const unEvaluatedList = evaList.filter(item => item.submitStatus !== "已评完");
         if (unEvaluatedList.length === 0) {
             ToastAndroid.show("所有项目均已评教，无需操作。", ToastAndroid.SHORT);
             return;
@@ -110,15 +112,15 @@ export function EvaluationOverview() {
             return;
         }
 
-        const task = async (item: Evaluation, index: number, total: number) => {
-            setProgressText(`(${index + 1}/${total}) ${item.kcmc} - ${item.jzgmc}`);
+        const task = async (item: EvaTeacherList, index: number, total: number) => {
+            setProgressText(`(${index + 1}/${total}) ${item.courseName} - ${item.teacherName}`);
             setIsModalVisible(true);
             const HtmlText = await evaluationApi.getEvaluationDetail(
-                item.jgh_id,
-                item.jxb_id,
-                item.kch_id,
-                item.xsdm,
-                item.pjmbmcb_id,
+                item.securityToken,
+                item.teachingClassId,
+                item.courseId,
+                item.courseTypeCode,
+                item.rubricId,
             );
             const {idObj} = parseEvaluationHTML(HtmlText);
             const defReq = createDefaultReq(item, idObj);
@@ -134,19 +136,19 @@ export function EvaluationOverview() {
     };
 
     const handleClear = async () => {
-        const task = async (item: Evaluation, index: number, total: number) => {
-            setProgressText(`(${index + 1}/${total}) 清空: ${item.kcmc}`);
+        const task = async (item: EvaTeacherList, index: number, total: number) => {
+            setProgressText(`(${index + 1}/${total}) 清空: ${item.courseName}`);
             setIsModalVisible(true);
             const HtmlText = await evaluationApi.getEvaluationDetail(
-                item.jgh_id,
-                item.jxb_id,
-                item.kch_id,
-                item.xsdm,
-                item.pjmbmcb_id,
+                item.securityToken,
+                item.teachingClassId,
+                item.courseId,
+                item.courseTypeCode,
+                item.rubricId,
             );
             const {idObj} = parseEvaluationHTML(HtmlText);
             const defReq = createDefaultReq(item, idObj);
-            await evaluationApi.handleEvaResult(defReq); // 假设这是清空的API调用
+            await evaluationApi.handleEvaResult(defReq);
 
             setProgress((index + 1) / total);
         };
@@ -159,11 +161,11 @@ export function EvaluationOverview() {
     const submit = async () => {
         const evaluationItem = evaList[0];
         const HtmlText = await evaluationApi.getEvaluationDetail(
-            evaluationItem.jgh_id,
-            evaluationItem.jxb_id,
-            evaluationItem.kch_id,
-            evaluationItem.xsdm,
-            evaluationItem.pjmbmcb_id,
+            evaluationItem.securityToken,
+            evaluationItem.teachingClassId,
+            evaluationItem.courseId,
+            evaluationItem.courseTypeCode,
+            evaluationItem.rubricId,
         );
         const {idObj, selected} = parseEvaluationHTML(HtmlText);
         const defReq = createDefaultReq(evaluationItem, idObj);
@@ -174,7 +176,9 @@ export function EvaluationOverview() {
     async function init() {
         try {
             const res = await evaluationApi.getEvaluationList();
-            res.items.sort((a, b) => statusList.indexOf(a.tjztmc) - statusList.indexOf(b.tjztmc));
+            res.items
+                .sort((a, b)=>
+                    statusList.indexOf(a.submitStatus) - statusList.indexOf(b.submitStatus));
             setEvaList(res.items);
         } catch (e) {
             console.error("获取评教列表失败:", e);
@@ -243,7 +247,7 @@ export function EvaluationOverview() {
                     />
                     {evaList.map(item => (
                         <EvaluationRow
-                            key={item.jxb_id + item.jgh_id}
+                            key={item.teachingClassId + item.securityToken}
                             item={item}
                             onPress={handleRowPress}
                             colWidths={colWidths}

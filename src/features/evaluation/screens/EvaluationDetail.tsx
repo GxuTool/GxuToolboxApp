@@ -7,6 +7,7 @@ import {EvaCategory} from "@/features/evaluation/components/EvaCategory.tsx";
 import {evaluationApi} from "@/features/evaluation/api";
 import {evaluationReducer, initialState} from "@/features/evaluation/store/EvaReducer.ts";
 import {createDefaultReq, fillReq} from "@/features/evaluation/utils/reqBuilder.ts";
+import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
 
 export function EvaluationDetail({navigation, route}) {
     const scrollViewRef = useRef<ScrollView>(null);
@@ -14,7 +15,7 @@ export function EvaluationDetail({navigation, route}) {
     const {loading, error, teachers, comment, ids, selected, defaultReq} = state;
     const {theme} = useTheme();
 
-    const {evaluationItem} = route.params;
+    const {evaluationItem} = route.params as {evaluationItem: EvaTeacherList};
 
     const onSelect = useCallback((catIdx: number, itIdx: number, optIdx: number) => {
         dispatch({type: "SELECT_OPTION", payload: {catIdx, itIdx, optIdx}});
@@ -22,7 +23,7 @@ export function EvaluationDetail({navigation, route}) {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: `学生评价细节 - ${evaluationItem.jzgmc}（${evaluationItem.kcmc}）`,
+            title: `${evaluationItem.teacherName}（${evaluationItem.courseName}）`,
         });
     }, [navigation, evaluationItem]);
 
@@ -119,7 +120,6 @@ export function EvaluationDetail({navigation, route}) {
 
         const res = await evaluationApi.handleEvaResult(defaultReq, reqToSend);
         console.log(res);
-        // ToastAndroid.showWithGravity(res, ToastAndroid.SHORT, 5);
         dispatch({type: "SET_SELECTED", payload: submitSelected});
         init();
     };
@@ -129,11 +129,11 @@ export function EvaluationDetail({navigation, route}) {
         dispatch({type: "FETCH_START"});
         try {
             const HtmlText = await evaluationApi.getEvaluationDetail(
-                evaluationItem.jgh_id,
-                evaluationItem.jxb_id,
-                evaluationItem.kch_id,
-                evaluationItem.xsdm,
-                evaluationItem.pjmbmcb_id,
+                evaluationItem.securityToken,
+                evaluationItem.teachingClassId,
+                evaluationItem.courseId,
+                evaluationItem.courseTypeCode,
+                evaluationItem.rubricId,
             );
             const {idObj, teachers, selected} = parseEvaluationHTML(HtmlText);
 
@@ -183,9 +183,9 @@ export function EvaluationDetail({navigation, route}) {
             )}
             <View style={styles.card}>
                 <Text style={styles.header}>
-                    {evaluationItem.kcmc}——{evaluationItem.jzgmc}：{evaluationItem.tjztmc}
+                    {evaluationItem.courseName}——{evaluationItem.teacherName}：{evaluationItem.submitStatus}
                 </Text>
-                {teachers![0].categories.map((cat, catIdx: number) => (
+                {teachers![0].categories.map((cat: any, catIdx: number) => (
                     <EvaCategory key={cat.name + cat.qzz} cat={cat} catIdx={catIdx} onSelect={onSelect} />
                 ))}
             </View>

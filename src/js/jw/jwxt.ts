@@ -23,7 +23,24 @@ export const jwxt = {
         });
     },
 
-    login: async (
+    login: async (username: string, password: string): Promise<AxiosResponse> => {
+        return new Promise(resolve => {
+            http.post(
+                urlWithParams("/xtgl/login_slogin.html", {
+                    time: Date.now(),
+                }),
+                {
+                    language: "zh_CN",
+                    yhm: username,
+                    mm: password,
+                    yzm: "",
+                },
+            ).then(res => {
+                resolve(res);
+            });
+        });
+    },
+    loginWithRSA: async (
         username: string,
         password: string,
         public_key: string,
@@ -49,7 +66,7 @@ export const jwxt = {
     refreshToken: async (): Promise<AxiosResponse | void> => {
         const account = await userMgr.jw.getAccount();
         if (!account) {
-            ToastAndroid.show("请更新账号信息",ToastAndroid.SHORT);
+            ToastAndroid.show("请更新账号信息", ToastAndroid.SHORT);
             return;
         }
         const {username, password} = account;
@@ -90,7 +107,7 @@ export const jwxt = {
         if (typeof res.data === "string") {
             const html = res.data;
             const i = personalInfoParser(html);
-            const pick = (l: string) => i.find((it: { label: string; }) => it.label === l)?.value ?? "";
+            const pick = (l: string) => i.find((it: {label: string}) => it.label === l)?.value ?? "";
 
             const info = {
                 name: pick("姓名"),

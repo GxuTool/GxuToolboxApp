@@ -4,9 +4,10 @@ import {Color} from "@/shared/color.ts";
 import {useTheme} from "@rneui/themed";
 import React from "react";
 import {Evaluation} from "@/features/evaluation/types/evaluation.type.ts";
+import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
 
 interface EvaluationRowProps {
-    item: Evaluation;
+    item: EvaTeacherList;
     onPress: (item: Evaluation) => void;
     colWidths: number[];
     colorMap: Record<string, string>;
@@ -31,7 +32,7 @@ const EvaluationRowComponent = ({item, onPress, colWidths, colorMap}: Evaluation
         <TouchableOpacity onPress={() => onPress(item)}>
             <Row
                 cellTextStyle={cell => ({color: colorMap[cell] ?? theme.colors.black})}
-                data={[`${item.kcmc} - ${item.xsmc}`, item.jzgmc, item.tjztmc]}
+                data={[`${item.courseName} - ${item.courseTypeName}`, item.teacherName, item.submitStatus]}
                 style={styles.row}
                 flexArr={colWidths}
                 textStyle={styles.rowText}

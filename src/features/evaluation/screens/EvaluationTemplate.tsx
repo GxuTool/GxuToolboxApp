@@ -141,7 +141,7 @@ export function EvaluationTemplate() {
                     />
                 </View>
                 {EVALUATION_ITEMS.map((item, index) => (
-                    <EvaCard
+                    <QuestionCard
                         key={index}
                         index={index}
                         text={item}
@@ -163,7 +163,7 @@ export function EvaluationTemplate() {
 }
 
 /* -------------------- 单题卡片 -------------------- */
-const EvaCard = React.memo(
+const QuestionCard = React.memo(
     ({
         index,
         text,

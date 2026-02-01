@@ -1,13 +1,11 @@
-import {Evaluation, EvaluationRequest} from "@/features/evaluation/types/evaluation.type.ts";
+import {EvaluationRequest} from "@/features/evaluation/types/evaluation.type.ts";
+import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
 
-export function createDefaultReq(
-    evaluationItem: Evaluation,
-    idObj: any,
-): EvaluationRequest {
+export function createDefaultReq(evaluationItem: EvaTeacherList, idObj: any): EvaluationRequest {
     return {
-        jgh_id: evaluationItem.jgh_id,
-        jxb_id: evaluationItem.jxb_id,
-        kch_id: evaluationItem.kch_id,
+        jgh_id: evaluationItem.securityToken,
+        jxb_id: evaluationItem.teachingClassId,
+        kch_id: evaluationItem.courseId,
         modelList: [
             {
                 pjmbmcb_id: idObj.panelId,
@@ -17,7 +15,7 @@ export function createDefaultReq(
                 pjzt: "0",
                 py: "",
                 // 使用 map 基于解析出的数据动态生成列表
-                xspjList: idObj.sections.map(section => ({
+                xspjList: idObj.sections.map((section: {sectionId: any; questions: any[]}) => ({
                     pjzbxm_id: section.sectionId,
                     childXspjList: section.questions.map(question => ({
                         zsmbmcb_id: question.zsId,
@@ -40,7 +38,7 @@ export function fillReq(
     req: EvaluationRequest,
     selected: Record<string, Record<string, Record<string, number>>>,
     comment: string,
-    ids: any
+    ids: any,
 ): EvaluationRequest {
     // 使用深拷贝防止意外修改原始 state
     const newReq: EvaluationRequest = JSON.parse(JSON.stringify(req));
@@ -56,7 +54,10 @@ export function fillReq(
         }
     }
     // 总共有16个问题
-    const totalQuestions = ids.sections.reduce((sum, section) => sum + section.questions.length, 0);
+    const totalQuestions = ids.sections.reduce(
+        (sum: any, section: {questions: string | any[]}) => sum + section.questions.length,
+        0,
+    );
     if (newReq.modelList[0]) {
         newReq.modelList[0].pjzt = count === totalQuestions ? "1" : "0";
     }
