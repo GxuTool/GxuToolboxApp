@@ -10,17 +10,14 @@ import {useWebView} from "@/hooks/app.ts";
 async function getToken(username: string, password: string) {
     await userMgr.jw.storeAccount(username, password);
     ToastAndroid.show("开始尝试登录", ToastAndroid.SHORT);
-    const data = await jwxt.getPublicKey();
-    if (data.exponent) {
+    if (username && password) {
         // 尝试登录
-        await jwxt.login(username, password, data.modulus, data.exponent);
+        await jwxt.unifiedLogin(username, password);
         // 检验Token
         if (await jwxt.testToken(false)) {
             ToastAndroid.show("获取成功，尝试获取用户基础信息", ToastAndroid.SHORT);
             if ((await jwxt.getInfo()) !== undefined) {
                 ToastAndroid.show("获取基础信息成功", ToastAndroid.SHORT);
-                // const res = await beQuery.postLog(username);
-                // console.log("记录", res.data);
             } else {
                 ToastAndroid.show("获取基础信息失败", ToastAndroid.SHORT);
             }

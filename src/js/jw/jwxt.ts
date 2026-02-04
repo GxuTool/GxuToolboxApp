@@ -7,7 +7,6 @@ import {SchoolTerms} from "@/type/global.ts";
 import {ToastAndroid} from "react-native";
 import {UserInfo} from "@/type/infoQuery/base.ts";
 import {store} from "@/core/store.ts";
-import moment from "moment/moment";
 import {personalInfoParser} from "@/js/HTMLparser/personalInfoParser.ts";
 
 export const jwxt = {
@@ -63,18 +62,28 @@ export const jwxt = {
         });
     },
 
-    refreshToken: async (): Promise<AxiosResponse | void> => {
+    unifiedLogin: async (username: string, password: string): Promise<boolean> => {
+        const keys = await jwxt.getPublicKey();
+
+        if (keys.modulus && keys.exponent) {
+            await jwxt.loginWithRSA(username, password, keys.modulus, keys.exponent);
+            if (await jwxt.testToken(false)) {
+                return true;
+            }
+        }
+
+        await jwxt.login(username, password);
+        return await jwxt.testToken(false);
+    },
+
+    refreshToken: async (): Promise<boolean> => {
         const account = await userMgr.jw.getAccount();
         if (!account) {
             ToastAndroid.show("请更新账号信息", ToastAndroid.SHORT);
-            return;
+            return false;
         }
         const {username, password} = account;
-        await userMgr.jw.storeAccount(username, password);
-        const keys = await jwxt.getPublicKey();
-        if (keys.exponent) {
-            return await jwxt.login(username, password, keys.modulus, keys.exponent);
-        }
+        return jwxt.unifiedLogin(username, password);
     },
 
     testToken: async (autoRefresh = true): Promise<boolean> => {
@@ -87,9 +96,7 @@ export const jwxt = {
             return true;
         } else {
             if (autoRefresh) {
-                // 自动刷新逻辑
-                await jwxt.refreshToken();
-                if (await jwxt.testToken(false)) {
+                if (await jwxt.refreshToken()) {
                     jwxt.getInfo();
                     return true;
                 } else {
@@ -126,13 +133,12 @@ export const jwxt = {
         return;
     },
     getReschedulingNews: async (isRead = 1): Promise<AxiosResponse> => {
-        const res = await http.post("/xtgl/index_cxDbsy.html?doType=query", {
+        return await http.post("/xtgl/index_cxDbsy.html?doType=query", {
             sfyy: isRead,
             flag: 1,
             _search: false,
             "queryModel.showCount": 150,
             "queryModel.currentPage": 1,
         });
-        return res;
     },
 };
