@@ -12,8 +12,8 @@ import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {examApi} from "@/js/jw/exam.ts";
 import {useNavigation} from "@react-navigation/native";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
-import {electiveAPI} from "@/features/courseSelectionList/api";
-import {CourseListResScheme} from "@/features/courseSelectionList/api/schema.ts";
+import {electiveAPI} from "@/features/electiveStrategy/api";
+import {CourseListResScheme} from "@/features/electiveStrategy/api/schema.ts";
 
 export function ExamScore() {
     const {userConfig} = useContext(UserConfigContext);

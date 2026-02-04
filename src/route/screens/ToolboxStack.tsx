@@ -17,7 +17,7 @@ import {PhyExpScreen} from "@/screens/tool/jw/infoQuery/praticalCourse/PhyExpScr
 import {EngTrainingScheduleScreen} from "@/screens/tool/jw/infoQuery/praticalCourse/EngTrainingScheduleScreen.tsx";
 import {SelfCourseSelection} from "@/screens/tool/jw/courseSelection/SelfCourseSelection.tsx";
 import {GPAcalculator} from "@/screens/tool/jw/GPAcalculator/GPAcalculator.tsx";
-import {RescheduleNotificationScreen} from "@/screens/tool/jw/notification/RescheduleNotificationScreen.tsx";
+import {RescheduleNotificationScreen} from "@/features/notification/screen/RescheduleNotificationScreen.tsx";
 import {TimeShiftScreen} from "@/screens/tool/jw/notification/TimeShiftScreen.tsx";
 import AttendanceInfoQueryScreen from "@/screens/tool/auth/attendanceSystem/AttendanceInfoQueryScreen.tsx";
 import WebViewScreen from "@/screens/WebViewScreen.tsx";
@@ -100,8 +100,8 @@ export function ToolboxStack() {
                 options={{title: "选课课程列表查询"}}
             />
             <Stack.Screen
-                name="ElectiveCourse"
-                component={lazy(() => import("@/screens/tool/jw/ElectiveCourse/ElectiveCourse.tsx"))}
+                name="ElectiveStrategy"
+                component={lazy(() => import("@/features/electiveStrategy/screen/ElectiveStrategy"))}
                 options={{title: "校选课查漏"}}
             />
 

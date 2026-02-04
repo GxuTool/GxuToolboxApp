@@ -79,7 +79,7 @@ export function ToolboxIndex() {
                     label: "校选课查漏",
                     icon: <Icon name="archive-check-outline" size={iconSize} />,
                     type: "navigation",
-                    navigation: "ElectiveCourse",
+                    navigation: "ElectiveStrategy",
                 },
                 // {
                 //     label: "自主选课",
