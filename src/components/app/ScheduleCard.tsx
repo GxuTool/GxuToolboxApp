@@ -1,5 +1,5 @@
 import {BottomSheet, Card, Text, useTheme} from "@rneui/themed";
-import {Pressable, StyleSheet, ToastAndroid} from "react-native";
+import {Pressable, StyleSheet, ToastAndroid, View} from "react-native";
 import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {useCallback, useEffect, useState} from "react";
@@ -323,7 +323,7 @@ export function ScheduleCard() {
         }
     };
     return (
-        <Card containerStyle={style.card}>
+        <View>
             <Card.Title style={style.cardTitle}>
                 <Flex justify="space-between">
                     <Text h4>日程表</Text>
@@ -401,6 +401,6 @@ export function ScheduleCard() {
             <BottomSheet isVisible={scheduleShareVisible} onBackdropPress={() => setScheduleShareVisible(false)}>
                 <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setScheduleShareVisible(false)} />
             </BottomSheet>
-        </Card>
+        </View>
     );
 }
