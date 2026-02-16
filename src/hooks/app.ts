@@ -1,5 +1,7 @@
 import {useNavigation} from "@react-navigation/native";
 import {WebViewSource} from "react-native-webview/lib/WebViewTypes";
+import {useContext} from "react";
+import {UserConfigContext} from "@/components/AppProvider.tsx";
 
 export function useWebView() {
     const navigation = useNavigation();
@@ -20,4 +22,8 @@ export function useWebView() {
             });
         },
     };
+}
+
+export function useUserConfig() {
+    return useContext(UserConfigContext);
 }

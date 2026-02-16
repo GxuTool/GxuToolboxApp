@@ -1,15 +1,15 @@
-import {Dimensions, Pressable, ScrollView, StyleProp, StyleSheet, ToastAndroid, View, ViewStyle} from "react-native";
+import {Dimensions, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import {Flex, Icon} from "@/components/un-ui";
 import {Button, Text, useTheme} from "@rneui/themed";
-import React, {useContext, useRef} from "react";
+import React, {useRef} from "react";
 import {Color} from "@/shared/color.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {CanvasSchedule} from "@/components/tool/infoQuery/courseSchedule/CanvasSchedule.tsx";
 import moment from "moment";
 import RNFS from "react-native-fs";
 import {CameraRoll} from "@react-native-camera-roll/camera-roll";
 import Share, {ShareOptions} from "react-native-share";
 import Canvas from "react-native-canvas";
+import {useUserConfig} from "@/hooks/app.ts";
 
 type Props = {
     week: number;
@@ -18,7 +18,7 @@ type Props = {
 
 export function ScheduleShareSheet(props: Props) {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
 
     const {width: screenWidth, height: screenHeight} = Dimensions.get("window");
     const styles = StyleSheet.create({

@@ -3,10 +3,9 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Text, useTheme} from "@rneui/themed";
-import {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export interface UnListSection {
     title: string;
@@ -23,7 +22,7 @@ interface UnListItem {
 interface Props {}
 
 export function UnSectionList(props: Props & SectionListProps<UnListItem, UnListSection>) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const navigation = useNavigation();
     const {theme} = useTheme();
 

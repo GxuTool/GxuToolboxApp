@@ -1,11 +1,11 @@
 import {Pressable, StyleSheet} from "react-native";
 import {Dialog, Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
-import React, {useContext, useState} from "react";
+import React, {useState} from "react";
 import DateTimePicker, {useDefaultStyles} from "react-native-ui-datepicker";
 import moment from "moment/moment";
 import dayjs from "dayjs";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 interface Props {
     value: number;
@@ -17,7 +17,7 @@ interface Props {
 export function UnDateTimePicker(props: Props) {
     const defaultStyles = useDefaultStyles();
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const [dialogVisible, setDialogVisible] = useState(false);
     const [value, setValue] = useState(props.value);
     const style = StyleSheet.create({

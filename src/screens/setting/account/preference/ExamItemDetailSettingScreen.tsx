@@ -1,19 +1,19 @@
 import {KeyboardAvoidingView, ScrollView, StyleSheet, TextInput, View} from "react-native";
 import {Button, Divider, Text, useTheme} from "@rneui/themed";
-import {useContext, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {store} from "@/core/store.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {UnPicker} from "@/components/un-ui/UnPicker.tsx";
 import {Picker} from "@react-native-picker/picker";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {Row, Rows, Table} from "react-native-reanimated-table";
 import {Color} from "@/shared/color.ts";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 type ExamKeysType = keyof Omit<ExamInfo, "queryModel" | "userModel">;
 
 export function ExamItemDetailSettingScreen() {
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {userConfig, updateUserConfig} = useUserConfig();
     const {theme} = useTheme();
     const [examList, setExamList] = useState<ExamInfo[]>([]);
     const [activeExamIndex, setActiveExamIndex] = useState(0);

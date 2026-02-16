@@ -4,16 +4,14 @@ import {SettingStack} from "@/route/screens/SettingStack.tsx";
 import {ToolboxStack} from "@/route/screens/ToolboxStack.tsx";
 import {Color} from "@/shared/color.ts";
 import {Button, useTheme} from "@rneui/themed";
-import {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {HomeStack} from "@/route/screens/HomeStack.tsx";
-import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig, useWebView} from "@/hooks/app.ts";
 
 const Tab = createBottomTabNavigator();
 
 export default function MainTab() {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {openInJw} = useWebView();
     const headerRightEle = () => {
         return (

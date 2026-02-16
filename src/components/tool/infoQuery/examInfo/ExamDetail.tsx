@@ -4,10 +4,10 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
-import React, {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import React from "react";
 import {Pos} from "@/js/pos.ts";
 import {Color} from "@/shared/color.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 interface Props extends ViewProps {
     examInfo: ExamInfo;
@@ -24,7 +24,7 @@ function copy(value: string, tip: string) {
 }
 
 function PropItem({item, ...props}: {item: Info} & Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {theme} = useTheme();
     const label = item.label;
     const value = props.examInfo[item.key] ?? "";
@@ -79,7 +79,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
 }
 
 export function ExamDetail(props: Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const infoList = Object.entries(userConfig.preference.examDetail)
         .filter(prop => prop[1].show)
         .map(

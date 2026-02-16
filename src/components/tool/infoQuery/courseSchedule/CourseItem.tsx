@@ -6,8 +6,8 @@ import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {Course} from "@/type/infoQuery/course/course.ts";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 interface Props {
     style?: ViewStyle;
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function CourseItem(props: Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {course, index} = props;

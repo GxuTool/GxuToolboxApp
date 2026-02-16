@@ -1,17 +1,16 @@
-import React, {useContext} from "react";
+import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {Color} from "@/shared/color.ts";
 import {Button, useTheme} from "@rneui/themed";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {HomeScreen} from "@/screens/HomeScreen.tsx";
 import {ScheduleEdit} from "@/screens/home/schedule/ScheduleEdit.tsx";
-import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig, useWebView} from "@/hooks/app.ts";
 
 const Stack = createNativeStackNavigator();
 
 export function HomeStack() {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {openInJw} = useWebView();
     const headerRightEle = () => {
         return (

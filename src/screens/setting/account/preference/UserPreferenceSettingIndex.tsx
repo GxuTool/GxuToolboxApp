@@ -1,9 +1,8 @@
-import {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export function UserPreferenceSettingIndex() {
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {userConfig, updateUserConfig} = useUserConfig();
 
     const settingList: UnListSection[] = [
         {

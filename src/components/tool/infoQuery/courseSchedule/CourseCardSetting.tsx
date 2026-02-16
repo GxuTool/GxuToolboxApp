@@ -8,8 +8,8 @@ import {usePagerView} from "react-native-pager-view";
 import {UnDateTimePicker} from "@/components/un-ui/UnDateTimePicker.tsx";
 import moment from "moment/moment";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 interface Props {
     containerStyle?: StyleProp<ViewStyle>;
@@ -22,7 +22,7 @@ interface Props {
 }
 
 export function CourseCardSetting(props: Props) {
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {userConfig, updateUserConfig} = useUserConfig();
     const {courseScheduleData, updateCourseScheduleData} = useContext(CourseScheduleContext)!;
 
     const infoVisibleOptions: Record<keyof typeof courseScheduleData.courseInfoVisible, string> = {

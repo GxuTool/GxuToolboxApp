@@ -5,9 +5,9 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {AttendanceCourseClass, AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 interface Props {
     style?: ViewStyle;
@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function AttendanceCourseItem(props: Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const ColorMap = {

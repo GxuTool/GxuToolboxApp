@@ -4,8 +4,8 @@ import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 type EngTrainingExp = {
     date: string;
@@ -21,7 +21,7 @@ interface Props {
 }
 
 export function EngTrainingItem(props: Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {item} = props;

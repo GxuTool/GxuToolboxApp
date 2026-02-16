@@ -2,7 +2,7 @@ import {BottomSheet, Card, Text, useTheme} from "@rneui/themed";
 import {Pressable, StyleSheet, ToastAndroid} from "react-native";
 import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
-import {useCallback, useContext, useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {PracticalCourseList} from "../tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -17,7 +17,6 @@ import {
 } from "@/components/tool/infoQuery/courseSchedule/CourseScheduleView.tsx";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import {ExamInfoQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {courseApi} from "@/js/jw/course.ts";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {examApi} from "@/js/jw/exam.ts";
@@ -35,9 +34,10 @@ import {EngTrainingItem} from "@/components/tool/infoQuery/EngTraining/EngTraini
 import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export function ScheduleCard() {
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {userConfig, updateUserConfig} = useUserConfig();
     const navigation = useNavigation();
     const {theme} = useTheme();
     const pagerView = usePagerView({pagesAmount: 20});
@@ -344,8 +344,7 @@ export function ScheduleCard() {
                         </Pressable>
                         <Pressable
                             android_ripple={userConfig.theme.ripple}
-                            onPress={() => setScheduleShareVisible(true)
-                            }>
+                            onPress={() => setScheduleShareVisible(true)}>
                             <Icon type="antdesign" name="share-alt" size={24} />
                         </Pressable>
                         <Pressable
@@ -399,13 +398,8 @@ export function ScheduleCard() {
                     onTermChange={setTerm}
                 />
             </BottomSheet>
-            <BottomSheet
-                isVisible={scheduleShareVisible}
-                onBackdropPress={()=> setScheduleShareVisible(false)}>
-                <ScheduleShareSheet
-                    week={rest.activePage + 1}
-                    onClose={()=>setScheduleShareVisible(false)}
-                />
+            <BottomSheet isVisible={scheduleShareVisible} onBackdropPress={() => setScheduleShareVisible(false)}>
+                <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setScheduleShareVisible(false)} />
             </BottomSheet>
         </Card>
     );

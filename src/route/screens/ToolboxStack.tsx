@@ -1,4 +1,4 @@
-import React, {lazy, useContext} from "react";
+import React, {lazy} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {ToolboxIndex} from "@/screens/tool/ToolboxIndex.tsx";
 import {ExamInfo} from "@/features/examInfo/screens/ExamInfo.tsx";
@@ -8,7 +8,6 @@ import {ClassCourseSchedule} from "@/screens/tool/jw/infoQuery/courseSchedule/Cl
 import {EvaluationOverview} from "@/features/evaluation/screens/EvaluationOverview.tsx";
 import {EvaluationDetail} from "@/features/evaluation/screens/EvaluationDetail.tsx";
 import {Button, useTheme} from "@rneui/themed";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {EvaluationComment} from "@/features/evaluation/screens/EvaluationComment.tsx";
 import {BuildingListScreen} from "@/screens/tool/other/mapNavigation/BuildingListScreen.tsx";
 import {CourseScheduleQuery} from "@/screens/tool/jw/infoQuery/courseSchedule/CourseScheduleQuery.tsx";
@@ -17,18 +16,18 @@ import {PhyExpScreen} from "@/screens/tool/jw/infoQuery/praticalCourse/PhyExpScr
 import {EngTrainingScheduleScreen} from "@/screens/tool/jw/infoQuery/praticalCourse/EngTrainingScheduleScreen.tsx";
 import {SelfCourseSelection} from "@/screens/tool/jw/courseSelection/SelfCourseSelection.tsx";
 import {GPAcalculator} from "@/screens/tool/jw/GPAcalculator/GPAcalculator.tsx";
-import {RescheduleNotificationScreen} from "@/features/notification/screen/RescheduleNotificationScreen.tsx";
+// import {RescheduleNotificationScreen} from "@/features/notification/screen/RescheduleNotificationScreen.tsx";
 import {TimeShiftScreen} from "@/screens/tool/jw/notification/TimeShiftScreen.tsx";
 import AttendanceInfoQueryScreen from "@/screens/tool/auth/attendanceSystem/AttendanceInfoQueryScreen.tsx";
 import WebViewScreen from "@/screens/WebViewScreen.tsx";
-import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig, useWebView} from "@/hooks/app.ts";
 import {EvaluationTemplate} from "@/features/evaluation/screens/EvaluationTemplate.tsx";
 
 const Stack = createNativeStackNavigator();
 
 export function ToolboxStack() {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {openInJw} = useWebView();
     const headerRightEle = () => {
         return (
@@ -112,11 +111,11 @@ export function ToolboxStack() {
                 options={{title: "金工实训查询"}}
             />
 
-            <Stack.Screen
-                name="reschedulingNews"
-                component={RescheduleNotificationScreen}
-                options={{title: "调课信息查询"}}
-            />
+            {/*<Stack.Screen*/}
+            {/*    name="reschedulingNews"*/}
+            {/*    component={RescheduleNotificationScreen}*/}
+            {/*    options={{title: "调课信息查询"}}*/}
+            {/*/>*/}
             <Stack.Screen name="timeShiftScreen" component={TimeShiftScreen} options={{title: "调休信息查询"}} />
 
             <Stack.Screen name="EvaluationOverview" component={EvaluationOverview} options={{title: "期末学生评价"}} />

@@ -8,7 +8,7 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export interface CourseScheduleTableProps<T> {
     /** 课程列表，会自动解析是否本周 */
@@ -45,7 +45,7 @@ export interface CourseScheduleTableProps<T> {
 }
 
 export function CourseScheduleTable<T = any>(props: CourseScheduleTableProps<T>) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const [courseSchedule, setCourseSchedule] = useState<CourseClass[][]>([[], [], [], [], [], [], []]);

@@ -1,6 +1,6 @@
 import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
-import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
-import React, {useContext, useEffect, useMemo, useState} from "react";
+import {Button, Divider, Text, useTheme} from "@rneui/themed";
+import React, {useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {SchoolTermValue} from "@/type/global.ts";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
@@ -8,15 +8,15 @@ import {ExamScoreQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
 import {store} from "@/core/store.ts";
 import {Color} from "@/shared/color.ts";
 import {ExamScoreTable} from "@/features/examScore/component/ExamScoreTable.tsx";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {examApi} from "@/js/jw/exam.ts";
 import {useNavigation} from "@react-navigation/native";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
 import {electiveAPI} from "@/features/electiveStrategy/api";
 import {CourseListResScheme} from "@/features/electiveStrategy/api/schema.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export function ExamScore() {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {theme} = useTheme();
     const navigation = useNavigation();
     const [apiRes, setApiRes] = useState<ExamScoreQueryRes>({} as ExamScoreQueryRes);

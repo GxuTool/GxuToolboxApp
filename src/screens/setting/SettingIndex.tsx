@@ -5,13 +5,12 @@ import moment from "moment/moment";
 import {ColorPicker} from "@/components/un-ui/ColorPicker.tsx";
 import {launchImageLibrary} from "react-native-image-picker";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
-import {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx";
 import {ToastAndroid} from "react-native";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export function SettingIndex() {
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {userConfig, updateUserConfig} = useUserConfig();
 
     function selectBg() {
         launchImageLibrary({

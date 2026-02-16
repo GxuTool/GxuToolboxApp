@@ -2,9 +2,8 @@ import {Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "re
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
-import React, {useContext, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {CourseScheduleView} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleView.tsx";
 import {PracticalCourseList} from "@/components/tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
@@ -15,11 +14,11 @@ import {Row, Rows, Table} from "react-native-reanimated-table";
 import {Course} from "@/type/infoQuery/course/course.ts";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
-import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig, useWebView} from "@/hooks/app.ts";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {openInJw} = useWebView();
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);

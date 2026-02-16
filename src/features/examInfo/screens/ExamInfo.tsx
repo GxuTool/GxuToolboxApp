@@ -1,19 +1,16 @@
 import {ScrollView, StyleSheet, View} from "react-native";
-import {Button, Divider, Text, useTheme} from "@rneui/themed";
-import React, {useContext, useEffect, useState} from "react";
+import {Divider, Text, useTheme} from "@rneui/themed";
+import React, {useEffect, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {SchoolTermValue} from "@/type/global.ts";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 import {store} from "@/core/store.ts";
 import {Color} from "@/shared/color.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
-import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
-import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig, useWebView} from "@/hooks/app.ts";
 import {getExamInfo} from "@/features/examInfo/api";
 import {ExamInfoCard} from "@/features/examInfo/components/ExamInfoCard.tsx";
 import {ExamInfoApiResponse} from "@/features/examInfo/type/exam.types.ts";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
-import {examApi} from "@/js/jw/exam.ts";
 
 const initRes: ExamInfoApiResponse = {
     currentPage: 1,
@@ -24,7 +21,7 @@ const initRes: ExamInfoApiResponse = {
 
 export function ExamInfo() {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {openInJw} = useWebView();
     const [apiRes, setApiRes] = useState<ExamInfoApiResponse>(initRes as ExamInfoApiResponse);
     const [year, setYear] = useState(+userConfig.jw.year);

@@ -1,6 +1,6 @@
 import {SchoolTerms, SchoolTermValue, SchoolYears, SchoolYearValue} from "@/type/global.ts";
-import {useContext, useState} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useState} from "react";
+import {useUserConfig} from "@/hooks/app.ts";
 
 /**
  * 自定义Hook，用于管理学校学期信息的状态
@@ -19,7 +19,7 @@ import {UserConfigContext} from "@/components/AppProvider.tsx";
  * - userConfigTerm: 用户配置中的学期值
  */
 export function useSchoolTerm(yearV?: SchoolYearValue, termV?: SchoolTermValue) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const [year, setYear] = useState<SchoolYearValue>(yearV ?? +userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(termV ?? userConfig.jw.term);
 

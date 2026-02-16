@@ -6,6 +6,7 @@ import Flex from "./un-ui/Flex";
 import {Color} from "@/shared/color.ts";
 import {UserConfigContext} from "@/components/AppProvider.tsx";
 import PackageJSON from "@/../package.json";
+import {useUserConfig} from "@/hooks/app.ts";
 
 enum ChannelList {
     beta = "beta",
@@ -26,7 +27,7 @@ interface Version {
 
 export function UpdateCard() {
     const {theme} = useTheme();
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {userConfig, updateUserConfig} = useUserConfig();
     const [channel, setChannel] = useState<ChannelList>(
         PackageJSON.version.indexOf("beta") > -1 ? ChannelList.beta : ChannelList.release,
     );

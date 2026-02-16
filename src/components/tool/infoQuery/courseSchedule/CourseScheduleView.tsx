@@ -10,11 +10,11 @@ import {usePagerView} from "react-native-pager-view";
 import moment from "moment/moment";
 import {Course} from "@/type/infoQuery/course/course.ts";
 import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {Color} from "@/shared/color.ts";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {nextCourses} from "@/js/nextCourses.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export interface CourseScheduleViewProps<T> extends CourseScheduleTableProps<T> {
     /** 横向滚动使用的PageView对象 */
@@ -32,7 +32,7 @@ export interface CourseScheduleViewProps<T> extends CourseScheduleTableProps<T> 
 }
 
 export function CourseScheduleView<T = any>(props: CourseScheduleViewProps<T>) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {theme} = useTheme();
     const {AnimatedPagerView, ref, ...rest} = props.pageView;
     const startDay = props.startDay ?? userConfig.jw.startDay;

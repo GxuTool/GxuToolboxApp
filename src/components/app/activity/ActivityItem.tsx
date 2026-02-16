@@ -1,11 +1,11 @@
 import {Pressable, PressableProps, StyleSheet, ViewStyle} from "react-native";
 import {IActivity} from "@/type/app/activity.ts";
 import React, {useContext, useMemo} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ripple"> {
     style?: ViewStyle;
@@ -14,7 +14,7 @@ interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ri
 }
 
 export function ActivityItem(props: ActivityItemProps) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {item} = props;

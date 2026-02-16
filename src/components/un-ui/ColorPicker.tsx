@@ -2,9 +2,9 @@ import {Pressable, StyleSheet, View} from "react-native";
 import Flex from "./Flex.tsx";
 import {Button, Dialog, Slider, Text, useTheme} from "@rneui/themed";
 import {BaseColor, Color} from "@/shared/color.ts";
-import {useContext, useState} from "react";
+import {useState} from "react";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 interface Props {
     size: number;
@@ -16,7 +16,7 @@ interface Props {
 
 export function ColorPicker(props: Partial<Props>) {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const [dialogVisible, setDialogVisible] = useState(false);
     const defaultColor = Color(props.color ?? BaseColor.black);
     const [r, setR] = useState(defaultColor.rgba[0]);

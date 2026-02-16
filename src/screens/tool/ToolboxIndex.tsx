@@ -3,10 +3,9 @@ import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import React, {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import React from "react";
 import {Flex} from "@/components/un-ui";
-import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig, useWebView} from "@/hooks/app.ts";
 
 interface settingSection {
     title: string;
@@ -33,7 +32,7 @@ export function ToolboxIndex() {
     const navigation = useNavigation();
     const {theme} = useTheme();
     const {openInWeb} = useWebView();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
 
     const toolList = [
         {

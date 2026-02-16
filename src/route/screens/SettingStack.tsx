@@ -1,23 +1,22 @@
-import React, {useContext} from "react";
+import React from "react";
 import {SettingIndex} from "@/screens/setting/SettingIndex.tsx";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {JWAccountScreen} from "@/screens/setting/account/JWAccountScreen.tsx";
 import {Color} from "@/shared/color.ts";
 import {Button, useTheme} from "@rneui/themed";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {UserPreferenceSettingIndex} from "@/screens/setting/account/preference/UserPreferenceSettingIndex.tsx";
 import {CourseItemDetailSettingScreen} from "@/screens/setting/account/preference/CourseItemDetailSettingScreen.tsx";
 import {ExamItemDetailSettingScreen} from "@/screens/setting/account/preference/ExamItemDetailSettingScreen.tsx";
 import {useNavigation} from "@react-navigation/native";
-import {jwxt} from "@/js/jw/jwxt.ts";
 import {AuthAccountScreen} from "@/screens/setting/account/AuthAccountScreen.tsx";
 import {AttendanceSystemAccountScreen} from "@/screens/setting/account/AttendanceSystemAccountScreen.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 const Stack = createNativeStackNavigator();
 
 export function SettingStack() {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const navigation = useNavigation();
     const headerRightEle = () => {
         return (

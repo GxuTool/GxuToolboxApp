@@ -1,15 +1,15 @@
 import React, {useContext, useEffect, useState} from "react";
-import {Dimensions, StyleSheet,View} from "react-native";
+import {Dimensions, StyleSheet, View} from "react-native";
 import Canvas, {CanvasRenderingContext2D} from "react-native-canvas";
 import {Color} from "@/shared/color.ts";
 import {useTheme} from "@rneui/themed";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {CourseScheduleContext, CourseScheduleData} from "@/js/jw/course.ts";
 import moment from "moment/moment";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/core/store.ts";
 import {http} from "@/core/http.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 type Props = {
     week: number,
@@ -17,7 +17,7 @@ type Props = {
 }
 export function CanvasSchedule(props: Props) {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
     const [timeShift, setTimeShift] = useState<[string, string][]>([]);

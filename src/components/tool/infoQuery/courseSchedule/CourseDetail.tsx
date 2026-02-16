@@ -4,10 +4,10 @@ import {ListItem, Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
-import React, {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import React from "react";
 import {Color} from "@/shared/color.ts";
 import {Pos} from "@/js/pos.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 interface Props extends ViewProps {
     course: Course;
@@ -24,7 +24,7 @@ function copy(value: string, tip: string) {
 }
 
 function PropItem({item, ...props}: {item: Info} & Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {theme} = useTheme();
     const label = item.label;
     const value = props.course[item.key] ?? "";
@@ -79,7 +79,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
 }
 
 export function CourseDetail(props: Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const infoList = Object.entries(userConfig.preference.courseDetail)
         .filter(prop => prop[1].show)
         .map(

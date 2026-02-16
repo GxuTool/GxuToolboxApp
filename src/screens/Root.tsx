@@ -1,14 +1,13 @@
 import {ImageBackground, StatusBar, StyleSheet, useColorScheme, View, ViewProps} from "react-native";
 import {DarkTheme, DefaultTheme, NavigationContainer} from "@react-navigation/native";
 import {RootStack} from "@/route/RootStack.tsx";
-import React, {useCallback, useContext, useEffect, useMemo, useState} from "react";
-import {UpdateCard} from "@/components/UpdateCard.tsx";
+import React, {useCallback, useMemo} from "react";
 import {CourseScheduleContext, generateCourseScheduleStyle, useCourseScheduleData} from "@/js/jw/course.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {useTheme} from "@rneui/themed";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export function Root(props: ViewProps) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const {theme} = useTheme();
     const colorScheme = useColorScheme();
     const {courseScheduleData, updateCourseScheduleData} = useCourseScheduleData();

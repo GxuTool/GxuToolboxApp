@@ -1,8 +1,8 @@
 import {SchoolTerms, SchoolTermValue, SchoolYears, SchoolYearValue} from "@/type/global.ts";
 import {UnPicker} from "@/components/un-ui/UnPicker.tsx";
-import {useContext, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Picker, PickerItemProps} from "@react-native-picker/picker";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export interface UnTermSelectorProps {
     year?: SchoolYearValue | number;
@@ -12,7 +12,7 @@ export interface UnTermSelectorProps {
 }
 
 export function UnTermSelector(props: UnTermSelectorProps) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const [optionList, setOptionList] = useState<PickerItemProps<string>[]>([]);
 
     useEffect(() => {

@@ -2,8 +2,7 @@ import Flex from "@/components/un-ui/Flex";
 import {Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import {BottomSheet, Divider, Input, Text, useTheme} from "@rneui/themed";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
-import React, {useContext, useEffect, useState} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import React, {useEffect, useState} from "react";
 import {courseApi, CourseScheduleData} from "@/js/jw/course.ts";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {CourseScheduleView} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleView.tsx";
@@ -17,9 +16,10 @@ import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 import {Picker} from "@react-native-picker/picker";
 import {ColorPicker} from "@/components/un-ui/ColorPicker.tsx";
 import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export function ScheduleEdit() {
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {userConfig, updateUserConfig} = useUserConfig();
     const {theme} = useTheme();
     const pageView = usePagerView({pagesAmount: 20});
 

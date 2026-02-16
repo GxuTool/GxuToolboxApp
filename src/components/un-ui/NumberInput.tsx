@@ -2,9 +2,9 @@ import {Pressable, StyleSheet, TextInput, View} from "react-native";
 import Flex from "./Flex.tsx";
 import {Icon} from "./Icon.tsx";
 import {Color} from "@/shared/color.ts";
-import {useContext, useRef} from "react";
+import {useRef} from "react";
 import {useTheme} from "@rneui/themed";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useUserConfig} from "@/hooks/app.ts";
 
 export interface NumberInputProps {
     value: number;
@@ -20,7 +20,7 @@ export interface NumberInputProps {
 
 export function NumberInput(props: NumberInputProps) {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {userConfig} = useUserConfig();
     const style = StyleSheet.create({
         container: {
             borderColor: theme.colors.grey4,
