@@ -29,6 +29,11 @@ export function SettingIndex() {
             title: "账号",
             data: [
                 {
+                    label: "查看个人信息",
+                    type: "navigation",
+                    value: "personalInfo",
+                },
+                {
                     label: "教务账号设置",
                     type: "navigation",
                     value: "jwAccount",
