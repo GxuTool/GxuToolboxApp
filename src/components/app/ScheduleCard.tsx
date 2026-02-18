@@ -1,8 +1,8 @@
 import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
-import {Pressable, StyleSheet, ToastAndroid, View} from "react-native";
+import {Pressable, StyleSheet, View} from "react-native";
 import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
-import {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {PracticalCourseList} from "../tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -35,8 +35,11 @@ import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useUnToast} from "@/components/un-ui/UnToast.tsx";
+import {jwxt} from "@/js/jw/jwxt.ts";
 
 export function ScheduleCard() {
+    const {createToast} = useUnToast();
     const {userConfig, updateUserConfig} = useUserConfig();
     const navigation = useNavigation();
     const {theme} = useTheme();
@@ -88,11 +91,9 @@ export function ScheduleCard() {
     async function getExamList() {
         const data = await examApi.getExamInfo(year, term);
         if (data?.items) {
-            ToastAndroid.show("获取考试信息成功", ToastAndroid.SHORT);
             setExamList(data.items);
             await store.save({key: "examInfo", data});
         } else {
-            ToastAndroid.show("获取考试信息失败", ToastAndroid.SHORT);
         }
     }
 
@@ -129,7 +130,6 @@ export function ScheduleCard() {
     async function getCourseSchedule() {
         const data = await courseApi.getCourseSchedule(year, term);
         if (data?.kbList) {
-            ToastAndroid.show("获取课表成功", ToastAndroid.SHORT);
             if (attendanceData instanceof AttendanceDataClass) {
                 data.setTermAttendanceData = attendanceData;
             }
@@ -139,7 +139,6 @@ export function ScheduleCard() {
                 getPhyExp();
             }
         } else {
-            ToastAndroid.show("获取课表失败", ToastAndroid.SHORT);
         }
     }
 
@@ -265,13 +264,36 @@ export function ScheduleCard() {
     }
 
     async function loadData() {
-        await getAttendanceData();
-        await getStartDay();
-        getTimeShift();
-        await getCourseSchedule();
-        await getExamList();
+        let count = 0;
+        const taskList: Promise<any>[] = [
+            getAttendanceData(),
+            getStartDay(),
+            getTimeShift(),
+            getCourseSchedule(),
+            getExamList(),
+            getEngTrainingSchedule(),
+        ];
+
+        const toast = createToast(`测试教务Token是否过期 [0/${taskList.length + 1}]`, "刷新日程表");
+        toast.setProgress(0);
+        await jwxt.testToken();
+        count++;
+        toast.setContent(`尝试刷新数据中 [${count}/${taskList.length + 1}]`);
+        toast.setProgress(+(count / (taskList.length + 1)).toFixed(1));
+
+        taskList.forEach(task =>
+            task.finally(() => {
+                count++;
+                toast.setProgress(+(count / (taskList.length + 1)).toFixed(1));
+                toast.setContent(`尝试刷新数据中 [${count}/${taskList.length + 1}]`);
+                if (count === taskList.length + 1) {
+                    toast.setProgress(1);
+                    toast.setContent("获取完毕");
+                    setTimeout(toast.close, 5000);
+                }
+            }),
+        );
         getActivityList();
-        await getEngTrainingSchedule();
     }
 
     useEffect(() => {
@@ -322,6 +344,7 @@ export function ScheduleCard() {
                 return false;
         }
     };
+
     return (
         <View>
             <Flex justify="space-between" style={style.cardTitle}>
@@ -353,7 +376,6 @@ export function ScheduleCard() {
                         android_ripple={userConfig.theme.ripple}
                         onPress={() => {
                             loadData();
-                            ToastAndroid.show("尝试刷新数据", ToastAndroid.SHORT);
                         }}>
                         <Icon name="sync" size={24} />
                     </Pressable>

@@ -5,6 +5,7 @@ import React, {useCallback, useMemo} from "react";
 import {CourseScheduleContext, generateCourseScheduleStyle, useCourseScheduleData} from "@/js/jw/course.ts";
 import {useTheme} from "@rneui/themed";
 import {useUserConfig} from "@/hooks/app.ts";
+import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";
 
 export function Root(props: ViewProps) {
     const {userConfig} = useUserConfig();
@@ -51,18 +52,20 @@ export function Root(props: ViewProps) {
     };
     return (
         <CourseScheduleContext.Provider value={contextValue}>
-            <View {...props} style={[style.backgroundStyle, props.style]}>
-                <ImageBackground
-                    style={style.bg}
-                    source={{uri: userConfig.theme.bgUrl}}
-                    loadingIndicatorSource={{uri: userConfig.theme.bgUrl}}
-                    resizeMode="cover">
-                    <StatusBar barStyle={colorScheme === "light" ? "dark-content" : "light-content"} />
-                    <NavigationContainer theme={navigationTheme}>
-                        <RootStack />
-                    </NavigationContainer>
-                </ImageBackground>
-            </View>
+            <UnToastContextProvider>
+                <View {...props} style={[style.backgroundStyle, props.style]}>
+                    <ImageBackground
+                        style={style.bg}
+                        source={{uri: userConfig.theme.bgUrl}}
+                        loadingIndicatorSource={{uri: userConfig.theme.bgUrl}}
+                        resizeMode="cover">
+                        <StatusBar barStyle={colorScheme === "light" ? "dark-content" : "light-content"} />
+                        <NavigationContainer theme={navigationTheme}>
+                            <RootStack />
+                        </NavigationContainer>
+                    </ImageBackground>
+                </View>
+            </UnToastContextProvider>
         </CourseScheduleContext.Provider>
     );
 }
