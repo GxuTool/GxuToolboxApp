@@ -1,13 +1,15 @@
 import {StyleSheet, View, ViewProps} from "react-native";
 import {useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
-import {UnText} from "@/components/un-ui/UnText.tsx";
+import {UnText, UnTextProps} from "@/components/un-ui/UnText.tsx";
 
 export interface UnCardProps extends ViewProps {
     color?: "primary" | "success" | "secondary" | "warning" | "error" | string;
+    disableOpacityBg?: boolean;
 
     title?: string;
     titleColor?: string;
+    titleStyle?: UnTextProps["style"];
 }
 export function UnCard(props: UnCardProps) {
     const {theme} = useTheme();
@@ -17,7 +19,9 @@ export function UnCard(props: UnCardProps) {
         : props.color;
     const style = StyleSheet.create({
         card: {
-            backgroundColor: Color.mix(mainColor, theme.colors.background, 0.5).setAlpha(0.5).rgbaString,
+            backgroundColor: Color.mix(mainColor, theme.colors.background, 0.5).setAlpha(
+                props.disableOpacityBg ? 1 : 0.5,
+            ).rgbaString,
             borderRadius: 8,
             padding: 8,
         },
@@ -31,7 +35,10 @@ export function UnCard(props: UnCardProps) {
         <View {...props} style={[props.style, style.card]}>
             {props.title && (
                 <View style={style.titleContainer}>
-                    <UnText h4 color={props.titleColor ?? Color.mix(mainColor, theme.colors.black, 0.4).rgbaString}>
+                    <UnText
+                        h4={!props.titleStyle}
+                        color={props.titleColor ?? Color.mix(mainColor, theme.colors.black, 0.4).rgbaString}
+                        style={props.titleStyle}>
                         {props.title}
                     </UnText>
                 </View>

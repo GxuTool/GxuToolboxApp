@@ -1,5 +1,5 @@
 import {TextProps} from "@rneui/base";
-import {Text} from "@rneui/themed";
+import {Text, useTheme} from "@rneui/themed";
 import {TextStyle} from "react-native";
 
 interface Props {
@@ -10,13 +10,14 @@ interface Props {
 export type UnTextProps = Props & TextProps;
 
 export function UnText(props: UnTextProps) {
+    const {theme} = useTheme();
     return (
         <Text
             {...props}
             style={[
                 {
                     fontSize: props.size,
-                    color: props.color,
+                    color: props.color ?? theme.colors.black,
                 },
                 props.style,
             ]}
