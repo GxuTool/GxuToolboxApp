@@ -1,6 +1,5 @@
 import React, {ReactNode, useContext, useEffect, useMemo, useState} from "react";
 import {StyleSheet, View} from "react-native";
-import Flex from "@/components/un-ui/Flex.tsx";
 import {BottomSheet, Text, useTheme} from "@rneui/themed";
 import {
     CourseScheduleTable,
@@ -15,6 +14,7 @@ import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {nextCourses} from "@/js/nextCourses.ts";
 import {useUserConfig} from "@/hooks/app.ts";
+import {UnCard} from "@/components/un-ui";
 
 export interface CourseScheduleViewProps<T> extends CourseScheduleTableProps<T> {
     /** 横向滚动使用的PageView对象 */
@@ -59,15 +59,9 @@ export function CourseScheduleView<T = any>(props: CourseScheduleViewProps<T>) {
             padding: "2.5%",
         },
         nextCourse: {
-            textAlign: "center",
-            borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.6).rgbaString,
-            borderWidth: 1,
-            borderRadius: 15,
-            paddingVertical: "2%",
-            marginLeft: "auto",
-            marginRight: "auto",
-            marginBottom: "3%",
-            paddingHorizontal: "8%",
+            alignItems: "center",
+            paddingVertical: 8,
+            marginHorizontal: 8,
         },
     });
 
@@ -106,14 +100,13 @@ export function CourseScheduleView<T = any>(props: CourseScheduleViewProps<T>) {
     return (
         <View style={{width: "100%"}}>
             {nextCourse && props.showNextCourse && (
-                <View style={style.nextCourse}>
+                <UnCard style={style.nextCourse}>
                     <Text style={{fontSize: 13}}>
                         下一节：{nextCourse.name} #{nextCourse.room}
                     </Text>
-                </View>
+                </UnCard>
             )}
             <AnimatedPagerView
-                testID="course-schedule-tabel-pager-view"
                 ref={ref}
                 style={style.pagerView}
                 initialPage={realCurrentWeek - 1}
@@ -129,22 +122,7 @@ export function CourseScheduleView<T = any>(props: CourseScheduleViewProps<T>) {
                 {useMemo(
                     () =>
                         rest.pages.map((_, index) => (
-                            <View testID="pager-view-content" key={index} collapsable={false}>
-                                <Flex inline justify="center" gap={5}>
-                                    {props.showDate && (
-                                        <Text>
-                                            {moment().isBefore(userConfig.jw.startDay) && "当前学期未开始"}
-                                            {moment().isAfter(moment(userConfig.jw.startDay).add(20, "w")) &&
-                                                "当前学期已结束"}
-                                            {isCurrentTerm &&
-                                                (index + 1 === realCurrentWeek
-                                                    ? `（第${index + 1}周）`
-                                                    : `（第${index + 1}周，目前为第${realCurrentWeek}周）`)}
-                                            {!isCurrentTerm && `（第${index + 1}周）`}
-                                        </Text>
-                                    )}
-                                    <Text>点击元素查看详情</Text>
-                                </Flex>
+                            <View key={index} collapsable={false}>
                                 <CourseScheduleTable<T>
                                     {...props}
                                     onCoursePress={showCourseDetail}

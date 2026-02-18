@@ -99,7 +99,7 @@ export function generateCourseScheduleStyle(config: IUserConfig["theme"]["course
             height: config.weekdayHeight,
         },
         weekdayText: {
-            fontSize: 14,
+            fontSize: 12,
             textAlign: "center",
             color: theme.colors.grey2,
         },
@@ -108,7 +108,7 @@ export function generateCourseScheduleStyle(config: IUserConfig["theme"]["course
         },
         timeSpanText: {
             textAlign: "center",
-            fontSize: 12,
+            fontSize: 10,
             color: theme.colors.grey2,
         },
         courseItem: {

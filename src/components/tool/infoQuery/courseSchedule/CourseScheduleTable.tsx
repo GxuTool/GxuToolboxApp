@@ -136,13 +136,18 @@ export function CourseScheduleTable<T = any>(props: CourseScheduleTableProps<T>)
                 <View style={[timeSpanHighLightTop, courseScheduleStyle.timeSpanHighLight]} />
             )}
             {/*时间表渲染*/}
-            <View style={[courseScheduleStyle.timeSpanContainer, courseScheduleStyle.weekdayContainer]}>
+            <View style={[courseScheduleStyle.weekdayContainer, courseScheduleStyle.timeSpanContainer]}>
                 <View style={courseScheduleStyle.weekdayItem}>
-                    <Text style={courseScheduleStyle.weekdayText}>
-                        {props.showDate
-                            ? startDay.clone().add(currentWeek, "w").month() + 1 + "月"
-                            : `第${props.currentWeek}周`}
-                    </Text>
+                    {props.showDate ? (
+                        <>
+                            <Text style={courseScheduleStyle.weekdayText}>
+                                {startDay.clone().add(currentWeek, "w").month() + 1 + "月"}
+                            </Text>
+                            <Text style={courseScheduleStyle.weekdayText}>{`第${props.currentWeek}周`}</Text>
+                        </>
+                    ) : (
+                        <Text style={courseScheduleStyle.weekdayText}>{`第${props.currentWeek}周`}</Text>
+                    )}
                 </View>
                 {/*时间段*/}
                 {userConfig.theme.course.timeSpanHeight > 40

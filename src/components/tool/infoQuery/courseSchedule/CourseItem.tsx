@@ -63,10 +63,12 @@ export function CourseItem(props: Props) {
             <Flex direction="column" gap={5}>
                 {courseScheduleData.courseInfoVisible.name && (
                     <Text style={[itemStyle.text, {fontWeight: 700}]}>
-                        <AttendanceStateIcon
-                            defaultColor={itemStyle.text.color}
-                            state={props.attendanceState ?? AST.AttendanceState.NotStarted}
-                        />
+                        {props.attendanceState && (
+                            <AttendanceStateIcon
+                                defaultColor={itemStyle.text.color}
+                                state={props.attendanceState ?? AST.AttendanceState.NotStarted}
+                            />
+                        )}
                         {courseScheduleData.courseInfoVisible.name && course.jxbsftkbj === "1" && (
                             <Text style={itemStyle.text}>
                                 <Icon name="clock-star-four-points" color={itemStyle.text.color} />调

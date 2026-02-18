@@ -1,29 +1,16 @@
 import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {Color} from "@/shared/color.ts";
-import {Button, useTheme} from "@rneui/themed";
+import {useTheme} from "@rneui/themed";
 import {HomeScreen} from "@/screens/HomeScreen.tsx";
 import {ScheduleEdit} from "@/screens/home/schedule/ScheduleEdit.tsx";
-import {useUserConfig, useWebView} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 
 const Stack = createNativeStackNavigator();
 
 export function HomeStack() {
     const {theme} = useTheme();
     const {userConfig} = useUserConfig();
-    const {openInJw} = useWebView();
-    const headerRightEle = () => {
-        return (
-            <Button
-                type="clear"
-                containerStyle={{marginRight: 10}}
-                onPress={() => {
-                    openInJw("/xtgl/index_initMenu.html");
-                }}>
-                打开教务
-            </Button>
-        );
-    };
     return (
         <Stack.Navigator
             initialRouteName="HomeScreen"
@@ -41,12 +28,11 @@ export function HomeStack() {
                 },
                 animation: "fade",
                 animationDuration: 100,
-                headerRight: headerRightEle,
             }}>
             <Stack.Screen
                 name="HomeScreen"
                 options={{
-                    title: "首页",
+                    headerShown: false,
                 }}
                 component={HomeScreen}
             />

@@ -1,4 +1,4 @@
-import {BottomSheet, Card, Text, useTheme} from "@rneui/themed";
+import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
 import {Pressable, StyleSheet, ToastAndroid, View} from "react-native";
 import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
@@ -66,7 +66,7 @@ export function ScheduleCard() {
             overflow: "hidden",
         },
         cardTitle: {
-            paddingHorizontal: 15,
+            paddingHorizontal: 12,
         },
         pagerView: {
             width: "100%",
@@ -324,46 +324,42 @@ export function ScheduleCard() {
     };
     return (
         <View>
-            <Card.Title style={style.cardTitle}>
-                <Flex justify="space-between">
-                    <Text h4>日程表</Text>
-                    <Flex gap={15} justify="flex-end">
-                        {rest.activePage + 1 !== realCurrentWeek && (
-                            <Pressable
-                                android_ripple={userConfig.theme.ripple}
-                                onPress={() => {
-                                    rest.setPage(realCurrentWeek - 1);
-                                }}>
-                                <Icon name="history" size={24} />
-                            </Pressable>
-                        )}
-                        <Pressable
-                            android_ripple={userConfig.theme.ripple}
-                            onPress={() => navigation.navigate("ScheduleEdit")}>
-                            <Icon name="table-edit" size={24} />
-                        </Pressable>
-                        <Pressable
-                            android_ripple={userConfig.theme.ripple}
-                            onPress={() => setScheduleShareVisible(true)}>
-                            <Icon type="antdesign" name="share-alt" size={24} />
-                        </Pressable>
-                        <Pressable
-                            android_ripple={userConfig.theme.ripple}
-                            onPress={() => setCourseScheduleSettingVisible(true)}>
-                            <Icon name="cog" size={24} />
-                        </Pressable>
+            <Flex justify="space-between" style={style.cardTitle}>
+                <Text h4>日程表</Text>
+                <Flex gap={15} justify="flex-end">
+                    {rest.activePage + 1 !== realCurrentWeek && (
                         <Pressable
                             android_ripple={userConfig.theme.ripple}
                             onPress={() => {
-                                loadData();
-                                ToastAndroid.show("尝试刷新数据", ToastAndroid.SHORT);
+                                rest.setPage(realCurrentWeek - 1);
                             }}>
-                            <Icon name="sync" size={24} />
+                            <Icon name="history" size={24} />
                         </Pressable>
-                    </Flex>
+                    )}
+                    <Pressable
+                        android_ripple={userConfig.theme.ripple}
+                        onPress={() => navigation.navigate("ScheduleEdit")}>
+                        <Icon name="table-edit" size={24} />
+                    </Pressable>
+                    <Pressable android_ripple={userConfig.theme.ripple} onPress={() => setScheduleShareVisible(true)}>
+                        <Icon type="antdesign" name="share-alt" size={24} />
+                    </Pressable>
+                    <Pressable
+                        android_ripple={userConfig.theme.ripple}
+                        onPress={() => setCourseScheduleSettingVisible(true)}>
+                        <Icon name="cog" size={24} />
+                    </Pressable>
+                    <Pressable
+                        android_ripple={userConfig.theme.ripple}
+                        onPress={() => {
+                            loadData();
+                            ToastAndroid.show("尝试刷新数据", ToastAndroid.SHORT);
+                        }}>
+                        <Icon name="sync" size={24} />
+                    </Pressable>
                 </Flex>
-            </Card.Title>
-            <Card.Divider />
+            </Flex>
+            <Divider />
             <CourseScheduleView<ExtendItemType>
                 showDate
                 showNextCourse
@@ -381,7 +377,7 @@ export function ScheduleCard() {
             />
             {courseSchedule?.sjkList && (
                 <>
-                    <Card.Divider />
+                    <Divider />
                     <PracticalCourseList courseList={courseSchedule.sjkList} />
                 </>
             )}
