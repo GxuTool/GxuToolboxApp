@@ -1,7 +1,6 @@
 import axios, {AxiosError, AxiosRequestConfig} from "axios";
 import {userMgr} from "../js/mgr/user.ts";
 import {ToastAndroid} from "react-native";
-import moment from "moment/moment";
 
 // 默认导出实例
 export const http = axios.create({
@@ -40,8 +39,8 @@ http.interceptors.response.use(
         const duration = startTime ? Date.now() - startTime : "N/A";
         requestStartTimes.delete(response.config); // 清理 Map
 
-        const { method, url } = response.config;
-        const { status, statusText } = response;
+        const {method, url} = response.config;
+        const {status, statusText} = response;
 
         // 使用 console.groupCollapsed 创建一个默认折叠的组
         console.groupCollapsed(
@@ -61,7 +60,7 @@ http.interceptors.response.use(
         const duration = startTime ? Date.now() - startTime : "N/A";
         requestStartTimes.delete(config); // 清理 Map
 
-        const { method, url } = config;
+        const {method, url} = config;
         const status = error.response?.status || "N/A";
         const statusText = error.response?.statusText || error.message;
 
@@ -77,7 +76,7 @@ http.interceptors.response.use(
         console.groupEnd();
 
         // 关键：必须返回一个 rejected Promise，以便调用方可以 catch 错误
-        return Promise.reject(error);
+        return error;
     },
 );
 
