@@ -37,6 +37,7 @@ import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/Sch
 import {useUserConfig} from "@/hooks/app.ts";
 import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {jwxt} from "@/js/jw/jwxt.ts";
+import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
 
 export function ScheduleCard() {
     const {createToast} = useUnToast();
@@ -82,6 +83,13 @@ export function ScheduleCard() {
             borderTopRightRadius: 8,
             borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
             borderWidth: 1,
+        },
+        menuItem: {
+            flexDirection: "row",
+            gap: 8,
+            width: 140,
+            padding: 4,
+            alignItems: "center",
         },
     });
 
@@ -361,19 +369,39 @@ export function ScheduleCard() {
                             <Icon name="history" size={24} />
                         </Pressable>
                     )}
-                    <Pressable
-                        android_ripple={userConfig.theme.ripple}
-                        onPress={() => navigation.navigate("ScheduleEdit")}>
-                        <Icon name="table-edit" size={24} />
-                    </Pressable>
-                    <Pressable android_ripple={userConfig.theme.ripple} onPress={() => setScheduleShareVisible(true)}>
-                        <Icon type="antdesign" name="share-alt" size={24} />
-                    </Pressable>
-                    <Pressable
-                        android_ripple={userConfig.theme.ripple}
-                        onPress={() => setCourseScheduleSettingVisible(true)}>
-                        <Icon name="cog" size={24} />
-                    </Pressable>
+                    <UnTooltip
+                        width={150}
+                        height={120}
+                        popover={
+                            <View style={{gap: 4}}>
+                                <Pressable
+                                    android_ripple={userConfig.theme.ripple}
+                                    onPress={() => navigation.navigate("ScheduleEdit")}>
+                                    <View style={style.menuItem}>
+                                        <Icon name="table-edit" size={24} />
+                                        <UnText>事件编辑</UnText>
+                                    </View>
+                                </Pressable>
+                                <Pressable
+                                    android_ripple={userConfig.theme.ripple}
+                                    onPress={() => setScheduleShareVisible(true)}>
+                                    <View style={style.menuItem}>
+                                        <Icon type="antdesign" name="share-alt" size={24} />
+                                        <UnText>分享课表</UnText>
+                                    </View>
+                                </Pressable>
+                                <Pressable
+                                    android_ripple={userConfig.theme.ripple}
+                                    onPress={() => setCourseScheduleSettingVisible(true)}>
+                                    <View style={style.menuItem}>
+                                        <Icon name="cog" size={24} />
+                                        <UnText>课表设置</UnText>
+                                    </View>
+                                </Pressable>
+                            </View>
+                        }>
+                        <Icon name="menu" size={24} />
+                    </UnTooltip>
                     <Pressable
                         android_ripple={userConfig.theme.ripple}
                         onPress={() => {
