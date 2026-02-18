@@ -1,12 +1,12 @@
-import {useContext, useEffect, useState} from "react";
-import {Button, Card, Text, useTheme} from "@rneui/themed";
+import {useEffect, useState} from "react";
+import {Button, Text, useTheme} from "@rneui/themed";
 import axios from "axios";
 import {Linking, PermissionsAndroid, StyleSheet} from "react-native";
 import Flex from "./un-ui/Flex";
 import {Color} from "@/shared/color.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import PackageJSON from "@/../package.json";
 import {useUserConfig} from "@/hooks/app.ts";
+import {UnCard} from "@/components/un-ui";
 
 enum ChannelList {
     beta = "beta",
@@ -53,9 +53,7 @@ export function UpdateCard() {
     });
 
     async function init() {
-        const {data} = await axios.get<VersionRes>(
-            "https://file.unde.site/GxuToolApp/version.json",
-        );
+        const {data} = await axios.get<VersionRes>("https://file.unde.site/GxuToolApp/version.json");
         const newVersion = data[channel].find(version => version.versionCode > PackageJSON.versionCode);
         if (newVersion) {
             setVisible(true);
@@ -91,20 +89,15 @@ export function UpdateCard() {
     };
 
     return visible ? (
-        <Card containerStyle={style.card}>
-            <Card.Title>
-                <Flex justify="space-between">
-                    <Text h4>发现新版本~</Text>
-                </Flex>
-            </Card.Title>
-            <Card.Divider />
+        <UnCard style={style.card} title="发现新版本~">
             <Flex direction="column" gap={10} align="flex-start" inline style={{paddingHorizontal: "2%"}}>
                 {/*<Text>可以在设置关闭更新提示</Text>*/}
                 <Text style={{fontSize: 14}}>版本号：{version?.versionName}</Text>
                 <Text style={{fontSize: 14}}>更新信息：</Text>
                 <Text style={{fontSize: 14}}>{version?.desc}</Text>
-                <Flex gap={10} inline>
+                <Flex gap={10} justify="flex-end" style={{width: "100%"}}>
                     <Button
+                        size="sm"
                         loading={downloading}
                         disabled={downloading}
                         onPress={() => handleUpdate(version?.ori.official!)}>
@@ -115,7 +108,7 @@ export function UpdateCard() {
                     {/*</Button>*/}
                 </Flex>
             </Flex>
-        </Card>
+        </UnCard>
     ) : (
         <></>
     );
