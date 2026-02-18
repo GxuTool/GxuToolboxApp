@@ -29,29 +29,29 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
     const bgColor = Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
         0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
     ).rgbaString;
-    const borderRadius = 16;
-    const span = 5;
+    const borderRadius = 8;
+    const span = 8;
     const style = StyleSheet.create({
         settingSectionContainer: {
             paddingBottom: "5%",
             marginBottom: 10,
         },
         settingSectionHeader: {
-            marginTop: span,
             backgroundColor: bgColor,
-            paddingHorizontal: "3%",
+            paddingHorizontal: borderRadius,
             borderTopLeftRadius: borderRadius,
             borderTopRightRadius: borderRadius,
-            paddingTop: "2%",
+            paddingTop: borderRadius,
+            paddingBottom: 4,
         },
         settingSectionFooter: {
             marginBottom: span,
             backgroundColor: bgColor,
             height: borderRadius,
-            paddingHorizontal: "3%",
+            paddingHorizontal: borderRadius,
             borderBottomLeftRadius: borderRadius,
             borderBottomRightRadius: borderRadius,
-            paddingTop: "2%",
+            paddingTop: borderRadius,
         },
         settingItemContainer: {
             backgroundColor: bgColor,
@@ -66,6 +66,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
         linkText: {
             borderBottomWidth: 1,
             borderBottomColor: theme.colors.black,
+            textAlign: "center",
         },
         labelText: {
             fontSize: 16,
@@ -105,7 +106,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                 return (
                     <Flex style={itemStyle} justify="space-between">
                         <Text style={style.labelText}>{item.label}</Text>
-                        <Text>{item.value}</Text>
+                        <Text style={{textAlign: "right"}}>{item.value}</Text>
                     </Flex>
                 );
             case "link":
@@ -116,7 +117,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                         android_ripple={userConfig.theme.ripple}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Text style={style.linkText}>
-                            <Icon name="link" size={16} />
+                            <Icon name="link" size={10} />
                             {item.value ?? item.url}
                         </Text>
                     </Pressable>
@@ -147,6 +148,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
     };
     return (
         <SectionList<UnListItem, UnListSection>
+            getItemCount={() => 5}
             renderItem={({item, index, section}) => (
                 <View style={style.settingItemContainer}>{renderItem(item, index !== section.data.length - 1)}</View>
             )}

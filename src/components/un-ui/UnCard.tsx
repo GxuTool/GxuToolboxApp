@@ -5,7 +5,9 @@ import {UnText} from "@/components/un-ui/UnText.tsx";
 
 export interface UnCardProps extends ViewProps {
     color?: "primary" | "success" | "secondary" | "warning" | "error" | string;
+
     title?: string;
+    titleColor?: string;
 }
 export function UnCard(props: UnCardProps) {
     const {theme} = useTheme();
@@ -29,7 +31,7 @@ export function UnCard(props: UnCardProps) {
         <View {...props} style={[props.style, style.card]}>
             {props.title && (
                 <View style={style.titleContainer}>
-                    <UnText h4 color={Color.mix(mainColor, theme.colors.black, 0.4).rgbaString}>
+                    <UnText h4 color={props.titleColor ?? Color.mix(mainColor, theme.colors.black, 0.4).rgbaString}>
                         {props.title}
                     </UnText>
                 </View>

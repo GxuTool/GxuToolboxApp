@@ -4,7 +4,7 @@ import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import React from "react";
-import {Flex} from "@/components/un-ui";
+import {Flex, UnCard} from "@/components/un-ui";
 import {useUserConfig, useWebView} from "@/hooks/app.ts";
 
 interface settingSection {
@@ -215,8 +215,12 @@ export function ToolboxIndex() {
     return (
         <ScrollView contentContainerStyle={style.settingContainer}>
             {toolList.map(section => (
-                <View style={style.settingSectionContainer} key={`tool-${section.title}`}>
-                    <Text h4>{section.title}</Text>
+                <UnCard
+                    color={theme.colors.grey5}
+                    titleColor={theme.colors.black}
+                    style={style.settingSectionContainer}
+                    title={section.title}
+                    key={`tool-${section.title}`}>
                     <Flex style={style.toolListContainer}>
                         {section.data.map(tool => (
                             <Pressable
@@ -231,7 +235,7 @@ export function ToolboxIndex() {
                             </Pressable>
                         ))}
                     </Flex>
-                </View>
+                </UnCard>
             ))}
         </ScrollView>
     );
