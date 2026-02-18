@@ -265,6 +265,15 @@ export function ScheduleCard() {
 
     async function loadData() {
         let count = 0;
+        const totalTaskCount = 7;
+
+        const toast = createToast(`测试教务Token是否过期 [0/${totalTaskCount}]`, "刷新日程表");
+        toast.setProgress(0);
+        await jwxt.testToken();
+        count++;
+        toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
+        toast.setProgress(+(count / totalTaskCount).toFixed(1));
+
         const taskList: Promise<any>[] = [
             getAttendanceData(),
             getStartDay(),
@@ -274,19 +283,12 @@ export function ScheduleCard() {
             getEngTrainingSchedule(),
         ];
 
-        const toast = createToast(`测试教务Token是否过期 [0/${taskList.length + 1}]`, "刷新日程表");
-        toast.setProgress(0);
-        await jwxt.testToken();
-        count++;
-        toast.setContent(`尝试刷新数据中 [${count}/${taskList.length + 1}]`);
-        toast.setProgress(+(count / (taskList.length + 1)).toFixed(1));
-
         taskList.forEach(task =>
             task.finally(() => {
                 count++;
-                toast.setProgress(+(count / (taskList.length + 1)).toFixed(1));
-                toast.setContent(`尝试刷新数据中 [${count}/${taskList.length + 1}]`);
-                if (count === taskList.length + 1) {
+                toast.setProgress(+(count / totalTaskCount).toFixed(1));
+                toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
+                if (count === totalTaskCount) {
                     toast.setProgress(1);
                     toast.setContent("获取完毕");
                     setTimeout(toast.close, 5000);
