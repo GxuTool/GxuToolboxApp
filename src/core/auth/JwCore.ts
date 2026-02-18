@@ -1,5 +1,6 @@
 import {userMgr} from "@/js/mgr/user.ts";
 import {jwxt} from "@/js/jw/jwxt.ts";
+import {JwClient} from "@/core/auth/JwClient.ts";
 
 type JwAccount = {
     username: string;
@@ -26,7 +27,7 @@ interface JwCore {
 
 let currentState: JwAuthState = {status: "no_account"};
 
-const JwCore: JwCore = {
+export const JwCore: JwCore = {
     getAuthState(): JwAuthState {
         return currentState;
     },
@@ -44,21 +45,36 @@ const JwCore: JwCore = {
     },
 
     async loginWithAccount(account: JwAccount): Promise<JwAuthState> {
-        const res = await jwxt.unifiedLogin(account.username, account.password);
+        const {username, password} = account;
+        const keys = await JwClient.getPublicKey();
+
+        let res;
+
+        if (keys.modulus && keys.exponent) {
+            await JwClient.loginWithRSA(username, password, keys.modulus, keys.exponent);
+            res = await JwClient.testToken();
+            if (!res) {
+                await JwClient.loginNormal(username, password);
+                res = await JwClient.testToken();
+            }
+        }
 
         if (res) {
-            currentState.status = "authenticated";
-            return {
+            const i: JwAuthState = {
                 status: "authenticated",
-                account: account,
+                account,
                 lastAuthTime: Date.now(),
             };
+            currentState = i;
+            return i;
+        } else {
+            const i: JwAuthState = {
+                status: "has_account_not_authenticated",
+                account,
+            };
+            currentState = i;
+            return i;
         }
-        currentState.status = "has_account_not_authenticated";
-        return {
-            status: "has_account_not_authenticated",
-            account: account,
-        };
     },
 
     async loginWithStoredAccount(): Promise<JwAuthState> {
