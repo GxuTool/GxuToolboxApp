@@ -2,7 +2,7 @@ import React, {useCallback, useMemo, useSyncExternalStore} from "react";
 import {UnCard, UnCardProps} from "@/components/un-ui/UnCard.tsx";
 import {StyleSheet, View} from "react-native";
 import {UnText} from "@/components/un-ui/UnText.tsx";
-import {LinearProgress} from "@rneui/themed";
+import {LinearProgress, useTheme} from "@rneui/themed";
 
 // ==================== 类型定义 ====================
 
@@ -69,12 +69,16 @@ const toastManager = new ToastStateManager();
 // ==================== Toast 组件（响应式） ====================
 
 const ToastItem: React.FC<ToastData> = ({content, title, color, progress, ...props}) => {
+    const {theme} = useTheme();
+    const mainColor = ["primary", "success", "secondary", "warning", "error", undefined].includes(color)
+        ? theme.colors[color ?? "primary"]
+        : color;
     return (
         <UnCard disableOpacityBg color={color} title={title} titleStyle={{fontSize: 10}} {...props}>
             <View style={{gap: 4}}>
                 {typeof content === "string" || typeof content === "number" ? <UnText>{content}</UnText> : content}
                 {progress !== undefined && (
-                    <LinearProgress value={progress} color={color} animation={{duration: 250}} />
+                    <LinearProgress value={progress} color={mainColor} animation={{duration: 250}} />
                 )}
             </View>
         </UnCard>
@@ -128,6 +132,7 @@ export interface UnToastRef {
     getContent: () => React.ReactNode;
     setContent: (v: React.ReactNode) => void;
     setColor: (v: ToastData["color"]) => void;
+    setData: (v: Partial<Omit<ToastData, "id">>) => void;
     close: (delay?: number) => void;
 }
 
@@ -147,7 +152,8 @@ export const useUnToast = () => {
                 getContent: () => toastManager.getToast(id)?.content,
                 setContent: v => toastManager.updateToast(id, {content: v}),
                 setColor: v => toastManager.updateToast(id, {color: v}),
-                close: (delay = 0) => setTimeout(() => toastManager.removeToast(id), delay),
+                setData: v => toastManager.updateToast(id, v),
+                close: (delay = 4000) => setTimeout(() => toastManager.removeToast(id), delay),
             };
         },
         [],

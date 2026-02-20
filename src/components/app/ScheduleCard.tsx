@@ -203,7 +203,9 @@ export function ScheduleCard() {
     const [engTrainingExpList, setEngTrainingExpList] = useState<EngTrainingExp[]>([]);
 
     async function getEngTrainingSchedule() {
-        const {datas} = await courseApi.engTraining.getPersonalExpList();
+        const res = await courseApi.engTraining.getPersonalExpList();
+        if (!res) return;
+        const datas = res.datas;
         const dateList = datas[0].filter(item => item.startRow === 2);
         // 根据日期获取实训
         // TODO: 判断节数
@@ -278,9 +280,22 @@ export function ScheduleCard() {
         const toast = createToast(`测试教务Token是否过期 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
         if (!(await jwxt.testToken(true, toast))) {
-            toast.setColor("error");
-            toast.setContent("获取Token错误，请尝试手动登录或者联系作者");
-            toast.close(2000);
+            // 失败时才检测时间段
+            if (!(moment().hour() > 5 && moment().hour() < 22)) {
+                toast.setData({
+                    color: "error",
+                    content: "该时段暂时无法连接校园网，请早上七点后再试",
+                    progress: 1,
+                });
+            } else {
+                toast.setData({
+                    color: "error",
+                    content: "获取Token错误，请尝试手动登录或者联系作者",
+                    progress: 1,
+                });
+            }
+            toast.close();
+            return;
         }
         count++;
         toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
@@ -301,10 +316,12 @@ export function ScheduleCard() {
                 toast.setProgress(+(count / totalTaskCount).toFixed(1));
                 toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
                 if (count === totalTaskCount) {
-                    toast.setProgress(1);
-                    toast.setColor("success");
-                    toast.setContent("获取完毕");
-                    toast.close(5000);
+                    toast.setData({
+                        color: "success",
+                        content: "刷新完毕",
+                        progress: 1,
+                    });
+                    toast.close();
                 }
             }),
         );

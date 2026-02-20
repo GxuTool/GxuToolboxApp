@@ -102,7 +102,7 @@ export const jwxt = {
                     jwxt.getInfo();
                     return true;
                 } else {
-                    ToastAndroid.show("自动刷新Token失败，请检查账号设置", ToastAndroid.SHORT);
+                    if (!toastRef) ToastAndroid.show("自动刷新Token失败，请检查账号设置", ToastAndroid.SHORT);
                     return false;
                 }
             } else {
