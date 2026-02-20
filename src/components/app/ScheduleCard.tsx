@@ -277,7 +277,11 @@ export function ScheduleCard() {
 
         const toast = createToast(`测试教务Token是否过期 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
-        await jwxt.testToken();
+        if (!(await jwxt.testToken(true, toast))) {
+            toast.setColor("error");
+            toast.setContent("获取Token错误，请尝试手动登录或者联系作者");
+            toast.close(2000);
+        }
         count++;
         toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
         toast.setProgress(+(count / totalTaskCount).toFixed(1));
@@ -298,8 +302,9 @@ export function ScheduleCard() {
                 toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
                 if (count === totalTaskCount) {
                     toast.setProgress(1);
+                    toast.setColor("success");
                     toast.setContent("获取完毕");
-                    setTimeout(toast.close, 5000);
+                    toast.close(5000);
                 }
             }),
         );

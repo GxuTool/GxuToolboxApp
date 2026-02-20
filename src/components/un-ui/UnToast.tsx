@@ -101,6 +101,7 @@ export const UnToastContextProvider: React.FC<{children: React.ReactNode}> = ({c
                     bottom: "20%",
                     zIndex: 9999,
                     width: "80%",
+                    gap: 10,
                 },
             }),
         [],
@@ -126,7 +127,8 @@ export interface UnToastRef {
     setProgress: (v: number | undefined) => void;
     getContent: () => React.ReactNode;
     setContent: (v: React.ReactNode) => void;
-    close: () => void;
+    setColor: (v: ToastData["color"]) => void;
+    close: (delay?: number) => void;
 }
 
 export const useUnToast = () => {
@@ -144,7 +146,8 @@ export const useUnToast = () => {
                 setProgress: v => toastManager.updateToast(id, {progress: v}),
                 getContent: () => toastManager.getToast(id)?.content,
                 setContent: v => toastManager.updateToast(id, {content: v}),
-                close: () => toastManager.removeToast(id),
+                setColor: v => toastManager.updateToast(id, {color: v}),
+                close: (delay = 0) => setTimeout(() => toastManager.removeToast(id), delay),
             };
         },
         [],

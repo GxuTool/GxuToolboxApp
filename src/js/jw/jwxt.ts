@@ -8,6 +8,7 @@ import {ToastAndroid} from "react-native";
 import {UserInfo} from "@/type/infoQuery/base.ts";
 import {store} from "@/core/store.ts";
 import {personalInfoParser} from "@/js/HTMLparser/personalInfoParser.ts";
+import {UnToastRef} from "@/components/un-ui/UnToast.tsx";
 
 export const jwxt = {
     getPublicKey: (): Promise<{modulus: string; exponent: string}> => {
@@ -86,7 +87,7 @@ export const jwxt = {
         return jwxt.unifiedLogin(username, password);
     },
 
-    testToken: async (autoRefresh = true): Promise<boolean> => {
+    testToken: async (autoRefresh = true, toastRef?: UnToastRef): Promise<boolean> => {
         const res = await http.post("/kbcx/xskbcx_cxXsgrkb.html", {
             xnm: "2021",
             xqm: SchoolTerms[0][0],
@@ -96,6 +97,7 @@ export const jwxt = {
             return true;
         } else {
             if (autoRefresh) {
+                if (toastRef) toastRef.setContent("尝试重新登录获取Token");
                 if (await jwxt.refreshToken()) {
                     jwxt.getInfo();
                     return true;
