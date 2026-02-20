@@ -23,8 +23,6 @@ export function NumberInput(props: NumberInputProps) {
     const {userConfig} = useUserConfig();
     const style = StyleSheet.create({
         container: {
-            borderColor: theme.colors.grey4,
-            borderWidth: 1,
             borderRadius: 5,
             height: props.size ?? 30,
             backgroundColor: Color(theme.colors.black).setAlpha(0.1).rgbaString,

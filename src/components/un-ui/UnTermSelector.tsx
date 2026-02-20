@@ -1,52 +1,109 @@
 import {SchoolTerms, SchoolTermValue, SchoolYears, SchoolYearValue} from "@/type/global.ts";
-import {UnPicker} from "@/components/un-ui/UnPicker.tsx";
-import {useEffect, useState} from "react";
-import {Picker, PickerItemProps} from "@react-native-picker/picker";
 import {useUserConfig} from "@/hooks/app.ts";
+import {Pressable, ScrollView, StyleSheet, View} from "react-native";
+import {Flex, Icon, UnText, UnTooltip, vh, vw} from "@/components/un-ui/index.ts";
+import {Divider, useTheme} from "@rneui/themed";
+import {Color} from "@/shared/color.ts";
+import {useEffect, useState} from "react";
 
 export interface UnTermSelectorProps {
     year?: SchoolYearValue | number;
     term?: SchoolTermValue;
     thirdTerm?: boolean;
+    disableSelectAll?: boolean;
     onChange?: (year: SchoolYearValue | number, term: SchoolTermValue) => void;
 }
 
 export function UnTermSelector(props: UnTermSelectorProps) {
     const {userConfig} = useUserConfig();
-    const [optionList, setOptionList] = useState<PickerItemProps<string>[]>([]);
+    const {theme} = useTheme();
+
+    const [selectedYear, setSelectedYear] = useState<SchoolYearValue>(props.year);
+    const [selectedTerm, setSelectedTerm] = useState<SchoolTermValue>(props.term);
+    const [selectedAll, setSelectedAll] = useState(false);
 
     useEffect(() => {
-        const newOptionList: PickerItemProps<string>[] = [];
-        SchoolYears.forEach(schoolYear => {
-            Array.from(SchoolTerms)
-                .reverse()
-                .forEach((term, index) => {
-                    if (
-                        (!props.thirdTerm && index === 0) ||
-                        Number(schoolYear[0]) < Number(userConfig.jw.year) - 5 ||
-                        Number(schoolYear[0]) > Number(userConfig.jw.year)
-                    )
-                        return;
-                    newOptionList.push({
-                        label: `${schoolYear[1]}学年${term[1]}`,
-                        value: `${schoolYear[0]}-${term[0]}`,
-                        color: index === 2 ? "#e1cd4c" : "#4ded5a",
-                    });
-                });
-        });
-        setOptionList(newOptionList);
-    }, []);
+        if (selectedYear || selectedTerm) setSelectedAll(false);
+        props.onChange?.(selectedYear, selectedTerm);
+    }, [selectedYear, selectedTerm]);
+
+    const style = StyleSheet.create({
+        labelContainer: {
+            height: 42,
+            paddingHorizontal: 16,
+        },
+        option: {
+            borderRadius: 8,
+            padding: 8,
+        },
+        selectedOption: {
+            backgroundColor: Color.mix(theme.colors.primary, theme.colors.grey3, 0.7).rgbaString,
+            borderRadius: 8,
+            padding: 8,
+        },
+    });
+    console.log(props);
 
     return (
-        <UnPicker<string>
-            selectedValue={`${props.year ?? userConfig.jw.year}-${props.term ?? userConfig.jw.term}`}
-            onValueChange={v => {
-                const [year, term] = v.split("-");
-                props.onChange?.(+year, term as SchoolTermValue);
-            }}>
-            {optionList.map((option, index) => (
-                <Picker.Item {...option} key={index} />
-            ))}
-        </UnPicker>
+        <UnTooltip
+            popover={
+                <View style={{paddingHorizontal: 16}}>
+                    {!props.disableSelectAll && (
+                        <>
+                            <Pressable
+                                android_ripple={userConfig.theme.ripple}
+                                onPress={() => {
+                                    setSelectedAll(true);
+                                    setSelectedTerm(undefined);
+                                    setSelectedYear(undefined);
+                                }}
+                                style={selectedAll ? style.selectedOption : style.option}>
+                                <UnText>全部学期</UnText>
+                            </Pressable>
+                            <Divider />
+                        </>
+                    )}
+                    <Flex align="flex-start" gap={4}>
+                        <ScrollView style={{width: vw(40) - 24}} contentContainerStyle={{gap: 4}}>
+                            {SchoolYears.map(year => (
+                                <Pressable
+                                    onPress={() => setSelectedYear(+year[0])}
+                                    key={year[1]}
+                                    style={+year[0] === +selectedYear ? style.selectedOption : style.option}
+                                    android_ripple={userConfig.theme.ripple}>
+                                    <UnText>{year[1]}学年</UnText>
+                                </Pressable>
+                            ))}
+                        </ScrollView>
+                        <Divider orientation="vertical" />
+                        <ScrollView style={{width: vw(40)}} contentContainerStyle={{gap: 4}}>
+                            {SchoolTerms.filter((_, i) => (props.thirdTerm && i == 2) || i !== 2).map(term => (
+                                <Pressable
+                                    onPress={() => setSelectedTerm(term[0])}
+                                    key={term[1]}
+                                    android_ripple={userConfig.theme.ripple}
+                                    style={term[0] === selectedTerm ? style.selectedOption : style.option}>
+                                    <UnText>{term[1]}</UnText>
+                                </Pressable>
+                            ))}
+                        </ScrollView>
+                    </Flex>
+                </View>
+            }
+            height={vh(30)}
+            width={vw(80)}
+            skipAndroidStatusBar>
+            <Flex style={style.labelContainer} inline justify="flex-end" gap={4}>
+                <Icon name="calendar" size={18} />
+                {selectedAll ? (
+                    <UnText>全部学期</UnText>
+                ) : (
+                    <UnText>
+                        {`${selectedYear}-${+selectedYear + 1}学年`}
+                        {SchoolTerms.find(term => term[0] === selectedTerm)?.[1]}
+                    </UnText>
+                )}
+            </Flex>
+        </UnTooltip>
     );
 }

@@ -38,7 +38,7 @@ export type numBool = 0 | 1;
 export const SchoolTerms = [
     ["3", "秋季学期"],
     ["12", "春季学期"],
-    ["16", "3"],
+    ["16", "小学期"],
 ]as const;
 export type SchoolTermsType = typeof SchoolTerms;
 export type SchoolTermValue = typeof SchoolTerms[number][0] | number;

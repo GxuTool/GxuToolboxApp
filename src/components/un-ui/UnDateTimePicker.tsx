@@ -23,8 +23,6 @@ export function UnDateTimePicker(props: Props) {
     const style = StyleSheet.create({
         labelContainer: {
             backgroundColor: Color(theme.colors.black).setAlpha(0.1).rgbaString,
-            borderColor: theme.colors.grey4,
-            borderWidth: 1,
             borderRadius: 5,
             paddingHorizontal: 15,
             paddingVertical: 10,

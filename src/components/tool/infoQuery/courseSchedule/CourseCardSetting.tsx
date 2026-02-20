@@ -110,6 +110,8 @@ export function CourseCardSetting(props: Props) {
                         <Text>学期</Text>
                         <View style={{flex: 1}}>
                             <UnTermSelector
+                                thirdTerm
+                                disableSelectAll
                                 year={props.year}
                                 term={props.term}
                                 onChange={(year, term) => {
