@@ -69,7 +69,7 @@ export const authApi = {
         // 获取公钥和存储中的帐密
         const rsa = await authApi.getPubKey();
         const account = await userMgr.auth.getAccount();
-        if (!account?.password || !account?.username) return;
+        if (!account?.password || !account?.username || !rsa) return;
         // 调用登录获取对应的cookie
         return (await authApi.login(
             account.username,
@@ -88,9 +88,10 @@ export const authApi = {
         data: EngTrainingTokenResData;
     }> => {
         // 获取学生码
-        const studentCodeRes = (await authApi.loginService(
+        const studentCodeRes = await authApi.loginService(
             "http://xlzxms.gxu.edu.cn/api/security-server/dietc/loginsso/student",
-        ))!;
+        );
+        if (!studentCodeRes) return;
         const studentCode = studentCodeRes.request.responseURL.match(/(?<==).*$/)[0];
         // 请求Authorization token
         const tokenParam = {

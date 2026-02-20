@@ -350,9 +350,9 @@ export const courseApi = {
          * 登录工程训练中心-学生服务
          */
         getPersonalExpList: async (): Promise<EngTrainingScheduleRes> => {
-            const {
-                data: {token},
-            } = await authApi.loginEngTraining();
+            const authRes = await authApi.loginEngTraining();
+            if (!authRes) return;
+            const token = authRes.data.token;
             const res = await axios.get<EngTrainingScheduleRes>(
                 "http://xlzxms.gxu.edu.cn/api/course-newedition-server/course/course/arrange/stuPersonalArrangeTable",
                 {

@@ -65,7 +65,7 @@ export const jwxt = {
 
     unifiedLogin: async (username: string, password: string): Promise<boolean> => {
         const keys = await jwxt.getPublicKey();
-
+        if (!keys) return false;
         if (keys.modulus && keys.exponent) {
             await jwxt.loginWithRSA(username, password, keys.modulus, keys.exponent);
             if (await jwxt.testToken(false)) {
