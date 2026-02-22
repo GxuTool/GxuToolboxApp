@@ -1,8 +1,8 @@
-import CookieManager from "@react-native-cookies/cookies";
 import {http, urlWithParams} from "@/core/http.ts";
 import {AxiosResponse} from "axios";
 import {getEncryptedPassword} from "@/shared/rasPassword";
 import {SchoolTerms} from "@/type/global.ts";
+import CookieManager from "@preeternal/react-native-cookie-manager";
 
 export const JwClient = {
     async getPublicKey(): Promise<{modulus: string; exponent: string}> {

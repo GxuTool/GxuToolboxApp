@@ -1,6 +1,5 @@
 import {http, urlWithParams} from "@/core/http.ts";
 import {getEncryptedPassword} from "@/shared/rasPassword";
-import CookieManager from "@react-native-cookies/cookies";
 import {AxiosResponse} from "axios";
 import {userMgr} from "@/js/mgr/user.ts";
 import {SchoolTerms} from "@/type/global.ts";
@@ -9,6 +8,7 @@ import {UserInfo} from "@/type/infoQuery/base.ts";
 import {store} from "@/core/store.ts";
 import {personalInfoParser} from "@/js/HTMLparser/personalInfoParser.ts";
 import {UnToastRef} from "@/components/un-ui/UnToast.tsx";
+import CookieManager from "@preeternal/react-native-cookie-manager";
 
 export const jwxt = {
     getPublicKey: (): Promise<{modulus: string; exponent: string}> => {
