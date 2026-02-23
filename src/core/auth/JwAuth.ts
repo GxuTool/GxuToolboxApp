@@ -16,7 +16,6 @@ interface Authenticated {
         username: string;
         password: string;
     };
-    lastAuthTime: number;
 }
 
 type JwAuthState =

@@ -1,5 +1,4 @@
 import {userMgr} from "@/js/mgr/user.ts";
-import {jwxt} from "@/js/jw/jwxt.ts";
 import {JwClient} from "@/core/auth/JwClient.ts";
 
 type JwAccount = {
@@ -8,6 +7,8 @@ type JwAccount = {
 };
 
 interface JwCore {
+    refreshToken(): Promise<JwAuthState>;
+
     loadAccount(): Promise<JwAccount | null>;
 
     saveAccount(account: JwAccount): Promise<void>;
@@ -28,6 +29,37 @@ interface JwCore {
 let currentState: JwAuthState = {status: "no_account"};
 
 export const JwCore: JwCore = {
+    async refreshToken(): Promise<JwAuthState> {
+        const account = await this.loadAccount();
+        if (!account) {
+            currentState = {status: "no_account"};
+            return currentState;
+        }
+
+        let ok = await JwClient.testTokenRaw();
+        if (ok) {
+            currentState = {
+                status: "authenticated",
+                account,
+            };
+        } else {
+            await this.loginWithStoredAccount();
+            ok = await JwClient.testTokenRaw();
+            if (ok) {
+                currentState = {
+                    status: "authenticated",
+                    account,
+                };
+            } else {
+                currentState = {
+                    status: "has_account_not_authenticated",
+                    account,
+                };
+            }
+        }
+        return currentState;
+    },
+
     getAuthState(): JwAuthState {
         return currentState;
     },
@@ -52,10 +84,10 @@ export const JwCore: JwCore = {
 
         if (keys.modulus && keys.exponent) {
             await JwClient.loginWithRSA(username, password, keys.modulus, keys.exponent);
-            res = await JwClient.testToken();
+            res = await JwClient.testTokenRaw();
             if (!res) {
                 await JwClient.loginNormal(username, password);
-                res = await JwClient.testToken();
+                res = await JwClient.testTokenRaw();
             }
         }
 
@@ -63,7 +95,6 @@ export const JwCore: JwCore = {
             const i: JwAuthState = {
                 status: "authenticated",
                 account,
-                lastAuthTime: Date.now(),
             };
             currentState = i;
             return i;
