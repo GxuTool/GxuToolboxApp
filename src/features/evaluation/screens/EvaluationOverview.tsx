@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useRef, useState} from "react";
-import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {Alert, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import {Row, Table} from "react-native-reanimated-table";
 import {useFocusEffect, useNavigation} from "@react-navigation/native";
 import {Color} from "@/shared/color.ts";
@@ -14,6 +14,7 @@ import {createDefaultReq, fillReq} from "@/features/evaluation/utils/reqBuilder.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useBatchProcessor} from "@/features/evaluation/hook/useBatchProcessor.ts";
 import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
+import {useJwAuth} from "@/core/auth/hooks/useJwAuth.ts";
 
 const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
     const progressPercent = Math.round(progress * 100);
@@ -25,6 +26,8 @@ const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
 };
 
 export function EvaluationOverview() {
+    const {authState} = useJwAuth();
+
     const {theme} = useTheme();
     const [evaList, setEvaList] = useState<EvaTeacherList[]>([]);
     const navigation = useNavigation();
@@ -175,10 +178,15 @@ export function EvaluationOverview() {
 
     async function init() {
         try {
+            if (authState.status !== "authenticated") {
+                Alert.alert("需要登录", "此操作需要登录教务系统", [
+                    {text: "知道了", onPress: () => navigation.goBack()},
+                ]);
+                return;
+            }
+
             const res = await evaluationApi.getEvaluationList();
-            res.items
-                .sort((a, b)=>
-                    statusList.indexOf(a.submitStatus) - statusList.indexOf(b.submitStatus));
+            res.items.sort((a, b) => statusList.indexOf(a.submitStatus) - statusList.indexOf(b.submitStatus));
             setEvaList(res.items);
         } catch (e) {
             console.error("获取评教列表失败:", e);

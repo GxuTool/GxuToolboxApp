@@ -6,8 +6,7 @@ import {useTheme} from "@rneui/themed";
 import {CourseList} from "@/features/electiveStrategy/api/schema.ts";
 import {getStrategy} from "@/features/electiveStrategy/utils";
 import {StatItem} from "@/features/electiveStrategy/component/StatItem.tsx";
-import {jwxt} from "@/js/jw/jwxt.ts";
-import {userMgr} from "@/js/mgr/user.ts";
+import {userProfile} from "@/core/user/profile.ts";
 
 export default function ElectiveStrategy() {
     const {theme} = useTheme();
@@ -25,10 +24,10 @@ export default function ElectiveStrategy() {
                 setError(null);
 
                 // 并行获取课程和用户信息
-                const coursePromise = electiveAPI.getCourses().then(r =>
-                    r!.items.filter((i: any) => i.selectionType === "通识选修课")
-                );
-                const infoPromise = jwxt.getInfo();
+                const coursePromise = electiveAPI
+                    .getCourses()
+                    .then(r => r!.items.filter((i: any) => i.selectionType === "通识选修课"));
+                const infoPromise = userProfile.loadUserInfo();
 
                 const [fetchedCourses, userInfo] = await Promise.all([coursePromise, infoPromise]);
 
@@ -39,7 +38,6 @@ export default function ElectiveStrategy() {
                 } else {
                     setUserGrade(2025);
                 }
-
             } catch (e) {
                 setError("数据加载失败，请稍后重试。");
             } finally {
@@ -55,15 +53,27 @@ export default function ElectiveStrategy() {
     const stats = useMemo(() => strategy!.calculate(courses), [courses, strategy]);
 
     if (loading) {
-        return <View style={styles.centered}><ActivityIndicator size="large" /></View>;
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" />
+            </View>
+        );
     }
 
     if (error) {
-        return <View style={styles.centered}><Text>{error}</Text></View>;
+        return (
+            <View style={styles.centered}>
+                <Text>{error}</Text>
+            </View>
+        );
     }
 
     if (!strategy || !stats) {
-        return <View style={styles.centered}><Text>无法确定培养方案。</Text></View>;
+        return (
+            <View style={styles.centered}>
+                <Text>无法确定培养方案。</Text>
+            </View>
+        );
     }
 
     return (
