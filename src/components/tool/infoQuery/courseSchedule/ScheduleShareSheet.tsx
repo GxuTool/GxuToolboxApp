@@ -41,7 +41,7 @@ export function ScheduleShareSheet(props: Props) {
             backgroundColor: theme.colors.background,
         },
         flexContainer: {
-            marginBottom: 25,
+            marginBottom: 10,
             marginVertical: 10,
         },
     });
@@ -120,10 +120,10 @@ export function ScheduleShareSheet(props: Props) {
                                 await saveToLocal();
                             }}>
                             <Flex justify={"center"}>
-                                <Icon name="arrow-collapse-down" size={30} />
+                                <Icon name="arrow-collapse-down" size={20} />
                             </Flex>
+                            <Text>保存到相册</Text>
                         </Pressable>
-                        <Text>保存到相册</Text>
                     </Flex>
                     <Flex justify={"center"} direction={"column"}>
                         <Pressable
@@ -132,13 +132,13 @@ export function ScheduleShareSheet(props: Props) {
                                 await shareSchedule();
                             }}>
                             <Flex justify={"center"}>
-                                <Icon name="share" size={30} />
+                                <Icon name="share" size={20} />
                             </Flex>
+                            <Text>分享课表</Text>
                         </Pressable>
-                        <Text>分享课表</Text>
                     </Flex>
                 </Flex>
-                <Flex style={{marginBottom:5}}>
+                <Flex style={{marginBottom: 5}}>
                     <Button
                         title="取消"
                         type="clear"
