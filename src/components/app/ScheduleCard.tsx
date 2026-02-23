@@ -286,6 +286,7 @@ export function ScheduleCard() {
                 content: "请进入设置页面正确设置教务账号",
                 progress: 1,
             });
+            toast.close();
             return;
         }
         if (!(await jwxt.testToken(true, toast))) {
