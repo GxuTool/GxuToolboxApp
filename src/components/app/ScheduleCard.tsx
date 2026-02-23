@@ -276,12 +276,21 @@ export function ScheduleCard() {
     async function loadData() {
         let count = 0;
         const totalTaskCount = 7;
+        const account = await userMgr.jw.getAccount();
 
         const toast = createToast(`测试教务Token是否过期 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
+        if (!account?.username || account.password) {
+            toast.setData({
+                color: "error",
+                content: "请进入设置页面正确设置教务账号",
+                progress: 1,
+            });
+            return;
+        }
         if (!(await jwxt.testToken(true, toast))) {
             // 失败时才检测时间段
-            if (!(moment().hour() > 5 && moment().hour() < 22)) {
+            if (moment().hour() < 7 || moment().hour() > 22) {
                 toast.setData({
                     color: "error",
                     content: "该时段暂时无法连接校园网，请早上七点后再试",

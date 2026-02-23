@@ -97,7 +97,7 @@ export const jwxt = {
             return true;
         } else {
             if (autoRefresh) {
-                if (toastRef) toastRef.setContent("尝试重新登录获取Token");
+                toastRef?.setContent("尝试重新登录获取Token");
                 if (await jwxt.refreshToken()) {
                     jwxt.getInfo();
                     return true;
