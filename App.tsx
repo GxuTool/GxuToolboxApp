@@ -1,10 +1,11 @@
-import React, {useMemo} from "react";
+import React, {useEffect, useMemo} from "react";
 import {ThemeProvider} from "@rneui/themed";
 import {theme} from "@/shared/theme.ts";
 import {Root} from "./src/screens/Root.tsx";
 import {useColorScheme} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";
 import {AppProvider} from "@/components/AppProvider.tsx";
+import {JwCore} from "@/core/auth/JwCore.ts";
 
 function App(): React.JSX.Element {
     const colorScheme = useColorScheme();
@@ -15,6 +16,19 @@ function App(): React.JSX.Element {
         }),
         [colorScheme],
     );
+
+    async function init() {
+        try {
+            await JwCore.refreshToken();
+        } catch (e) {
+            console.warn(e);
+        }
+    }
+
+    // 应用初始化
+    useEffect(() => {
+        init();
+    }, []);
 
     return (
         <ThemeProvider theme={currentTheme}>
