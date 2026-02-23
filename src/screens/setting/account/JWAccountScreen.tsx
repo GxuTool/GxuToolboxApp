@@ -1,9 +1,8 @@
 import {ActivityIndicator, Pressable, StyleSheet, ToastAndroid, View} from "react-native";
 import {Button, Input, Text} from "@rneui/themed";
-import {useEffect, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useWebView} from "@/hooks/app.ts";
-import {JwCore} from "@/core/auth/JwCore.ts";
 import {useJwAccount} from "@/core/auth/hooks/useJwAccount.ts";
 import {useJwAuth} from "@/core/auth/hooks/useJwAuth.ts";
 
@@ -18,35 +17,6 @@ function statusMeta(state: JwAuthState) {
         default:
             return {label: "未知状态", color: "#EF4444", bg: "#111827"};
     }
-}
-
-async function getToken(username: string, password: string) {
-    if (!username || !password) {
-        ToastAndroid.show("账号或密码为空", ToastAndroid.SHORT);
-        return;
-    }
-    await JwCore.saveAccount({username, password});
-    ToastAndroid.show("开始尝试登录", ToastAndroid.SHORT);
-    const state = await JwCore.loginWithAccount({username, password});
-    if (state.status === "authenticated") {
-        ToastAndroid.show("登录成功", ToastAndroid.SHORT);
-    } else {
-        ToastAndroid.show("获取失败，请检查帐密是否正确或者检查是否连接校园网", ToastAndroid.SHORT);
-    }
-
-    // // 尝试登录
-    // await jwxt.unifiedLogin(username, password);
-    // // 检验Token
-    // if (await jwxt.testToken(false)) {
-    //     ToastAndroid.show("获取成功，尝试获取用户基础信息", ToastAndroid.SHORT);
-    //     if ((await jwxt.getInfo()) !== undefined) {
-    //         ToastAndroid.show("获取基础信息成功", ToastAndroid.SHORT);
-    //     } else {
-    //         ToastAndroid.show("获取基础信息失败", ToastAndroid.SHORT);
-    //     }
-    // } else {
-    //     ToastAndroid.show("获取失败，请检查帐密是否正确或者检查是否连接校园网", ToastAndroid.SHORT);
-    // }
 }
 
 export function JWAccountScreen() {
@@ -70,21 +40,8 @@ export function JWAccountScreen() {
         const r = await login(username, password);
         if (r.ok) return;
 
-        // 失败情况下 Toast 作为补充提示
         ToastAndroid.show("登录失败", ToastAndroid.SHORT);
     }
-
-    // async function init() {
-    //     const account = await JwCore.loadAccount();
-    //     if (!account) return;
-    //     setUsername(account.username);
-    //     setPassword(account.password);
-    // }
-    //
-    // //从存储中读取数据
-    // useEffect(() => {
-    //     init();
-    // }, []);
 
     return (
         <View style={style.container}>
