@@ -38,6 +38,7 @@ import {useUserConfig} from "@/hooks/app.ts";
 import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {jwxt} from "@/js/jw/jwxt.ts";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
+import {userProfile} from "@/core/user/profile.ts";
 
 export function ScheduleCard() {
     const {createToast} = useUnToast();
@@ -277,10 +278,9 @@ export function ScheduleCard() {
         let count = 0;
         const totalTaskCount = 7;
         const account = await userMgr.jw.getAccount();
-
         const toast = createToast(`测试教务Token是否过期 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
-        if (!account?.username || account.password) {
+        if (!account?.username || !account?.password) {
             toast.setData({
                 color: "error",
                 content: "请进入设置页面正确设置教务账号",

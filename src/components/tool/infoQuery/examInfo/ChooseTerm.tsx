@@ -1,8 +1,8 @@
 import {ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {store} from "@/core/store.ts";
-import {useState, useMemo, useEffect} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useTheme} from "@rneui/themed";
-import {defaultYear} from "@/js/jw/infoQuery.ts";
+import {userProfile} from "@/core/user/profile.ts";
 
 interface ChooseTermProps {
     // 保持原有接口定义，支持 year 传空字符串
@@ -17,7 +17,7 @@ type FilterType = "all" | "no_future" | "current";
 export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeYear = true}: ChooseTermProps) {
     const {theme} = useTheme();
     // 入学年份
-    const [enrollmentYear] = useState(store.cache.userInfo.rawData.grade);
+    const [enrollmentYear, setEnrollmentYear] = useState<number>(2023);
 
     // 状态：显示范围过滤器
     const [filterType, setFilterType] = useState<FilterType>("no_future");
@@ -56,7 +56,13 @@ export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeY
         }
     }, [enrollmentYear, filterType, realAcademicYear]);
 
+    const init = async () => {
+        const info = await userProfile.loadUserInfo();
+        setEnrollmentYear(info.grade);
+    }
+
     useEffect(() => {
+        init();
         // 默认当前学年和当前学期，3到8月算下半学期
         const initTerm = currentMonth >= 3 && currentMonth < 9 ? "12" : "3";
         const initYear = Math.max(realAcademicYear, enrollmentYear);
