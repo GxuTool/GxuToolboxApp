@@ -64,8 +64,8 @@ http.interceptors.response.use(
         const status = error.response?.status || "N/A";
         const statusText = error.response?.statusText || error.message;
 
-        // 错误日志默认展开，以便立即看到
-        console.group(
+        // 错误日志默认展开，以便立即看到，483错误码折叠（夜间教务屏蔽）
+        console[status === 483 ? "groupCollapsed" : "group"](
             `%c[HTTP] <-- ${method?.toUpperCase()} ${url} (${status} ${statusText}) - ${duration}ms`,
             "color: #e74c3c; font-weight: bold;", // 红色表示失败
         );
