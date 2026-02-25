@@ -155,7 +155,7 @@ export function ClassCourseSchedule() {
                     <Flex gap={10}>
                         <Text>学期</Text>
                         <View style={{flex: 1}}>
-                            <UnTermSelector year={year} term={term} onChange={setBoth} />
+                            <UnTermSelector year={year} term={term} onChange={setBoth} disableSelectAll />
                         </View>
                     </Flex>
                     <Flex gap={10}>

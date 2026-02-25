@@ -12,6 +12,7 @@ export interface UnTermSelectorProps {
     thirdTerm?: boolean;
     disableSelectAll?: boolean;
     onChange?: (year: SchoolYearValue | number, term: SchoolTermValue) => void;
+    skipAndroidStatusBar?: boolean;
 }
 
 export function UnTermSelector(props: UnTermSelectorProps) {
@@ -34,12 +35,14 @@ export function UnTermSelector(props: UnTermSelectorProps) {
         },
         option: {
             borderRadius: 8,
-            padding: 8,
+            paddingHorizontal: 8,
+            paddingVertical: 12,
         },
         selectedOption: {
             backgroundColor: Color.mix(theme.colors.primary, theme.colors.grey3, 0.7).rgbaString,
             borderRadius: 8,
-            padding: 8,
+            paddingVertical: 12,
+            paddingHorizontal: 8,
         },
     });
     console.log(props);
@@ -64,7 +67,7 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                         </>
                     )}
                     <Flex align="flex-start" gap={4}>
-                        <ScrollView style={{width: vw(40) - 24}} contentContainerStyle={{gap: 4}}>
+                        <ScrollView style={{width: vw(55) - 24}} contentContainerStyle={{gap: 4}}>
                             {SchoolYears.map(year => (
                                 <Pressable
                                     onPress={() => setSelectedYear(+year[0])}
@@ -91,8 +94,8 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                 </View>
             }
             height={vh(30)}
-            width={vw(80)}
-            skipAndroidStatusBar>
+            width={vw(95)}
+            skipAndroidStatusBar={props.skipAndroidStatusBar}>
             <Flex style={style.labelContainer} inline justify="flex-end" gap={4}>
                 <Icon name="calendar" size={18} />
                 {selectedAll ? (

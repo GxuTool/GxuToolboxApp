@@ -38,7 +38,6 @@ import {useUserConfig} from "@/hooks/app.ts";
 import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {jwxt} from "@/js/jw/jwxt.ts";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
-import {userProfile} from "@/core/user/profile.ts";
 
 export function ScheduleCard() {
     const {createToast} = useUnToast();

@@ -88,6 +88,7 @@ export function CourseScheduleQuery() {
                             <UnTermSelector
                                 year={year}
                                 term={term}
+                                disableSelectAll
                                 onChange={(year, term) => {
                                     setYear(+year);
                                     setTerm(term);

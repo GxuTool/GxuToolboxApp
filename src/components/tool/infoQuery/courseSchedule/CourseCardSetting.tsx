@@ -112,6 +112,7 @@ export function CourseCardSetting(props: Props) {
                             <UnTermSelector
                                 thirdTerm
                                 disableSelectAll
+                                skipAndroidStatusBar
                                 year={props.year}
                                 term={props.term}
                                 onChange={(year, term) => {

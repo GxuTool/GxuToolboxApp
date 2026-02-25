@@ -61,7 +61,7 @@ export default function AttendanceInfoQueryScreen() {
     return (
         <>
             <AttendanceQuickLogin visible={quickLoginShow} onClose={() => setQuickLoginShow(false)} onSucceed={init} />
-            <UnTermSelector year={year} term={term} onChange={setBoth} />
+            <UnTermSelector year={year} term={term} onChange={setBoth} disableSelectAll />
             <Button
                 onPress={() =>
                     openInWeb("考勤系统", {

@@ -140,6 +140,7 @@ export function ScheduleEdit() {
                     <Text>学期</Text>
                     <View style={{flex: 1}}>
                         <UnTermSelector
+                            disableSelectAll
                             year={year}
                             term={term}
                             onChange={(year, term) => {
