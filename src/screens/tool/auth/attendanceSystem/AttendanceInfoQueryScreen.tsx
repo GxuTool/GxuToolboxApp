@@ -79,7 +79,7 @@ export default function AttendanceInfoQueryScreen() {
             <Tab
                 value={tabIndex}
                 dense={true}
-                titleStyle={{color: theme.colors.primary}}
+                titleStyle={{color: "#fff"}}
                 indicatorStyle={{backgroundColor: theme.colors.primary}}
                 onChange={setTabIndex}>
                 <Tab.Item title="考勤课表" />
