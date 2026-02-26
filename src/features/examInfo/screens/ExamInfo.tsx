@@ -6,7 +6,7 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 import {store} from "@/core/store.ts";
 import {Color} from "@/shared/color.ts";
-import {useUserConfig, useWebView} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/app.ts";
 import {getExamInfo} from "@/features/examInfo/api";
 import {ExamInfoCard} from "@/features/examInfo/components/ExamInfoCard.tsx";
 import {ExamInfoApiResponse} from "@/features/examInfo/type/exam.types.ts";
@@ -22,7 +22,6 @@ const initRes: ExamInfoApiResponse = {
 export function ExamInfo() {
     const {theme} = useTheme();
     const {userConfig} = useUserConfig();
-    const {openInJw} = useWebView();
     const [apiRes, setApiRes] = useState<ExamInfoApiResponse>(initRes as ExamInfoApiResponse);
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
@@ -108,33 +107,6 @@ export function ExamInfo() {
                 includeWholeYear={false}
             />
             <View style={style.container}>
-                {/*<Flex gap={10} direction="column" align="flex-start">*/}
-                {/*    <Text h4>查询参数</Text>*/}
-                {/*    <Flex gap={10}>*/}
-                {/*        <Text>学期</Text>*/}
-                {/*        <View style={{flex: 1}}>*/}
-                {/*            <UnTermSelector*/}
-                {/*                year={year}*/}
-                {/*                term={term}*/}
-                {/*                onChange={(year, term) => {*/}
-                {/*                    setYear(+year);*/}
-                {/*                    setTerm(term);*/}
-                {/*                }}*/}
-                {/*            />*/}
-                {/*        </View>*/}
-                {/*    </Flex>*/}
-                {/*    <Flex gap={10}>*/}
-                {/*        <Button containerStyle={{flex: 1}} onPress={query}>*/}
-                {/*            查询*/}
-                {/*        </Button>*/}
-                {/*        <Button*/}
-                {/*            onPress={() => {*/}
-                {/*                openInJw("/kwgl/kscx_cxXsksxxIndex.html?gnmkdm=N358105&layout=default");*/}
-                {/*            }}>*/}
-                {/*            前往教务查询*/}
-                {/*        </Button>*/}
-                {/*    </Flex>*/}
-                {/*</Flex>*/}
                 <Divider />
                 <Flex direction="column" gap={15} align="flex-start">
                     <Flex align="flex-end" gap={5}>

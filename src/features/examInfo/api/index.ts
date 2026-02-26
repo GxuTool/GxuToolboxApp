@@ -12,9 +12,6 @@ export async function getExamInfo(
     page: number = 1,
 ): Promise<ExamInfoApiResponse | null> {
     const yearIndex = SchoolYears.findIndex(v => +v[0] === year);
-    if (!(await jwxt.testToken())) {
-        return null;
-    }
     const reqBody = objectToFormUrlEncoded({
         xnm: SchoolYears[yearIndex ?? SchoolYears.findIndex(v => +v[0] === defaultYear)][0],
         xqm: term ?? SchoolTerms[0][0],
@@ -34,7 +31,6 @@ export async function getExamInfo(
         }
         return valiRes.data;
     } else {
-        ToastAndroid.show("获取考试信息失败", ToastAndroid.SHORT);
         return null;
     }
 }

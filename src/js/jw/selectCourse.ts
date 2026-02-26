@@ -8,9 +8,6 @@ import {ToastAndroid} from "react-native";
 export const CourseSelectionApi = {
     getCourseInfo: async (year: number, term: number): Promise<any> => {
         const yearIndex = SchoolYears.findIndex(v => +v[0] === year);
-        if (!(await jwxt.testToken())) {
-            return null;
-        }
         const reqBody = objectToFormUrlEncoded({
             xkxnm: SchoolYears[yearIndex ?? SchoolYears.findIndex(v => +v[0] === defaultYear)][0],
             xkxqm: term ?? SchoolTerms[0][0],
