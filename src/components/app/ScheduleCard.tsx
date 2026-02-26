@@ -38,6 +38,7 @@ import {useUserConfig} from "@/hooks/app.ts";
 import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {jwxt} from "@/js/jw/jwxt.ts";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
+import {JwCore} from "@/core/auth/JwCore.ts";
 
 export function ScheduleCard() {
     const {createToast} = useUnToast();
@@ -162,7 +163,7 @@ export function ScheduleCard() {
                 key: "userInfo",
             })
             .catch(console.warn);
-        const account = await userMgr.jw.getAccount();
+        const account = await JwCore.loadAccount();
         if (!userInfo || !account) return;
 
         const schoolId = Schools.filter(school => school[1] === userInfo.school)?.[0]?.[0];
@@ -281,36 +282,40 @@ export function ScheduleCard() {
     async function loadData() {
         let count = 0;
         const totalTaskCount = 7;
-        const account = await userMgr.jw.getAccount();
-        const toast = createToast(`测试教务Token是否过期 [0/${totalTaskCount}]`, "刷新日程表");
+
+        const {status}: JwAuthState = await JwCore.refreshToken();
+
+        const toast = createToast(`检测登录状态 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
-        if (!account?.username || !account?.password) {
-            toast.setData({
-                color: "error",
-                content: "请进入设置页面正确设置教务账号",
-                progress: 1,
-            });
-            toast.close();
-            return;
-        }
-        if (!(await jwxt.testToken(true, toast))) {
-            // 失败时才检测时间段
-            if (moment().hour() < 7 || moment().hour() > 22) {
+
+        switch (status) {
+            case "no_account":
                 toast.setData({
                     color: "error",
-                    content: "该时段暂时无法连接校园网，请早上七点后再试",
+                    content: "请进入设置页面，填写教务账号并登录",
                     progress: 1,
                 });
-            } else {
-                toast.setData({
-                    color: "error",
-                    content: "获取Token错误，请尝试手动登录或者联系作者",
-                    progress: 1,
-                });
-            }
-            toast.close();
-            return;
+                toast.close();
+                return;
+            case "has_account_not_authenticated":
+                if (moment().hour() < 7 || moment().hour() >= 23) {
+                    toast.setData({
+                        color: "error",
+                        content: "该时段暂时无法连接校园网，请早上七点后再试",
+                        progress: 1,
+                    });
+                }
+                else {
+                    toast.setData({
+                        color: "error",
+                        content: "获取课表失败，请检查账号状态",
+                        progress: 1,
+                    });
+                    toast.close();
+                    return;
+                }
         }
+
         count++;
         toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
         toast.setProgress(+(count / totalTaskCount).toFixed(1));

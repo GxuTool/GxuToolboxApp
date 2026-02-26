@@ -230,7 +230,6 @@ export function ClassCourseSchedule() {
                     </View>
                 </Flex>
                 <Divider />
-                // 修改课表预览部分
                 {classScheduleApiRes && classScheduleApiRes.weekNum && classScheduleApiRes.weekNum.length > 0 && (
                     <>
                         <Text h4>课表预览</Text>
