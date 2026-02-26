@@ -119,6 +119,12 @@ export function ToolboxIndex() {
                     type: "navigation",
                     navigation: "timeShiftScreen",
                 },
+                {
+                    label: "法定节假日",
+                    icon: <Icon name="bed" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "HolidayScreen",
+                },
             ],
         },
         {

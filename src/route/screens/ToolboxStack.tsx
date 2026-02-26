@@ -22,6 +22,7 @@ import AttendanceInfoQueryScreen from "@/screens/tool/auth/attendanceSystem/Atte
 import WebViewScreen from "@/screens/WebViewScreen.tsx";
 import {useUserConfig, useWebView} from "@/hooks/app.ts";
 import {EvaluationTemplate} from "@/features/evaluation/screens/EvaluationTemplate.tsx";
+import {HolidayScreen} from "@/features/holidays/screen/HolidayScreen.tsx";
 
 const Stack = createNativeStackNavigator();
 
@@ -117,6 +118,7 @@ export function ToolboxStack() {
             {/*    options={{title: "调课信息查询"}}*/}
             {/*/>*/}
             <Stack.Screen name="timeShiftScreen" component={TimeShiftScreen} options={{title: "调休信息查询"}} />
+            <Stack.Screen name="HolidayScreen" component={HolidayScreen} options={{title: "假期安排"}} />
 
             <Stack.Screen name="EvaluationOverview" component={EvaluationOverview} options={{title: "期末学生评价"}} />
             <Stack.Screen name="EvaluationDetail" component={EvaluationDetail} options={{title: "学生评价细节"}} />
