@@ -2,7 +2,7 @@ import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
 import {Pressable, StyleSheet, View} from "react-native";
 import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {PracticalCourseList} from "../tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -56,42 +56,47 @@ export function ScheduleCard() {
     const [courseScheduleSettingVisible, setCourseScheduleSettingVisible] = useState(false);
     const [scheduleShareVisible, setScheduleShareVisible] = useState(false);
 
-    const style = StyleSheet.create({
-        card: {
-            backgroundColor: Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
-                0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
-            ).rgbaString,
-            borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.7).rgbaString,
-            borderRadius: 16,
-            paddingHorizontal: 0,
-            marginHorizontal: 5,
-            elevation: 0, // Android 去除阴影
-            shadowOpacity: 0, // iOS 去除阴影
-            overflow: "hidden",
-        },
-        cardTitle: {
-            paddingHorizontal: 12,
-        },
-        pagerView: {
-            width: "100%",
-            height: userConfig.theme.course.timeSpanHeight * 13 + userConfig.theme.course.weekdayHeight + 50,
-        },
-        bottomSheetContainer: {
-            backgroundColor: theme.colors.background,
-            padding: "5%",
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-            borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
-            borderWidth: 1,
-        },
-        menuItem: {
-            flexDirection: "row",
-            gap: 8,
-            width: 140,
-            padding: 4,
-            alignItems: "center",
-        },
-    });
+    const style = useMemo(
+        () =>
+            StyleSheet.create({
+                card: {
+                    backgroundColor: Color(
+                        theme.mode === "light" ? theme.colors.background : theme.colors.grey5,
+                    ).setAlpha(0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100)
+                        .rgbaString,
+                    borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.7).rgbaString,
+                    borderRadius: 16,
+                    paddingHorizontal: 0,
+                    marginHorizontal: 5,
+                    elevation: 0, // Android 去除阴影
+                    shadowOpacity: 0, // iOS 去除阴影
+                    overflow: "hidden",
+                },
+                cardTitle: {
+                    paddingHorizontal: 12,
+                },
+                pagerView: {
+                    width: "100%",
+                    height: userConfig.theme.course.timeSpanHeight * 13 + userConfig.theme.course.weekdayHeight + 50,
+                },
+                bottomSheetContainer: {
+                    backgroundColor: theme.colors.background,
+                    padding: "5%",
+                    borderTopLeftRadius: 8,
+                    borderTopRightRadius: 8,
+                    borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
+                    borderWidth: 1,
+                },
+                menuItem: {
+                    flexDirection: "row",
+                    gap: 8,
+                    width: 140,
+                    padding: 4,
+                    alignItems: "center",
+                },
+            }),
+        [theme, userConfig.theme.bgOpacity, userConfig.theme.course],
+    );
 
     // 获取考试
     const [examList, setExamList] = useState<ExamInfo[]>([]);
