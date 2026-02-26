@@ -349,7 +349,7 @@ export function ScheduleCard() {
 
     useEffect(() => {
         init();
-    }, [year, term, userConfig.activity]);
+    }, [year, term]);
 
     type ExtendItemType = ExamInfo | IActivity | EngTrainingExp;
     type ScheduleViewType = CourseScheduleViewProps<ExtendItemType>;

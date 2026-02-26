@@ -168,9 +168,6 @@ export function ToolboxIndex() {
     ] as settingSection[];
     const data = {
         style: {
-            cardBg: Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
-                0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
-            ).rgbaString,
             settingItemRipple: {
                 color: theme.colors.grey4,
             } as PressableAndroidRippleConfig,
@@ -186,7 +183,9 @@ export function ToolboxIndex() {
             paddingTop: "2%",
             paddingBottom: "5%",
             borderRadius: 16,
-            backgroundColor: data.style.cardBg,
+            backgroundColor: Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
+                0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
+            ).rgbaString,
             marginBottom: 10,
         },
         toolListContainer: {
