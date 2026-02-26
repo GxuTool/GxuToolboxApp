@@ -1,7 +1,6 @@
 import {Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
-import {Color} from "@/shared/color.ts";
 import React, {useEffect, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
@@ -10,11 +9,11 @@ import {PracticalCourseList} from "@/components/tool/infoQuery/courseSchedule/Pr
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {usePagerView} from "react-native-pager-view";
 import {courseApi} from "@/js/jw/course.ts";
-import {Row, Rows, Table} from "react-native-reanimated-table";
 import {Course} from "@/type/infoQuery/course/course.ts";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useUserConfig, useWebView} from "@/hooks/app.ts";
+import {UnTable, UnTableCols} from "@/components/un-ui";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
@@ -23,7 +22,7 @@ export function CourseScheduleQuery() {
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
     const pageView = usePagerView({pagesAmount: 20});
-    const [courseScheduleList, setCourseScheduleList] = useState<Course[]>();
+    const [courseScheduleList, setCourseScheduleList] = useState<Course[]>([]);
     const [courseScheduleApiRes, setCourseScheduleApiRes] = useState<CourseScheduleQueryRes>();
     const style = StyleSheet.create({
         container: {
@@ -34,18 +33,6 @@ export function CourseScheduleQuery() {
             margin: 5,
             textAlign: "center",
         },
-        tableBorder: {
-            borderWidth: 2,
-            borderColor: Color.mix(theme.colors.primary, theme.colors.grey4, 0.4).rgbaString,
-        },
-        tableHeader: {
-            backgroundColor: Color.mix(
-                Color(theme.colors.primary),
-                Color(theme.colors.background),
-                theme.mode === "dark" ? 0.7 : 0.2,
-            ).setAlpha(theme.mode === "dark" ? 0.3 : 0.6).rgbaString,
-        },
-        tableHeaderText: {},
     });
 
     async function query() {
@@ -76,7 +63,37 @@ export function CourseScheduleQuery() {
         });
     }
 
-    const tableWidthArr = [150, 70, 100, 150];
+    const cols: UnTableCols<Course> = [
+        {
+            title: "课程名",
+            width: 150,
+            dataIndex: "kcmc",
+        },
+        {
+            title: "教师",
+            width: 70,
+            dataIndex: "xm",
+        },
+        {
+            title: "上课地点",
+            width: 100,
+            dataIndex: "cdmc",
+        },
+        {
+            title: "qq群",
+            width: 150,
+            dataIndex: "qqqh",
+            render: qq =>
+                qq.trim() ? (
+                    <Pressable android_ripple={userConfig.theme.ripple} onPress={() => qqLink(qq)}>
+                        <Text style={style.tableText}>{qq}</Text>
+                    </Pressable>
+                ) : (
+                    "-"
+                ),
+        },
+    ];
+
     return (
         <ScrollView>
             <View style={style.container}>
@@ -132,36 +149,7 @@ export function CourseScheduleQuery() {
                 <Divider />
                 <Text h4>课程列表</Text>
                 <ScrollView horizontal style={{marginTop: 10}}>
-                    <Table borderStyle={style.tableBorder}>
-                        <Row
-                            style={style.tableHeader}
-                            height={40}
-                            widthArr={tableWidthArr}
-                            textStyle={style.tableText}
-                            data={["课程名", "教师", "上课地点", "qq群"]}
-                        />
-                        <Rows
-                            widthArr={tableWidthArr}
-                            textStyle={style.tableText}
-                            heightArr={new Array(courseScheduleList?.length).fill(40)}
-                            data={
-                                courseScheduleList?.map<any[]>(course => [
-                                    course.kcmc,
-                                    course.xm,
-                                    course.cdmc,
-                                    course.qqqh.trim() ? (
-                                        <Pressable
-                                            android_ripple={userConfig.theme.ripple}
-                                            onPress={() => qqLink(course.qqqh)}>
-                                            <Text style={style.tableText}>{course.qqqh}</Text>
-                                        </Pressable>
-                                    ) : (
-                                        "-"
-                                    ),
-                                ]) ?? []
-                            }
-                        />
-                    </Table>
+                    <UnTable<Course> data={courseScheduleList} cols={cols} />
                 </ScrollView>
             </View>
         </ScrollView>

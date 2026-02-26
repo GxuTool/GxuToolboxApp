@@ -22,7 +22,7 @@ const StatusBadge = ({status}: {status: ExamStatus}) => {
                 position: "absolute",
                 top: -1,
                 right: -1,
-                backgroundColor: config[status].color,
+                backgroundColor: config[status]?.color ?? theme.colors.grey2,
                 paddingHorizontal: 8,
                 paddingVertical: 3,
                 borderTopRightRadius: 8,

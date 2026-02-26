@@ -7,6 +7,7 @@ import {UnTermSelector, UnTermSelectorProps} from "./UnTermSelector.tsx";
 import {UnText, UnTextProps} from "./UnText.tsx";
 import {UnCard, UnCardProps} from "@/components/un-ui/UnCard.tsx";
 import {UnTooltip} from "@/components/un-ui/UnTooltip.tsx";
+import {UnTable, UnTableCol, UnTableCols, UnTableProps} from "@/components/un-ui/UnTable.tsx";
 
 function vw(v: number) {
     return (v / 100) * Dimensions.get("window").width;
@@ -15,5 +16,15 @@ function vh(v: number) {
     return (v / 100) * Dimensions.get("window").height;
 }
 
-export type {FlexProps, UnIconProps, NumberInputProps, UnTermSelectorProps, UnTextProps, UnCardProps};
-export {Flex, Icon, NumberInput, UnRefreshControl, UnTermSelector, UnText, UnTooltip, UnCard, vw, vh};
+export type {
+    FlexProps,
+    UnIconProps,
+    NumberInputProps,
+    UnTermSelectorProps,
+    UnTextProps,
+    UnCardProps,
+    UnTableProps,
+    UnTableCol,
+    UnTableCols,
+};
+export {Flex, Icon, NumberInput, UnRefreshControl, UnTermSelector, UnText, UnTooltip, UnCard, UnTable, vw, vh};
