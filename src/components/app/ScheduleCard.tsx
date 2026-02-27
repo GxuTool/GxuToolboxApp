@@ -1,5 +1,5 @@
 import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
-import {Pressable, StyleSheet, View} from "react-native";
+import {Pressable, StyleSheet, ToastAndroid, View} from "react-native";
 import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import React, {useCallback, useEffect, useMemo, useState} from "react";
@@ -21,7 +21,6 @@ import {courseApi} from "@/js/jw/course.ts";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {examApi} from "@/js/jw/exam.ts";
 import {UserInfo} from "@/type/infoQuery/base.ts";
-import {userMgr} from "@/js/mgr/user.ts";
 import {useNavigation} from "@react-navigation/native";
 import {CourseScheduleExamItem} from "@/components/tool/infoQuery/examInfo/CourseScheduleExamItem.tsx";
 import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
@@ -36,7 +35,6 @@ import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
 import {useUnToast} from "@/components/un-ui/UnToast.tsx";
-import {jwxt} from "@/js/jw/jwxt.ts";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
 import {JwCore} from "@/core/auth/JwCore.ts";
 
@@ -279,14 +277,20 @@ export function ScheduleCard() {
         loadData();
     }
 
+    const [loading, setLoading] = useState(false);
     async function loadData() {
+        if (loading) {
+            ToastAndroid.show("请等待数据刷新完成再点击噢", ToastAndroid.SHORT);
+            return;
+        }
+        setLoading(true);
         let count = 0;
         const totalTaskCount = 7;
 
-        const {status}: JwAuthState = await JwCore.refreshToken();
-
         const toast = createToast(`检测登录状态 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
+
+        const {status}: JwAuthState = await JwCore.refreshToken();
 
         switch (status) {
             case "no_account":
@@ -295,6 +299,7 @@ export function ScheduleCard() {
                     content: "请进入设置页面，填写教务账号并登录",
                     progress: 1,
                 });
+                setLoading(false);
                 toast.close();
                 return;
             case "has_account_not_authenticated":
@@ -304,16 +309,16 @@ export function ScheduleCard() {
                         content: "该时段暂时无法连接校园网，请早上七点后再试",
                         progress: 1,
                     });
-                }
-                else {
+                } else {
                     toast.setData({
                         color: "error",
                         content: "获取课表失败，请检查账号状态",
                         progress: 1,
                     });
-                    toast.close();
-                    return;
                 }
+                setLoading(false);
+                toast.close();
+                return;
         }
 
         count++;
@@ -340,7 +345,7 @@ export function ScheduleCard() {
                         content: "刷新完毕",
                         progress: 1,
                     });
-                    toast.close();
+                    toast.close(4000, () => setLoading(false));
                 }
             }),
         );

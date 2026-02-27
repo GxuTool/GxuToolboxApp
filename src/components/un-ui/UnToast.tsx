@@ -133,7 +133,7 @@ export interface UnToastRef {
     setContent: (v: React.ReactNode) => void;
     setColor: (v: ToastData["color"]) => void;
     setData: (v: Partial<Omit<ToastData, "id">>) => void;
-    close: (delay?: number) => void;
+    close: (delay?: number, cb?: () => void) => void;
 }
 
 export const useUnToast = () => {
@@ -153,7 +153,11 @@ export const useUnToast = () => {
                 setContent: v => toastManager.updateToast(id, {content: v}),
                 setColor: v => toastManager.updateToast(id, {color: v}),
                 setData: v => toastManager.updateToast(id, v),
-                close: (delay = 4000) => setTimeout(() => toastManager.removeToast(id), delay),
+                close: (delay = 4000, cb) =>
+                    setTimeout(() => {
+                        toastManager.removeToast(id);
+                        cb?.();
+                    }, delay),
             };
         },
         [],
