@@ -1,4 +1,4 @@
-import axios, {AxiosError, AxiosRequestConfig} from "axios";
+import axios, {AxiosError} from "axios";
 import {userMgr} from "../js/mgr/user.ts";
 import {ToastAndroid} from "react-native";
 
@@ -12,8 +12,6 @@ export const http = axios.create({
     maxRedirects: 0,
 });
 
-const requestStartTimes = new Map<AxiosRequestConfig, number>();
-
 http.interceptors.request.use(config => {
     userMgr.jw
         .getAccount()
@@ -26,55 +24,14 @@ http.interceptors.request.use(config => {
             ToastAndroid.show("未正确设置账号，请前往设置设置账号", ToastAndroid.SHORT);
         });
 
-    // 在请求发送前记录开始时间
-    requestStartTimes.set(config, Date.now());
-    // 只打印简洁的请求信息
-    // console.log(`[HTTP] --> ${config.method?.toUpperCase()} ${config.url}`);
     return config;
 });
 
 http.interceptors.response.use(
     response => {
-        const startTime = requestStartTimes.get(response.config);
-        const duration = startTime ? Date.now() - startTime : "N/A";
-        requestStartTimes.delete(response.config); // 清理 Map
-
-        const {method, url} = response.config;
-        const {status, statusText} = response;
-
-        // 使用 console.groupCollapsed 创建一个默认折叠的组
-        console.groupCollapsed(
-            `%c[HTTP] <-- ${method?.toUpperCase()} ${url} (${status} ${statusText}) - ${duration}ms`,
-            "color: #2ecc71; font-weight: bold;", // 绿色表示成功
-        );
-
-        console.log("Request Payload:", response.config.data);
-        console.log("Response Data:", response.data);
-        console.groupEnd();
-
         return response;
     },
     (error: AxiosError) => {
-        const config = error.config!;
-        const startTime = requestStartTimes.get(config);
-        const duration = startTime ? Date.now() - startTime : "N/A";
-        requestStartTimes.delete(config); // 清理 Map
-
-        const {method, url} = config;
-        const status = error.response?.status || "N/A";
-        const statusText = error.response?.statusText || error.message;
-
-        // 错误日志默认展开，以便立即看到，483错误码折叠（夜间教务屏蔽）
-        console[status === 483 ? "groupCollapsed" : "group"](
-            `%c[HTTP] <-- ${method?.toUpperCase()} ${url} (${status} ${statusText}) - ${duration}ms`,
-            "color: #e74c3c; font-weight: bold;", // 红色表示失败
-        );
-
-        console.log("Error:", error.message);
-        console.log("Request Payload:", config.data);
-        console.log("Response Data:", error.response?.data);
-        console.groupEnd();
-
         // 关键：必须返回一个 rejected Promise，以便调用方可以 catch 错误
         return error;
     },

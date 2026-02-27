@@ -45,7 +45,6 @@ export function UnTermSelector(props: UnTermSelectorProps) {
             paddingHorizontal: 8,
         },
     });
-    console.log(props);
 
     return (
         <UnTooltip

@@ -133,13 +133,13 @@ export function generateCourseScheduleStyle(config: IUserConfig["theme"]["course
 export function useCourseScheduleData() {
     const [courseScheduleData, setCourseScheduleData] = useState<typeof CourseScheduleData>(CourseScheduleData);
     const updateCourseScheduleData = useCallback(
-        (data: Partial<typeof CourseScheduleData>) => {
+        async (data: Partial<typeof CourseScheduleData>) => {
             const newData = {
                 ...courseScheduleData,
                 ...data,
             };
             setCourseScheduleData(newData);
-            store.save({key: "courseScheduleSetting", data: newData});
+            await store.save({key: "courseScheduleSetting", data: newData});
         },
         [courseScheduleData],
     );
@@ -154,9 +154,9 @@ export function useCourseScheduleData() {
                 }));
             })
             .catch(err => {
-                console.error("加载课程表设置失败:", err);
+                console.log("加载课程表设置失败:", err);
             });
-    }, []); // 移除依赖，只在组件挂载时执行一次
+    }, []);
 
     return {courseScheduleData, updateCourseScheduleData};
 }
