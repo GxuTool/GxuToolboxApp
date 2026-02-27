@@ -1,24 +1,19 @@
-interface NoAccount {
-    status: "no_account";
+export enum JwAuthStateMap {
+    NoAccount = "no_account",
+    HasAccountNotAuthenticated = "has_account_not_authenticated",
+    Authenticated = "authenticated",
 }
 
-interface HasAccountNotAuthenticated {
-    status: "has_account_not_authenticated";
-    account: {
-        username: string;
-        password: string;
-    };
-}
+export type JwAccount = {
+    username: string;
+    password: string;
+};
 
-interface Authenticated {
-    status: "authenticated";
-    account: {
-        username: string;
-        password: string;
-    };
-}
-
-type JwAuthState =
-    | NoAccount
-    | HasAccountNotAuthenticated
-    | Authenticated;
+export type JwAuthState =
+    | {
+          status: JwAuthStateMap.NoAccount;
+      }
+    | {
+          status: JwAuthStateMap.Authenticated | JwAuthStateMap.HasAccountNotAuthenticated;
+          account: JwAccount;
+      };

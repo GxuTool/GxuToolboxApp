@@ -1,45 +1,21 @@
 import {userMgr} from "@/js/mgr/user.ts";
 import {JwClient} from "@/core/auth/JwClient.ts";
+import {JwAccount, JwAuthState, JwAuthStateMap} from "@/core/auth/JwAuth.ts";
 
-type JwAccount = {
-    username: string;
-    password: string;
-};
+let currentState: JwAuthState = {status: JwAuthStateMap.NoAccount};
 
-interface JwCore {
-    refreshToken(): Promise<JwAuthState>;
-
-    loadAccount(): Promise<JwAccount | null>;
-
-    saveAccount(account: JwAccount): Promise<void>;
-
-    clearAccount(): Promise<void>;
-
-    getAuthState(): JwAuthState;
-
-    // getUserInfo(): any;
-
-    loginWithAccount(account: JwAccount): Promise<JwAuthState>;
-
-    loginWithStoredAccount(): Promise<JwAuthState>;
-
-    // unifiedLogin(username: string, password: string): Promise<boolean>;
-}
-
-let currentState: JwAuthState = {status: "no_account"};
-
-export const JwCore: JwCore = {
-    async refreshToken(): Promise<JwAuthState> {
+export const JwCore = {
+    async refreshToken() {
         const account = await this.loadAccount();
         if (!account) {
-            currentState = {status: "no_account"};
+            currentState = {status: JwAuthStateMap.NoAccount};
             return currentState;
         }
 
         let ok = await JwClient.testTokenRaw();
         if (ok) {
             currentState = {
-                status: "authenticated",
+                status: JwAuthStateMap.Authenticated,
                 account,
             };
         } else {
@@ -47,12 +23,12 @@ export const JwCore: JwCore = {
             ok = await JwClient.testTokenRaw();
             if (ok) {
                 currentState = {
-                    status: "authenticated",
+                    status: JwAuthStateMap.Authenticated,
                     account,
                 };
             } else {
                 currentState = {
-                    status: "has_account_not_authenticated",
+                    status: JwAuthStateMap.HasAccountNotAuthenticated,
                     account,
                 };
             }
@@ -60,23 +36,23 @@ export const JwCore: JwCore = {
         return currentState;
     },
 
-    getAuthState(): JwAuthState {
+    getAuthState() {
         return currentState;
     },
 
-    async loadAccount(): Promise<JwAccount | null> {
+    async loadAccount() {
         return userMgr.jw.getAccount();
     },
 
-    async saveAccount(account: JwAccount): Promise<void> {
+    async saveAccount(account: JwAccount) {
         return userMgr.jw.storeAccount(account.username, account.password);
     },
 
-    async clearAccount(): Promise<void> {
+    async clearAccount() {
         return userMgr.jw.storeAccount("", "");
     },
 
-    async loginWithAccount(account: JwAccount): Promise<JwAuthState> {
+    async loginWithAccount(account: JwAccount) {
         const {username, password} = account;
         const keys = await JwClient.getPublicKey();
 
@@ -93,14 +69,14 @@ export const JwCore: JwCore = {
 
         if (res) {
             const i: JwAuthState = {
-                status: "authenticated",
+                status: JwAuthStateMap.Authenticated,
                 account,
             };
             currentState = i;
             return i;
         } else {
             const i: JwAuthState = {
-                status: "has_account_not_authenticated",
+                status: JwAuthStateMap.HasAccountNotAuthenticated,
                 account,
             };
             currentState = i;
@@ -111,7 +87,7 @@ export const JwCore: JwCore = {
     async loginWithStoredAccount(): Promise<JwAuthState> {
         const account = await this.loadAccount();
         if (!account) {
-            currentState = {status: "no_account"};
+            currentState = {status: JwAuthStateMap.NoAccount};
             return currentState;
         }
         return await this.loginWithAccount(account);

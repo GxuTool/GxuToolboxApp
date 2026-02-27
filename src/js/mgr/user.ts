@@ -15,7 +15,7 @@ export const userMgr = {
         },
         getAccount: async () => {
             try {
-                return await store.load<{username: string; password: string}>({
+                return await store.load<JwAccount>({
                     key: "userAccount",
                 });
             } catch (e) {
@@ -37,7 +37,7 @@ export const userMgr = {
         },
         getAccount: async () => {
             try {
-                return await store.load<{username: string; password: string}>({
+                return await store.load<JwAccount>({
                     key: "userAuthAccount",
                 });
             } catch (e) {

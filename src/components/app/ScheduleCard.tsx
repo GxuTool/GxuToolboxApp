@@ -37,6 +37,7 @@ import {useUserConfig} from "@/hooks/app.ts";
 import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
 import {JwCore} from "@/core/auth/JwCore.ts";
+import {JwAuthStateMap} from "@/core/auth/JwAuth.ts";
 
 export function ScheduleCard() {
     const {createToast} = useUnToast();
@@ -290,10 +291,10 @@ export function ScheduleCard() {
         const toast = createToast(`检测登录状态 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
 
-        const {status}: JwAuthState = await JwCore.refreshToken();
+        const {status} = await JwCore.refreshToken();
 
         switch (status) {
-            case "no_account":
+            case JwAuthStateMap.NoAccount:
                 toast.setData({
                     color: "error",
                     content: "请进入设置页面，填写教务账号并登录",
@@ -302,7 +303,7 @@ export function ScheduleCard() {
                 setLoading(false);
                 toast.close();
                 return;
-            case "has_account_not_authenticated":
+            case JwAuthStateMap.HasAccountNotAuthenticated:
                 if (moment().hour() < 7 || moment().hour() >= 23) {
                     toast.setData({
                         color: "error",

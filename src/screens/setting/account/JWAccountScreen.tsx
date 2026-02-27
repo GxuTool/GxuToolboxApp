@@ -5,14 +5,15 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useWebView} from "@/hooks/app.ts";
 import {useJwAccount} from "@/core/auth/hooks/useJwAccount.ts";
 import {useJwAuth} from "@/core/auth/hooks/useJwAuth.ts";
+import {JwAuthState, JwAuthStateMap} from "@/core/auth/JwAuth.ts";
 
 function statusMeta(state: JwAuthState) {
     switch (state.status) {
-        case "no_account":
+        case JwAuthStateMap.NoAccount:
             return {label: "未配置账号", color: "#9CA3AF", bg: "#111827"};
-        case "has_account_not_authenticated":
+        case JwAuthStateMap.HasAccountNotAuthenticated:
             return {label: "已保存账号（未登录/已失效）", color: "#F59E0B", bg: "#111827"};
-        case "authenticated":
+        case JwAuthStateMap.Authenticated:
             return {label: "已登录教务系统", color: "#10B981", bg: "#111827"};
         default:
             return {label: "未知状态", color: "#EF4444", bg: "#111827"};
