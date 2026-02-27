@@ -28,7 +28,7 @@ const StatusBadge = ({status}: {status: ExamStatus}) => {
                 borderTopRightRadius: 8,
                 borderBottomLeftRadius: 8,
             }}>
-            <Text style={{color: "white", fontSize: 12, fontWeight: "bold"}}>{config[status].text}</Text>
+            <Text style={{color: "white", fontSize: 12, fontWeight: "bold"}}>{config[status]?.text}</Text>
         </View>
     );
 };
