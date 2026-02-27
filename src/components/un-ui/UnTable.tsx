@@ -1,8 +1,8 @@
 import {ScrollView, StyleSheet, TextStyle, ViewStyle} from "react-native";
 import {Color} from "@/shared/color.ts";
 import {useTheme} from "@rneui/themed";
-import React from "react";
-import {Cell, Row, Table, TableWrapper} from "react-native-reanimated-table";
+import React, {useMemo} from "react";
+import {Cell, Row, Table} from "react-native-reanimated-table";
 import {UnText} from "@/components/un-ui/UnText.tsx";
 
 export interface UnTableProps<T = any> {
@@ -68,6 +68,30 @@ export function UnTable<T = any>(props: UnTableProps<T>) {
         },
     });
 
+    const cells = useMemo(
+        () =>
+            props.data.map((record, i) => (
+                <Row
+                    data={props.cols.map(col => (
+                        <Cell
+                            width={col.width}
+                            flex={col.flex}
+                            height={props.rowHeight ?? 50}
+                            textStyle={[style.tableText, col.cellTextStyle]}
+                            style={[style.tableCell, col.cellStyle]}
+                            data={
+                                (col.dataIndex !== undefined
+                                    ? (col.render?.(record[col.dataIndex], record, i) ??
+                                      record[col.dataIndex] ??
+                                      col.default)
+                                    : (col.render?.(undefined, record, i) ?? col.default)) as React.ReactNode
+                            }
+                        />
+                    ))}
+                />
+            )),
+        [props.data],
+    );
     return (
         <ScrollView horizontal>
             <Table borderStyle={props.borderStyle} style={[style.table, props.style]}>
@@ -85,36 +109,19 @@ export function UnTable<T = any>(props: UnTableProps<T>) {
                         ))}
                     />
                 )}
-                {props.data.map((record, i) => (
+                {props.data.length > 0 ? (
+                    cells
+                ) : (
                     <Row
-                        data={props.cols.map(col => (
-                            <Cell
-                                width={col.width}
-                                heightArr={new Array(props.data.length).fill(props.rowHeight ?? 50)}
-                                flex={col.flex}
-                                height={props.rowHeight ?? 50}
-                                textStyle={[style.tableText, col.cellTextStyle]}
-                                style={[style.tableCell, col.cellStyle]}
-                                data={
-                                    (col.dataIndex !== undefined
-                                        ? (col.render?.(record[col.dataIndex], record, i) ??
-                                          record[col.dataIndex] ??
-                                          col.default)
-                                        : (col.render?.(undefined, record, i) ?? col.default)) as React.ReactNode
-                                }
-                            />
-                        ))}
+                        data={[
+                            !props.noDataText || typeof props.noDataText === "string" ? (
+                                <UnText style={{textAlign: "center"}}>{props.noDataText ?? "暂无数据"}</UnText>
+                            ) : (
+                                props.noDataText
+                            ),
+                        ]}
+                        style={style.noData}
                     />
-                ))}
-
-                {props.data.length === 0 && (
-                    <TableWrapper style={style.noData}>
-                        {!props.noDataText || typeof props.noDataText === "string" ? (
-                            <UnText style={{textAlign: "center"}}>{props.noDataText ?? "暂无数据"}</UnText>
-                        ) : (
-                            props.noDataText
-                        )}
-                    </TableWrapper>
                 )}
             </Table>
         </ScrollView>
