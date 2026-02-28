@@ -147,12 +147,12 @@ export function ToolboxIndex() {
                     type: "navigation",
                     navigation: "PositionListScreen",
                 },
-                {
-                    label: "小部件预览",
-                    icon: <Icon name="widgets" size={iconSize} />,
-                    type: "navigation",
-                    navigation: "WidgetPreviewScreen",
-                },
+                // {
+                //     label: "小部件预览",
+                //     icon: <Icon name="widgets" size={iconSize} />,
+                //     type: "navigation",
+                //     navigation: "WidgetPreviewScreen",
+                // },
                 {
                     label: "校园网充值",
                     icon: <Icon name="wifi" size={iconSize} />,

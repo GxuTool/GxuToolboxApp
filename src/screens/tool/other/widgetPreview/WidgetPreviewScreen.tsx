@@ -5,12 +5,18 @@ import {WidgetPreview} from "react-native-android-widget";
 
 import {CourseScheduleWidget} from "@/widget/CourseScheduleWidget.tsx";
 import {nextCourses} from "@/js/nextCourses.ts";
+import {useTheme} from "@rneui/themed";
 
 export function WidgetPreviewScreen() {
-    const [courses, setCourses] = useState<{ today: any[], tomorrow: any[], next: any }>({today: [], tomorrow: [], next: null});
+    const {theme} = useTheme();
+    const [courses, setCourses] = useState<{today: any[]; tomorrow: any[]; next: any}>({
+        today: [],
+        tomorrow: [],
+        next: null,
+    });
 
     useEffect(() => {
-        nextCourses().then((res) => {
+        nextCourses().then(res => {
             if (res) {
                 setCourses(res);
             }
@@ -20,17 +26,24 @@ export function WidgetPreviewScreen() {
     return (
         <View style={styles.container}>
             <WidgetPreview
-                renderWidget={() => <CourseScheduleWidget todayCourse={courses.today} tomorrowCourse={courses.tomorrow} />}
+                renderWidget={() => (
+                    <CourseScheduleWidget
+                        theme={theme.mode}
+                        todayCourse={courses.today}
+                        tomorrowCourse={courses.tomorrow}
+                    />
+                )}
                 width={370}
                 height={370}
             />
-            <ScrollView style={{
-                backgroundColor: "white",
-                width: "90%",
-                borderRadius: 10,
-                marginTop: 20,
-                padding: 10,
-            }}>
+            <ScrollView
+                style={{
+                    backgroundColor: "white",
+                    width: "90%",
+                    borderRadius: 10,
+                    marginTop: 20,
+                    padding: 10,
+                }}>
                 <Text
                     style={{
                         color: "black",

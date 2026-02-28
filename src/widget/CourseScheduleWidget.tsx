@@ -17,6 +17,7 @@ interface CourseScheduleWidgetProps {
         room: string;
     }[];
     lastUpdated?: string;
+    theme: "light" | "dark";
 }
 
 // 辅助函数，获取周几
@@ -32,6 +33,7 @@ const getDayOfWeek = (offset = 0) => {
  * @param todayCourse
  * @param tomorrowCourse
  * @param lastUpdated
+ * @param theme
  * @constructor
  * @description
  * 状态：
@@ -39,11 +41,18 @@ const getDayOfWeek = (offset = 0) => {
  * - 今日无课，但明日有课，显示明日课表，标题：明日课程预告 / 周X（明天）
  * - 今日无课，明日无课，显示“今明两日无课”，标题：今日 / 周X
  */
-export function CourseScheduleWidget({todayCourse = [], tomorrowCourse = [], lastUpdated}: CourseScheduleWidgetProps) {
+export function CourseScheduleWidget({
+    todayCourse = [],
+    tomorrowCourse = [],
+    lastUpdated,
+    theme,
+}: CourseScheduleWidgetProps) {
     let displayTitle = `今天 / ${getDayOfWeek()}`;
     let coursesToDisplay = [];
     let moreCoursesCount = 0;
     let noCourseMessage = "";
+
+    const isDark = theme === "dark";
 
     const hasTodayCourse = todayCourse && todayCourse.length > 0;
     const hasTomorrowCourse = tomorrowCourse && tomorrowCourse.length > 0;
@@ -74,26 +83,27 @@ export function CourseScheduleWidget({todayCourse = [], tomorrowCourse = [], las
                 height: "match_parent",
                 width: "match_parent",
                 padding: 16,
-                backgroundColor: "#f4f8ff",
+                backgroundColor: isDark ? "#2d2d2f" : "#f4f8ff",
                 borderRadius: 16,
                 flexDirection: "column",
-            }}
-        >
-            {/* 标题和刷新按钮容器 */}
-            <FlexWidget style={{
-                width: "match_parent",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 8,
             }}>
+            {/* 标题和刷新按钮容器 */}
+            <FlexWidget
+                style={{
+                    width: "match_parent",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 8,
+                }}>
                 <FlexWidget>
                     <TextWidget
                         text={displayTitle}
                         style={{
-                            fontSize: 15,
+                            fontSize: 17,
+                            fontWeight: "bold",
                             fontFamily: "Inter-SemiBold",
-                            color: "#333333",
+                            color: isDark ? "#cfcfcf" : "#333333",
                         }}
                     />
                     <TextWidget
@@ -101,7 +111,7 @@ export function CourseScheduleWidget({todayCourse = [], tomorrowCourse = [], las
                         style={{
                             fontSize: 15,
                             fontFamily: "Inter-SemiBold",
-                            color: "#333333",
+                            color: isDark ? "#cfcfcf" : "#333333",
                         }}
                     />
                 </FlexWidget>
@@ -113,7 +123,7 @@ export function CourseScheduleWidget({todayCourse = [], tomorrowCourse = [], las
                         text="↻" // 刷新图标
                         style={{
                             fontSize: 22,
-                            color: "#555555",
+                            color: isDark ? "#acacac" : "#555555",
                         }}
                     />
                 </FlexWidget>
@@ -121,14 +131,13 @@ export function CourseScheduleWidget({todayCourse = [], tomorrowCourse = [], las
 
             {/* 课程列表 或 无课提示 */}
             {coursesToDisplay.length > 0 ? (
-                <FlexWidget style={{
-                    flexDirection: "column",
-                    width: "match_parent",
-                }}>
+                <FlexWidget
+                    style={{
+                        flexDirection: "column",
+                        width: "match_parent",
+                    }}>
                     {coursesToDisplay.map((item, index) => {
-                        return (
-                            <CourseItem key={index} course={item} />
-                        );
+                        return <CourseItem theme={theme} key={index} course={item} />;
                     })}
 
                     {/* “还有更多课程”的提示 */}
@@ -137,21 +146,21 @@ export function CourseScheduleWidget({todayCourse = [], tomorrowCourse = [], las
                             text={`...还有 ${moreCoursesCount} 节课`}
                             style={{
                                 fontSize: 12,
-                                color: "#888888",
+                                color: isDark ? "#aaaaaa" : "#888888",
                                 marginTop: 6,
                             }}
                         />
                     )}
                 </FlexWidget>
-                // ==========================================================
             ) : (
+                // ==========================================================
                 // --- 无课时渲染提示信息 ---
                 <FlexWidget style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
                     <TextWidget
                         text={noCourseMessage}
                         style={{
                             fontSize: 16,
-                            color: "#888888",
+                            color: isDark ? "#aaaaaa" : "#888888",
                         }}
                     />
                 </FlexWidget>

@@ -23,9 +23,26 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
             case "WIDGET_ADDED":
             case "WIDGET_UPDATE":
             case "WIDGET_RESIZED":
-                const { today: initialToday = [], tomorrow: initialTomorrow = [] } = await nextCourses() ?? {};
+                const {today: initialToday = [], tomorrow: initialTomorrow = []} = (await nextCourses()) ?? {};
                 const initialTimestamp = new Date().toLocaleTimeString();
-                props.renderWidget(<Widget todayCourse={initialToday} tomorrowCourse={initialTomorrow} lastUpdated={initialTimestamp} />);
+                props.renderWidget({
+                    light: (
+                        <Widget
+                            theme="light"
+                            todayCourse={initialToday}
+                            tomorrowCourse={initialTomorrow}
+                            lastUpdated={initialTimestamp}
+                        />
+                    ),
+                    dark: (
+                        <Widget
+                            theme="dark"
+                            todayCourse={initialToday}
+                            tomorrowCourse={initialTomorrow}
+                            lastUpdated={initialTimestamp}
+                        />
+                    ),
+                });
                 break;
 
             case "WIDGET_DELETED":
@@ -36,9 +53,26 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
                 if (props.clickAction === "REFRESH_SCHEDULE") {
                     // Fetch fresh data ONLY on refresh click
                     console.log("refresh");
-                    const { today = [], tomorrow = [] } = await nextCourses() ?? {};
+                    const {today = [], tomorrow = []} = (await nextCourses()) ?? {};
                     const refreshTimestamp = new Date().toLocaleTimeString();
-                    props.renderWidget(<Widget todayCourse={today} tomorrowCourse={tomorrow} lastUpdated={refreshTimestamp} />);
+                    props.renderWidget({
+                        light: (
+                            <Widget
+                                theme="light"
+                                todayCourse={today}
+                                tomorrowCourse={tomorrow}
+                                lastUpdated={refreshTimestamp}
+                            />
+                        ),
+                        dark: (
+                            <Widget
+                                theme="dark"
+                                todayCourse={today}
+                                tomorrowCourse={tomorrow}
+                                lastUpdated={refreshTimestamp}
+                            />
+                        ),
+                    });
                 }
                 break;
 
