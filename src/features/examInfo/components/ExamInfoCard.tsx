@@ -77,7 +77,13 @@ export const ExamInfoCard = ({item}: Props) => {
             <View style={styles.body}>
                 <InfoRow icon="clock-outline" label="考试时间" value={item.time} />
                 <InfoRow icon="office-building-marker-outline" label="考试地点" value={item.classroom} />
-                <InfoRow icon="seat-outline" label="座位号" value={item.seat || "未知"} />
+                {item.status !== "past" && (
+                    <InfoRow
+                        icon="seat-outline"
+                        label="座位号"
+                        value={item.seat || "未知"}
+                    />
+                )}
             </View>
             <View style={styles.footer}>
                 <Text style={{color: theme.colors.grey2, fontSize: 12}}>{item.type}</Text>
