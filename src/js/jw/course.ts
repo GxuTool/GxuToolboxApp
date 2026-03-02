@@ -292,6 +292,26 @@ export const courseApi = {
             return null;
         }
     },
+    getClassCourseScheduleNew: async (
+        year: SchoolYearValue,
+        term: SchoolTermValue,
+        bh_id: number,
+    ): Promise<ClassScheduleQueryRes | null> => {
+        const reqBody = objectToFormUrlEncoded({
+            xnm: year,
+            xqm: term,
+            bh_id: bh_id,
+        });
+        const res = await http.post<ClassScheduleQueryRes>("/kbdy/bjkbdy_cxBjKb.html", reqBody);
+        if (typeof res.data === "object") {
+            await randomCourseColor(res.data.kbList);
+            await randomCourseColor(res.data.sjkList);
+            return res.data;
+        } else {
+            ToastAndroid.show("获取课表信息失败", ToastAndroid.SHORT);
+            return null;
+        }
+    },
 
     /**
      * 获取物理实验课列表

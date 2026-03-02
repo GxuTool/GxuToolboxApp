@@ -38,7 +38,12 @@ import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
 import {JwCore} from "@/core/auth/JwCore.ts";
 import {JwAuthStateMap} from "@/core/auth/JwAuth.ts";
+import {useCourseSchedule} from "@/features/courseSchedule/hooks/useCourseSchedule.ts";
 
+/**
+ * 课表
+ * @constructor
+ */
 export function ScheduleCard() {
     const {createToast} = useUnToast();
     const {userConfig, updateUserConfig} = useUserConfig();
@@ -47,14 +52,18 @@ export function ScheduleCard() {
     const pagerView = usePagerView({pagesAmount: 20});
     const {...rest} = pagerView;
 
-    const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
-    const startDay = moment(userConfig.jw.startDay);
-
-    const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
+    const {startDay} = useCourseSchedule(year,term);
+
+    const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
+    // const startDay = moment(userConfig.jw.startDay);
+
+    const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
+
     const [courseScheduleSettingVisible, setCourseScheduleSettingVisible] = useState(false);
     const [scheduleShareVisible, setScheduleShareVisible] = useState(false);
+
 
     const style = useMemo(
         () =>
@@ -154,35 +163,6 @@ export function ScheduleCard() {
         } else {
         }
     }
-
-    // 获取学期第一天
-    const getStartDay = useCallback(async () => {
-        const userInfo = await store
-            .load<UserInfo>({
-                key: "userInfo",
-            })
-            .catch(console.warn);
-        const account = await JwCore.loadAccount();
-        if (!userInfo || !account) return;
-
-        const schoolId = Schools.filter(school => school[1] === userInfo.school)?.[0]?.[0];
-        if (!schoolId) return;
-        const data = await courseApi.getClassCourseSchedule(
-            year,
-            term,
-            schoolId,
-            userInfo.subject_id,
-            userInfo.grade,
-            account.username.slice(2, 8),
-        );
-
-        if (!Array.isArray(data?.weekNum) || (data?.weekNum.length ?? 0) < 1) return;
-        const firstDay = data?.weekNum[0].rq.split("/")[0];
-        if (userConfig.jw.startDay !== firstDay && typeof firstDay === "string") {
-            userConfig.jw.startDay = firstDay;
-            updateUserConfig(userConfig);
-        }
-    }, [year, term]);
 
     // 物理实验
     const [phyExpList, setPhyExpList] = useState<PhyExp[]>([]);
@@ -286,7 +266,7 @@ export function ScheduleCard() {
         }
         setLoading(true);
         let count = 0;
-        const totalTaskCount = 7;
+        const totalTaskCount = 6;
 
         const toast = createToast(`检测登录状态 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
@@ -328,7 +308,6 @@ export function ScheduleCard() {
 
         const taskList: Promise<any>[] = [
             getAttendanceData(),
-            getStartDay(),
             getTimeShift(),
             getCourseSchedule(),
             getExamList(),
@@ -346,7 +325,7 @@ export function ScheduleCard() {
                         content: "刷新完毕",
                         progress: 1,
                     });
-                    toast.close(4000, () => setLoading(false));
+                    toast.close(2000, () => setLoading(false));
                 }
             }),
         );
