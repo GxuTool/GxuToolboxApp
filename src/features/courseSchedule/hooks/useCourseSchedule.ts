@@ -9,12 +9,14 @@ import {courseApi} from "@/js/jw/course.ts";
 import moment from "moment/moment";
 import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import {PhyExp} from "@/type/infoQuery/course/course.ts";
-import {CourseClass} from "@/class/jw/course.ts";
+import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
 import {http} from "@/core/http.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {useTheme} from "@rneui/themed";
 import {SchoolTermValue} from "@/type/global.ts";
 import {IActivity} from "@/type/app/activity.ts";
+import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
+import {IExam} from "@/features/courseSchedule/type/schema/exam.ts";
 // 金工实训
 type EngTrainingExp = {
     date: string;
@@ -29,7 +31,7 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
     const {userConfig, updateUserConfig} = useUserConfig();
     const {theme} = useTheme();
     const [examList, setExamList] = useState<ExamInfo[]>([]);
-    const [courseSchedule, setCourseSchedule] = useState<CourseClass[]>();
+    const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
     const startDay = moment(userConfig.jw.startDay);
     const [phyExpList, setPhyExpList] = useState<PhyExp[]>([]);
     const [attendanceData, setAttendanceData] = useState<AttendanceDataClass>();
@@ -56,7 +58,8 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
     const getExamList = useCallback(async () => {
         const data = await examApi.getExamInfo(year, term);
         if (data?.items) {
-            setExamList(data.items);
+            const valiData = IExam.safeParse(data.items);
+            setExamList(valiData.data);
             await store.save({key: "examInfo", data});
         }
     }, [year, term]);
@@ -66,7 +69,8 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
         if (data?.kbList) {
             await store.save({key: "courseRes", data});
             getPhyExp(data.kbList);
-            setCourseSchedule(data.kbList);
+            const valiData = ICourse.safeParse(data);
+            setCourseSchedule(valiData.data);
         }
     }, [year, term]);
 
