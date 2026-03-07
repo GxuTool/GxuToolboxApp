@@ -17,6 +17,7 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {IActivity} from "@/type/app/activity.ts";
 import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
 import {IExam} from "@/features/courseSchedule/type/schema/exam.ts";
+import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 // 金工实训
 type EngTrainingExp = {
     date: string;
@@ -31,10 +32,12 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
     const {userConfig, updateUserConfig} = useUserConfig();
     const {theme} = useTheme();
     const [examList, setExamList] = useState<ExamInfo[]>([]);
-    const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
+    // const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
     const startDay = moment(userConfig.jw.startDay);
     const [phyExpList, setPhyExpList] = useState<PhyExp[]>([]);
     const [attendanceData, setAttendanceData] = useState<AttendanceDataClass>();
+
+    const courseSchedule = useCourse(year,term);
 
     const getStartDay = useCallback(async () => {
         const userInfo = await store
@@ -64,15 +67,15 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
         }
     }, [year, term]);
 
-    const getCourseSchedule = useCallback(async () => {
-        const data = await courseApi.getCourseSchedule(year, term);
-        if (data?.kbList) {
-            await store.save({key: "courseRes", data});
-            getPhyExp(data.kbList);
-            const valiData = ICourse.safeParse(data);
-            setCourseSchedule(valiData.data);
-        }
-    }, [year, term]);
+    // const getCourseSchedule = useCallback(async () => {
+    //     const data = await courseApi.getCourseSchedule(year, term);
+    //     if (data?.kbList) {
+    //         await store.save({key: "courseRes", data});
+    //         getPhyExp(data.kbList);
+    //         const valiData = ICourse.safeParse(data);
+    //         setCourseSchedule(valiData.data);
+    //     }
+    // }, [year, term]);
 
     const getPhyExp = useCallback(
         async (currentSchedule?: CourseClass[]) => {
@@ -155,7 +158,7 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
     useEffect(() => {
         getExamList();
         getStartDay();
-        getCourseSchedule();
+        // getCourseSchedule();
         getTimeShift();
         getAttendanceData();
         getActivityList();

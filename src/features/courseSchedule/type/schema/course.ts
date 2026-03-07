@@ -14,7 +14,7 @@ const TheoryCourseSchema = z.object({
     jcs: z.string(),
     kcmc: z.string(),
     zcd: z.string(),
-    xqj: z.string(),
+    xqj: z.string().transform(Number),
     xm: z.string(),
 });
 
@@ -28,11 +28,13 @@ export const ICourse = rawCourse.transform(i => ({
         title: c.qtkcgs,
         time: c.qsjsz,
         teacher: c.jsxm,
-        source:"jw"
+        source: "jw",
     })),
     theoryList: i.kbList.map(c => ({
         location: c.cdbh,
         index: c.jcs,
+        begin: Number(c.jcs.split("-")[0]),
+        end: Number(c.jcs.split("-")[1]),
         title: c.kcmc,
         week: parseWeeks(c.zcd),
         teacher: c.xm,
