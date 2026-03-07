@@ -5,6 +5,7 @@ import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import {DefaultUserTheme} from "@/shared/theme.ts";
 import moment from "moment";
 import {IUserActivity} from "@/type/app/activity.ts";
+import {PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 
 export interface IUserConfig {
     /** 主题相关配置 */
@@ -64,6 +65,10 @@ export interface IUserTheme {
         courseItemBorderWidth: number;
         /** 课程元素颜色Map */
         courseColor: Record<string, string>;
+        /** 当前使用的色板名称 */
+        palette?: PaletteName;
+        /** 用户自定义课程颜色覆盖表 { [课程名]: 颜色值 } */
+        customColors?: Record<string, string>;
     };
 }
 

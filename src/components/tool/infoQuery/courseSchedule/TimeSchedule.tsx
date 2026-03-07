@@ -9,6 +9,8 @@ import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
 import {useUserConfig} from "@/hooks/app.ts";
+import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
+import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
 
 export interface TimeScheduleItemData<T = any> {
     /** 元素数据 */
@@ -26,7 +28,10 @@ export interface ScheduleTableItem {
     end: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
     title: string;
     subtitle?: string;
+    location?: string;
+    teacher?: string;
     color?: string;
+    kind?: string;
 }
 
 export interface CourseScheduleTableProps<T> {
@@ -253,42 +258,40 @@ export function TimeSchedule(props: TimeScheduleProps) {
                             );
                         })}
 
-                        {currentDayScheduleItems.map(item =>
-                            props.scheduleItemRender ? (
-                                props.scheduleItemRender(item)
-                            ) : (
-                                <View
-                                    key={item.id}
-                                    style={{
-                                        marginTop: 4,
-                                        position: "absolute",
-                                        paddingVertical: 6,
-                                        width: "96%",
-                                        marginHorizontal: "2%",
-                                        borderRadius: 5,
-                                        backgroundColor: item.color ?? "#ffd666",
-                                        height:
-                                            (item.end - item.begin + 1) * userConfig.theme.course.timeSpanHeight -
-                                            userConfig.theme.course.courseItemMargin * 2,
-                                        top:
-                                            userConfig.theme.course.weekdayHeight +
-                                            (item.begin - 1) * userConfig.theme.course.timeSpanHeight +
-                                            userConfig.theme.course.courseItemMargin,
-                                    }}>
-                                    <Text
-                                        style={{
-                                            textAlign: "center",
-                                            fontSize: 12,
-                                            fontWeight: "600",
-                                        }}>
-                                        {item.title}
-                                    </Text>
-                                    {!!item.subtitle && (
-                                        <Text style={{textAlign: "center", fontSize: 10}}>{item.subtitle}</Text>
-                                    )}
-                                </View>
-                            ),
+                        {currentDayScheduleItems.map(item => {
+                            switch (item.kind) {
+                                case "exam":
+                                    return (
+                                        <NewCourseItem
+                                            key={item.id}
+                                            item={{...item, color: item.color ?? "#ff4d4f"}} // Red for exam
+                                            onPress={item => console.log("Exam pressed", item)}
+                                        />
+                                    );
+                                case "holiday":
+                                    return (
+                                        <HolidayItem item={item} />
+                                        // <NewCourseItem
+                                        //     key={item.id}
+                                        //     item={{...item, color: item.color ?? "#52c41a"}} // Green for holiday
+                                        //     onPress={item => console.log("Holiday pressed", item)}
+                                        // />
+                                    );
+                                case "course":
+                                default:
+                                    return (
+                                        <NewCourseItem
+                                            key={item.id}
+                                            item={item}
+                                            onPress={item => console.log("Course pressed", item)}
+                                        />
+                                    );
+                            }
+                            }
                         )}
+
+
+
                         {currentDayItemList.map(item => props.itemRender?.(item, props.onItemPress))}
                     </View>
                 );

@@ -18,8 +18,8 @@ export function normalizeCourse(data: ICourse): ScheduleTableItem[] {
                 begin: course.begin as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
                 end: course.end as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
                 title: course.title,
-                subtitle: course.location,
-                // teacher: course.teacher,
+                location: course.location,
+                teacher: course.teacher,
                 // color: undefined,
             });
         });
