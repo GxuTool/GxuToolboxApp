@@ -1,7 +1,7 @@
 import {Pressable, StyleSheet} from "react-native";
 import {useUserConfig} from "@/hooks/app.ts";
 import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
-import React, {memo, useMemo} from "react";
+import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
@@ -12,7 +12,6 @@ interface NewExamItemProps {
     item: ScheduleTableItem;
     onPress?: (item: ScheduleTableItem) => void;
 }
-
 export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
     const {userConfig} = useUserConfig();
     const {theme} = useTheme();
@@ -20,11 +19,11 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
 
     const span = item.end - item.begin + 1;
     const y = item.begin - 1;
+    const baseColor = item.color ?? getColor({title: item.title, kind: "exam"}) ?? theme.colors.error;
+    const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.22 : 0.12).rgbaString;
+    const textColor = Color.mix(baseColor, theme.colors.black, 0.55).rgbaString;
 
-    // Replicate legacy color logic
-    const baseColor = item.color ?? getColor({title: item.title, kind: "exam"}) ?? theme.colors.primary;
-    const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString;
-    const textColor = Color.mix(baseColor, theme.colors.black, 0.5).rgbaString;
+    const seat = item.seat || (item.subtitle?.match(/<(.+?)>/)?.[1] ?? "");
 
     const styles = useMemo(
         () =>
@@ -33,49 +32,65 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
                     position: "absolute",
                     width: "96%",
                     marginHorizontal: "2%",
-                    borderRadius: 5,
+                    borderRadius: 6,
+                    borderTopWidth: 3,
+                    borderTopColor: baseColor,
                     backgroundColor: backgroundColor,
                     height:
-                        (item.end - item.begin + 1) * userConfig.theme.course.timeSpanHeight -
-                        userConfig.theme.course.courseItemMargin * 2,
+                        span * userConfig.theme.course.timeSpanHeight - userConfig.theme.course.courseItemMargin * 2,
                     top:
                         userConfig.theme.course.weekdayHeight +
-                        (item.begin - 1) * userConfig.theme.course.timeSpanHeight +
+                        y * userConfig.theme.course.timeSpanHeight +
                         userConfig.theme.course.courseItemMargin,
+                    overflow: "hidden",
                 },
                 text: {
                     textAlign: "center",
                     color: textColor,
                     fontSize: 12,
                 },
-                icon: {
+                badge: {
+                    fontSize: 12,
+                    fontWeight: "700",
+                    color: textColor,
+                    opacity: 0.9,
+                },
+                title: {
+                    textAlign: "center",
                     color: textColor,
                     fontSize: 12,
+                    fontWeight: "700",
+                },
+                meta: {
+                    textAlign: "center",
+                    color: textColor,
+                    fontSize: 10,
+                    opacity: 0.95,
+                },
+                icon: {
+                    color: textColor,
+                    fontSize: 11,
                 },
             }),
-        [backgroundColor, textColor, span, y, userConfig.theme.course],
+        [backgroundColor, textColor, span, y, userConfig.theme.course, baseColor],
     );
 
     return (
         <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={userConfig.theme.ripple}>
-            <Flex direction="column" gap={2} style={{padding: 4, height: "100%", overflow: "hidden"}} align="center">
-                <Text style={[styles.text, {fontWeight: "bold"}]} numberOfLines={5}>
+            <Flex direction="column" gap={2} style={{padding: 4,paddingTop: 10, height: "100%"}} align="center">
+                <Text style={styles.badge}>
+                    考试
+                </Text>
+                <Text style={styles.title}>
                     {item.title}
                 </Text>
-
                 {!!item.location && (
-                    <Text style={styles.text}>
-                        <Icon name="map-marker" size={12} color={textColor} />
+                    <Text style={styles.meta}>
+                        <Icon name="map-marker" style={styles.icon} />
                         {"\n" + item.location.replace("-", "\n")}
                     </Text>
                 )}
-
-                {!!item.teacher && (
-                    <Text style={styles.text} ellipsizeMode="tail" numberOfLines={5}>
-                        <Icon name="account" style={styles.text} />
-                        {"\n" + item.teacher}
-                    </Text>
-                )}
+                {!!seat && <Text style={styles.meta}>{`${seat}`}</Text>}
             </Flex>
         </Pressable>
     );

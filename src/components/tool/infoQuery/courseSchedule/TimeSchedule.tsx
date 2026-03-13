@@ -11,6 +11,7 @@ import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
 import {useUserConfig} from "@/hooks/app.ts";
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
+import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
 
 export interface TimeScheduleItemData<T = any> {
     /** 元素数据 */
@@ -32,6 +33,7 @@ export interface ScheduleTableItem {
     teacher?: string;
     color?: string;
     kind?: string;
+    seat?: string;
 }
 
 export interface CourseScheduleTableProps<T> {
@@ -262,7 +264,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
                             switch (item.kind) {
                                 case "exam":
                                     return (
-                                        <NewCourseItem
+                                        <NewExamItem
                                             key={item.id}
                                             item={{...item, color: item.color ?? "#ff4d4f"}} // Red for exam
                                             onPress={item => console.log("Exam pressed", item)}
@@ -271,11 +273,6 @@ export function TimeSchedule(props: TimeScheduleProps) {
                                 case "holiday":
                                     return (
                                         <HolidayItem item={item} />
-                                        // <NewCourseItem
-                                        //     key={item.id}
-                                        //     item={{...item, color: item.color ?? "#52c41a"}} // Green for holiday
-                                        //     onPress={item => console.log("Holiday pressed", item)}
-                                        // />
                                     );
                                 case "course":
                                 default:
