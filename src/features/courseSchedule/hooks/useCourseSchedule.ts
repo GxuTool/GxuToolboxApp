@@ -1,23 +1,19 @@
 import {useCallback, useEffect, useState} from "react";
-import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
-import {examApi} from "@/js/jw/exam.ts";
 import {store} from "@/core/store.ts";
 import {useUserConfig} from "@/hooks/app.ts";
 import {UserInfo} from "@/type/infoQuery/base.ts";
-import {JwCore} from "@/core/auth/JwCore.ts";
+import {JwCore} from "@/core/auth/Jw/JwCore.ts";
 import {courseApi} from "@/js/jw/course.ts";
 import moment from "moment/moment";
 import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import {PhyExp} from "@/type/infoQuery/course/course.ts";
-import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 import {http} from "@/core/http.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {useTheme} from "@rneui/themed";
 import {SchoolTermValue} from "@/type/global.ts";
 import {IActivity} from "@/type/app/activity.ts";
-import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
-import {IExam} from "@/features/courseSchedule/type/schema/exam.ts";
-import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
+import {useBaseCourse} from "@/features/courseSchedule/hooks/detail/useBaseCourse.ts";
 import {useExam} from "@/features/courseSchedule/hooks/detail/useExam.ts";
 // 金工实训
 type EngTrainingExp = {
@@ -36,7 +32,7 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
     const [phyExpList, setPhyExpList] = useState<PhyExp[]>([]);
     const [attendanceData, setAttendanceData] = useState<AttendanceDataClass>();
 
-    const courseSchedule = useCourse(year, term);
+    const courseSchedule = useBaseCourse(year, term);
     const examSchedule = useExam(year, term);
 
     const getStartDay = useCallback(async () => {
@@ -57,25 +53,6 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
             updateUserConfig(userConfig);
         }
     }, [year, term]);
-
-    // const getExamList = useCallback(async () => {
-    //     const data = await examApi.getExamInfo(year, term);
-    //     if (data?.items) {
-    //         const valiData = IExam.safeParse(data.items);
-    //         setExamList(valiData.data);
-    //         await store.save({key: "examInfo", data});
-    //     }
-    // }, [year, term]);
-
-    // const getCourseSchedule = useCallback(async () => {
-    //     const data = await courseApi.getCourseSchedule(year, term);
-    //     if (data?.kbList) {
-    //         await store.save({key: "courseRes", data});
-    //         getPhyExp(data.kbList);
-    //         const valiData = ICourse.safeParse(data);
-    //         setCourseSchedule(valiData.data);
-    //     }
-    // }, [year, term]);
 
     const getPhyExp = useCallback(
         async (currentSchedule?: CourseClass[]) => {
@@ -156,9 +133,7 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
     }
 
     useEffect(() => {
-        // getExamList();
         getStartDay();
-        // getCourseSchedule();
         getTimeShift();
         getAttendanceData();
         getActivityList();

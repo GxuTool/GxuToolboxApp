@@ -55,19 +55,18 @@ export function AttendanceSystemAccountScreen() {
             <Text h2 style={style.title}>
                 设置考勤系统帐密
             </Text>
-            <Text style={style.note}>仅用于工具通过考勤系统系统获取考勤信息，凌晨请连接校园网</Text>
+            <Text style={style.note}>仅用于工具通过考勤系统获取考勤信息</Text>
             <Input
                 value={username}
                 onChangeText={v => setUsername(v)}
                 label="账号/学号"
-                placeholder="工具绑定的考勤系统账号"
                 style={style.input}
             />
             <Input
                 value={password}
                 onChangeText={v => setPassword(v)}
                 label="密码"
-                placeholder="对应账号的密码，默认为身份证后6位"
+                placeholder="默认为身份证后6位"
                 secureTextEntry={!showPwd}
                 rightIcon={
                     <Icon
@@ -136,7 +135,7 @@ const style = StyleSheet.create({
         cursor: "pointer",
     },
     input: {
-        height: 40,
+        height: 70,
     },
     image: {
         width: 95,

@@ -62,6 +62,9 @@ export const NewCourseItem = memo(({item, onPress}: NewCourseItemProps) => {
                 <Text style={[styles.text, {fontWeight: "bold"}]} numberOfLines={5}>
                     {item.title}
                 </Text>
+                <Text style={styles.text}>
+                    {item.subtitle}
+                </Text>
 
                 {!!item.location && (
                     <Text style={styles.text}>
