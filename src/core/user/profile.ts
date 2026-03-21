@@ -1,9 +1,9 @@
 import {store} from "@/core/store.ts";
-import {JwClient} from "@/core/auth/JwClient.ts";
+import {JwAuthClient} from "@/core/auth/Jw/JwAuthClient.ts";
 
 export const userProfile = {
     saveUserInfo() {
-        const info = JwClient.getUserInfo();
+        const info = JwAuthClient.getUserInfo();
         store.save({
             key: "userInfo",
             data: info,

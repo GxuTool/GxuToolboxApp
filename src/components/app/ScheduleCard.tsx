@@ -26,8 +26,8 @@ import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/Sch
 import {useUserConfig} from "@/hooks/app.ts";
 import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
-import {JwCore} from "@/core/auth/JwCore.ts";
-import {JwAuthStateMap} from "@/core/auth/JwAuth.ts";
+import {JwCore} from "@/core/auth/Jw/JwCore.ts";
+import {AuthStateMap} from "@/core/auth/auth.type.ts";
 import {useCourseSchedule} from "@/features/courseSchedule/hooks/useCourseSchedule.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
@@ -272,7 +272,7 @@ export function ScheduleCard() {
         const {status} = await JwCore.refreshToken();
 
         switch (status) {
-            case JwAuthStateMap.NoAccount:
+            case AuthStateMap.NoAccount:
                 toast.setData({
                     color: "error",
                     content: "请进入设置页面，填写教务账号并登录",
@@ -281,7 +281,7 @@ export function ScheduleCard() {
                 setLoading(false);
                 toast.close();
                 return;
-            case JwAuthStateMap.HasAccountNotAuthenticated:
+            case AuthStateMap.HasAccountNotAuthenticated:
                 if (moment().hour() < 7 || moment().hour() >= 23) {
                     toast.setData({
                         color: "error",

@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from "react";
-import {JwCore} from "@/core/auth/JwCore";
+import {JwCore} from "@/core/auth/Jw/JwCore.ts";
 
 export function useJwAccount() {
     const [username, setUsername] = useState("");

@@ -1,6 +1,6 @@
 import {useCallback, useRef, useState} from "react";
-import {JwCore} from "@/core/auth/JwCore";
-import {JwAuthState, JwAuthStateMap} from "@/core/auth/JwAuth.ts";
+import {JwCore} from "@/core/auth/Jw/JwCore.ts";
+import {AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
 
 type UiResult = {
     kind: "idle" | "success" | "error";
@@ -9,7 +9,7 @@ type UiResult = {
 };
 
 export function useJwAuth() {
-    const [authState, setAuthState] = useState<JwAuthState>(JwCore.getAuthState());
+    const [authState, setAuthState] = useState<AuthState>(JwCore.getAuthState());
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<UiResult>({kind: "idle", title: ""});
 
@@ -51,7 +51,7 @@ export function useJwAuth() {
                 const state = await JwCore.loginWithAccount({username: u, password: p});
                 setAuthState(state);
 
-                if (state.status === JwAuthStateMap.Authenticated) {
+                if (state.status === AuthStateMap.Authenticated) {
                     setResult({kind: "success", title: "登录成功", message: ""});
                     return {ok: true as const, state};
                 }

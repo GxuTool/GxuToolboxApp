@@ -83,7 +83,7 @@ export function SettingStack() {
 
             {/*  账号相关  */}
             <Stack.Screen name="personalInfo" component={PersonalInfo} options={{title: "查看个人信息"}} />
-            <Stack.Screen name="jwAccount" component={JWAccountScreen} options={{title: "教务系统账号设置"}} />
+            <Stack.Screen name="jwAccount" component={JWAccountScreen} options={{title: "登录教务系统"}} />
             <Stack.Screen name="authAccount" component={AuthAccountScreen} options={{title: "统一认证系统账号设置"}} />
             <Stack.Screen name="attendanceSystemAccount" component={AttendanceSystemAccountScreen} options={{title: "考勤系统账号设置"}} />
 

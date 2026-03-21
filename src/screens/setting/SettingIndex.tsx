@@ -155,7 +155,7 @@ export function SettingIndex() {
                 {
                     label: "软件信息",
                     type: "text",
-                    value: `CopyRight © 2025-${moment().year()} \n寰辰 <UNDERLR@foxmail.com>`,
+                    value: `CopyRight © 2025-${moment().year()} \n寰辰 <UNDERLR@foxmail.com>\n 蹑景 <nieying58@gmail.com>`,
                 },
             ],
         },

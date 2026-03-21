@@ -9,10 +9,12 @@ import {authApi} from "@/js/auth/auth.ts";
 async function getToken(username: string, password: string) {
     await userMgr.auth.storeAccount(username, password);
     ToastAndroid.show("开始尝试登录统一认证系统", ToastAndroid.SHORT);
-    const rsaData = await authApi.getPubKey();
+    await authApi.logout();
+    const rsaData = await authApi.getPublicKey();
     if (rsaData.exponent) {
         // 尝试登录
         const res = await authApi.login(username, password, rsaData.modulus, rsaData.exponent);
+        await authApi.testToken();
         if (res) {
             ToastAndroid.show("登录成功", ToastAndroid.SHORT);
         } else {
@@ -25,8 +27,6 @@ export function AuthAccountScreen() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
-    const navigation = useNavigation();
-
     async function init() {
         const account = await userMgr.auth.getAccount();
         if (!account) return;
@@ -69,14 +69,6 @@ export function AuthAccountScreen() {
                 style={style.input}
             />
             <Button onPress={() => getToken(username, password)}>登录统一认证系统</Button>
-            {/*<Button*/}
-            {/*    containerStyle={{marginTop: 10}}*/}
-            {/*    onPress={() => {*/}
-            {/*        openInJw("/xtgl/login_slogin.html")*/}
-            {/*    }}>*/}
-            {/*    打开教务登录页*/}
-            {/*</Button>*/}
-            {/*<Text style={style.note}>提示获取成功后，回到课表页进行测试，若无法正常获取课表，可能为密码错误</Text>*/}
         </View>
     );
 }

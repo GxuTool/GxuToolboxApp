@@ -5,7 +5,7 @@ import {Root} from "./src/screens/Root.tsx";
 import {useColorScheme} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";
 import {AppProvider} from "@/components/AppProvider.tsx";
-import {JwCore} from "@/core/auth/JwCore.ts";
+import {JwCore} from "@/core/auth/Jw/JwCore.ts";
 
 function App(): React.JSX.Element {
     const colorScheme = useColorScheme();

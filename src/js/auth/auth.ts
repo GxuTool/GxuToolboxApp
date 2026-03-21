@@ -7,12 +7,13 @@ import {EngTrainingTokenRes, EngTrainingTokenResData} from "@/type/api/infoQuery
 import CryptoJS from "crypto-js";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
+import {SchoolTerms} from "@/type/global.ts";
 
 export const authApi = {
     /**
      * 获取统一认证登录rsa需要的公钥
      */
-    getPubKey: async (): Promise<{
+    getPublicKey: async (): Promise<{
         exponent: string;
         modulus: string;
     }> => {
@@ -67,7 +68,7 @@ export const authApi = {
      */
     loginService: async (serviceUrl: string): Promise<AxiosResponse | void> => {
         // 获取公钥和存储中的帐密
-        const rsa = await authApi.getPubKey();
+        const rsa = await authApi.getPublicKey();
         const account = await userMgr.auth.getAccount();
         if (!account?.password || !account?.username || !rsa) return;
         // 调用登录获取对应的cookie
@@ -79,6 +80,21 @@ export const authApi = {
             serviceUrl,
         )) as AxiosResponse;
     },
+
+    /**
+     * 测试是否登录成功
+     */
+    async testToken(): Promise<boolean> {
+        const res = await http.get("http://ca.gxu.edu.cn:81/zfim/application/home/getYyfz.zf");
+        console.log(res);
+        return typeof res.data === "object";
+    },
+
+    async logout(): Promise<void> {
+        const res = await http.get("https://ca.gxu.edu.cn:8443/zfca/logout?service=http://ca.gxu.edu.cn:81/zfim/logout");
+        console.log(res);
+    },
+
 
     /**
      * 登录工程训练中心，返回请求头使用的 `Authorization` 的Token（data.token）和对应的学生码

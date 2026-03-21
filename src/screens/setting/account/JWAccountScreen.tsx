@@ -3,18 +3,18 @@ import {Button, Input, Text} from "@rneui/themed";
 import {useMemo, useState} from "react";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useWebView} from "@/hooks/app.ts";
-import {useJwAccount} from "@/core/auth/hooks/useJwAccount.ts";
-import {useJwAuth} from "@/core/auth/hooks/useJwAuth.ts";
-import {JwAuthState, JwAuthStateMap} from "@/core/auth/JwAuth.ts";
+import {useJwAccount} from "@/core/auth/Jw/hooks/useJwAccount.ts";
+import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
+import {AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
 
-function statusMeta(state: JwAuthState) {
+function statusMeta(state: AuthState) {
     switch (state.status) {
-        case JwAuthStateMap.NoAccount:
+        case AuthStateMap.NoAccount:
             return {label: "未配置账号", color: "#9CA3AF", bg: "#111827"};
-        case JwAuthStateMap.HasAccountNotAuthenticated:
+        case AuthStateMap.HasAccountNotAuthenticated:
             return {label: "已保存账号（未登录/已失效）", color: "#F59E0B", bg: "#111827"};
-        case JwAuthStateMap.Authenticated:
-            return {label: "已登录教务系统", color: "#10B981", bg: "#111827"};
+        case AuthStateMap.Authenticated:
+            return {label: "已登录", color: "#10B981", bg: "#111827"};
         default:
             return {label: "未知状态", color: "#EF4444", bg: "#111827"};
     }
@@ -46,10 +46,6 @@ export function JWAccountScreen() {
 
     return (
         <View style={style.container}>
-            <Text h2 style={style.title}>
-                设置教务帐密
-            </Text>
-            <Text style={style.note}>仅用于工具从教务系统获取信息，凌晨请连接校园网</Text>
             <View style={styles.card}>
                 <View style={styles.cardTopRow}>
                     <View style={styles.statusDotWrap}>
@@ -121,10 +117,7 @@ export function JWAccountScreen() {
                         打开教务登录页
                     </Button>
                 </View>
-
-                <Text style={styles.helperText}>
-                    提示获取成功后，回到课表页测试，若无法正常获取课表，可能为密码错误
-                </Text>
+                <Text style={style.note}>仅供工具从教务系统获取信息{"\n"}23:00 至次日 7:30 请连接校园网</Text>
             </View>
         </View>
     );

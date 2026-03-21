@@ -1,34 +1,34 @@
 import {userMgr} from "@/js/mgr/user.ts";
-import {JwClient} from "@/core/auth/JwClient.ts";
-import {JwAccount, JwAuthState, JwAuthStateMap} from "@/core/auth/JwAuth.ts";
+import {JwAuthClient} from "@/core/auth/Jw/JwAuthClient.ts";
+import {Account, AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
 
-let currentState: JwAuthState = {status: JwAuthStateMap.NoAccount};
+let currentState: AuthState = {status: AuthStateMap.NoAccount};
 
 export const JwCore = {
     async refreshToken() {
         const account = await this.loadAccount();
         if (!account) {
-            currentState = {status: JwAuthStateMap.NoAccount};
+            currentState = {status: AuthStateMap.NoAccount};
             return currentState;
         }
 
-        let ok = await JwClient.testTokenRaw();
+        let ok = await JwAuthClient.testTokenRaw();
         if (ok) {
             currentState = {
-                status: JwAuthStateMap.Authenticated,
+                status: AuthStateMap.Authenticated,
                 account,
             };
         } else {
             await this.loginWithStoredAccount();
-            ok = await JwClient.testTokenRaw();
+            ok = await JwAuthClient.testTokenRaw();
             if (ok) {
                 currentState = {
-                    status: JwAuthStateMap.Authenticated,
+                    status: AuthStateMap.Authenticated,
                     account,
                 };
             } else {
                 currentState = {
-                    status: JwAuthStateMap.HasAccountNotAuthenticated,
+                    status: AuthStateMap.HasAccountNotAuthenticated,
                     account,
                 };
             }
@@ -44,7 +44,7 @@ export const JwCore = {
         return userMgr.jw.getAccount();
     },
 
-    async saveAccount(account: JwAccount) {
+    async saveAccount(account: Account) {
         return userMgr.jw.storeAccount(account.username, account.password);
     },
 
@@ -52,31 +52,31 @@ export const JwCore = {
         return userMgr.jw.storeAccount("", "");
     },
 
-    async loginWithAccount(account: JwAccount) {
+    async loginWithAccount(account: Account) {
         const {username, password} = account;
-        const keys = await JwClient.getPublicKey();
+        const keys = await JwAuthClient.getPublicKey();
 
         let res;
 
         if (keys.modulus && keys.exponent) {
-            await JwClient.loginWithRSA(username, password, keys.modulus, keys.exponent);
-            res = await JwClient.testTokenRaw();
+            await JwAuthClient.loginWithRSA(username, password, keys.modulus, keys.exponent);
+            res = await JwAuthClient.testTokenRaw();
             if (!res) {
-                await JwClient.loginNormal(username, password);
-                res = await JwClient.testTokenRaw();
+                await JwAuthClient.loginNormal(username, password);
+                res = await JwAuthClient.testTokenRaw();
             }
         }
 
         if (res) {
-            const i: JwAuthState = {
-                status: JwAuthStateMap.Authenticated,
+            const i: AuthState = {
+                status: AuthStateMap.Authenticated,
                 account,
             };
             currentState = i;
             return i;
         } else {
-            const i: JwAuthState = {
-                status: JwAuthStateMap.HasAccountNotAuthenticated,
+            const i: AuthState = {
+                status: AuthStateMap.HasAccountNotAuthenticated,
                 account,
             };
             currentState = i;
@@ -84,10 +84,10 @@ export const JwCore = {
         }
     },
 
-    async loginWithStoredAccount(): Promise<JwAuthState> {
+    async loginWithStoredAccount(): Promise<AuthState> {
         const account = await this.loadAccount();
         if (!account) {
-            currentState = {status: JwAuthStateMap.NoAccount};
+            currentState = {status: AuthStateMap.NoAccount};
             return currentState;
         }
         return await this.loginWithAccount(account);

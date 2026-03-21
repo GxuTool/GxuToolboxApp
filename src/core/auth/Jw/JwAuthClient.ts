@@ -6,7 +6,7 @@ import CookieManager from "@preeternal/react-native-cookie-manager";
 import {UserInfo} from "@/type/infoQuery/base.ts";
 import {personalInfoParser} from "@/js/HTMLparser/personalInfoParser.ts";
 
-export const JwClient = {
+export const JwAuthClient = {
     async getPublicKey(): Promise<{modulus: string; exponent: string}> {
         await CookieManager.clearAll();
         const res = await http.get(urlWithParams("/xtgl/login_getPublicKey.html", {time: Date.now()}));

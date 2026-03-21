@@ -14,8 +14,8 @@ import {createDefaultReq, fillReq} from "@/features/evaluation/utils/reqBuilder.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useBatchProcessor} from "@/features/evaluation/hook/useBatchProcessor.ts";
 import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
-import {useJwAuth} from "@/core/auth/hooks/useJwAuth.ts";
-import {JwAuthStateMap} from "@/core/auth/JwAuth.ts";
+import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
+import {AuthStateMap} from "@/core/auth/auth.type.ts";
 
 const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
     const progressPercent = Math.round(progress * 100);
@@ -179,7 +179,7 @@ export function EvaluationOverview() {
 
     async function init() {
         try {
-            if (authState.status !== JwAuthStateMap.Authenticated) {
+            if (authState.status !== AuthStateMap.Authenticated) {
                 Alert.alert("需要登录", "此操作需要登录教务系统", [
                     {text: "知道了", onPress: () => navigation.goBack()},
                 ]);
