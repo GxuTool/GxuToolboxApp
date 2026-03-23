@@ -26,7 +26,6 @@ import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/Sch
 import {useUserConfig} from "@/hooks/app.ts";
 import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
-import {JwCore} from "@/core/auth/Jw/JwCore.ts";
 import {AuthStateMap} from "@/core/auth/auth.type.ts";
 import {useCourseSchedule} from "@/features/courseSchedule/hooks/useCourseSchedule.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
@@ -38,6 +37,7 @@ import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
 import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
 import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
 import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
+import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 
 /**
  * 课表
@@ -269,7 +269,7 @@ export function ScheduleCard() {
         const toast = createToast(`检测登录状态 [0/${totalTaskCount}]`, "刷新日程表");
         toast.setProgress(0);
 
-        const {status} = await JwCore.refreshToken();
+        const {status} = await JwMachine.refreshToken();
 
         switch (status) {
             case AuthStateMap.NoAccount:

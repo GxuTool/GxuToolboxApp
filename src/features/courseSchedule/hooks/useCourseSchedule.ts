@@ -2,7 +2,6 @@ import {useCallback, useEffect, useState} from "react";
 import {store} from "@/core/store.ts";
 import {useUserConfig} from "@/hooks/app.ts";
 import {UserInfo} from "@/type/infoQuery/base.ts";
-import {JwCore} from "@/core/auth/Jw/JwCore.ts";
 import {courseApi} from "@/js/jw/course.ts";
 import moment from "moment/moment";
 import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
