@@ -6,6 +6,7 @@ import {store} from "@/core/store.ts";
 import {UserInfo} from "@/type/infoQuery/base.ts";
 import {JwCore} from "@/core/auth/Jw/JwCore.ts";
 import {courseApi} from "@/js/jw/course.ts";
+import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 
 export function useStartDay(year: number, term: SchoolTermValue) {
     const {userConfig, updateUserConfig} = useUserConfig();
@@ -17,7 +18,7 @@ export function useStartDay(year: number, term: SchoolTermValue) {
                 key: "userInfo",
             })
             .catch(console.warn);
-        const account = await JwCore.loadAccount();
+        const account = await JwMachine.loadAccount();
         if (!userInfo || !account) return;
 
         const data = await courseApi.getClassCourseScheduleNew(year, term, account.username.slice(2, 8));

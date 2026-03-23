@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {JwCore} from "@/core/auth/Jw/JwCore.ts";
+import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 
 export function useJwAccount() {
     const [username, setUsername] = useState("");
@@ -11,7 +12,7 @@ export function useJwAccount() {
         mountedRef.current = true;
         (async () => {
             try {
-                const account = await JwCore.loadAccount();
+                const account = await JwMachine.loadAccount();
                 if (!mountedRef.current) return;
                 if (account) {
                     setUsername(account.username ?? "");
@@ -30,7 +31,7 @@ export function useJwAccount() {
     const saveAccount = useCallback(async (u?: string, p?: string) => {
         const nextUsername = (u ?? username).trim();
         const nextPassword = (p ?? password).trim();
-        await JwCore.saveAccount({username: nextUsername, password: nextPassword});
+        await JwMachine.saveAccount({username: nextUsername, password: nextPassword});
         setUsername(nextUsername);
         setPassword(nextPassword);
     }, [username, password]);

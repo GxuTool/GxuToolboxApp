@@ -3,23 +3,17 @@ import {Button, Input, Text} from "@rneui/themed";
 import {useEffect, useState} from "react";
 import {userMgr} from "@/js/mgr/user.ts";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {useNavigation} from "@react-navigation/native";
-import {authApi} from "@/js/auth/auth.ts";
+import {unifiedMachine} from "@/core/auth/unified/unifiedMachine.ts";
+import {AuthStateMap} from "@/core/auth/auth.type.ts";
 
 async function getToken(username: string, password: string) {
-    await userMgr.auth.storeAccount(username, password);
+    await unifiedMachine.saveAccount({username, password});
     ToastAndroid.show("开始尝试登录统一认证系统", ToastAndroid.SHORT);
-    await authApi.logout();
-    const rsaData = await authApi.getPublicKey();
-    if (rsaData.exponent) {
-        // 尝试登录
-        const res = await authApi.login(username, password, rsaData.modulus, rsaData.exponent);
-        await authApi.testToken();
-        if (res) {
-            ToastAndroid.show("登录成功", ToastAndroid.SHORT);
-        } else {
-            ToastAndroid.show("登录失败，请检查帐密是否正确或者检查是否连接校园网", ToastAndroid.SHORT);
-        }
+    const state = await unifiedMachine.loginWithAccount({username, password});
+    if (state.status === AuthStateMap.Authenticated) {
+        ToastAndroid.show("登录成功", ToastAndroid.SHORT);
+    } else {
+        ToastAndroid.show("登录失败，请检查帐密是否正确或者检查是否连接校园网", ToastAndroid.SHORT);
     }
 }
 
@@ -27,8 +21,9 @@ export function AuthAccountScreen() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
+
     async function init() {
-        const account = await userMgr.auth.getAccount();
+        const account = await unifiedMachine.loadAccount();
         if (!account) return;
         setUsername(account.username);
         setPassword(account.password);

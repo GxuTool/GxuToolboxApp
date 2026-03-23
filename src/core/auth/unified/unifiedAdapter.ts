@@ -3,9 +3,10 @@ import {Account} from "@/core/auth/auth.type.ts";
 import {userMgr} from "@/js/mgr/user.ts";
 import {authApi} from "@/js/auth/auth.ts";
 
-const unifiedAdapter: AuthAdapter<Account> = {
-    clearAccount(): Promise<unknown> {
-        return Promise.resolve(undefined);
+export const unifiedAdapter: AuthAdapter<Account> = {
+    async clearAccount(): Promise<unknown> {
+        await authApi.logout();
+        return userMgr.auth.storeAccount("", "");
     },
     async loginWithAccount(account: Account): Promise<boolean> {
         const {username, password} = account;

@@ -15,6 +15,7 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {IActivity} from "@/type/app/activity.ts";
 import {useBaseCourse} from "@/features/courseSchedule/hooks/detail/useBaseCourse.ts";
 import {useExam} from "@/features/courseSchedule/hooks/detail/useExam.ts";
+import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 // 金工实训
 type EngTrainingExp = {
     date: string;
@@ -41,7 +42,7 @@ export function useCourseSchedule(year: number, term: SchoolTermValue) {
                 key: "userInfo",
             })
             .catch(console.warn);
-        const account = await JwCore.loadAccount();
+        const account = await JwMachine.loadAccount();
         if (!userInfo || !account) return;
 
         const data = await courseApi.getClassCourseScheduleNew(year, term, account.username.slice(2, 8));

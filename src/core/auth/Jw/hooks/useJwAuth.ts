@@ -1,6 +1,7 @@
 import {useCallback, useRef, useState} from "react";
-import {JwCore} from "@/core/auth/Jw/JwCore.ts";
-import {AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
+import {Account, AuthStateMap} from "@/core/auth/auth.type.ts";
+import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
+import {AuthState} from "@/core/auth/createAuthCore.ts";
 
 type UiResult = {
     kind: "idle" | "success" | "error";
@@ -9,7 +10,7 @@ type UiResult = {
 };
 
 export function useJwAuth() {
-    const [authState, setAuthState] = useState<AuthState>(JwCore.getAuthState());
+    const [authState, setAuthState] = useState<AuthState<Account>>(JwMachine.getState());
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<UiResult>({kind: "idle", title: ""});
 
@@ -27,7 +28,7 @@ export function useJwAuth() {
 
             if (!u || !p) {
                 setResult({kind: "error", title: "输入无效", message: "账号或密码为空"});
-                return {ok: false as const, state: JwCore.getAuthState()};
+                return {ok: false as const, state: JwMachine.getState()};
             }
 
             const now = Date.now();
@@ -48,7 +49,7 @@ export function useJwAuth() {
             clearResult();
 
             try {
-                const state = await JwCore.loginWithAccount({username: u, password: p});
+                const state = await JwMachine.loginWithAccount({username: u, password: p});
                 setAuthState(state);
 
                 if (state.status === AuthStateMap.Authenticated) {
@@ -68,7 +69,7 @@ export function useJwAuth() {
                     title: "发生异常",
                     message: e?.message ? String(e.message) : "未知错误",
                 });
-                const state = JwCore.getAuthState();
+                const state = JwMachine.getState();
                 setAuthState(state);
                 return {ok: false as const, state};
             } finally {

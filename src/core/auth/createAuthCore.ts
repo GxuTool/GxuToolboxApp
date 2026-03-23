@@ -1,8 +1,9 @@
-export type AuthState<A> =
-    | {status: "no_account"}
-    | {status: "has_account_not_authenticated"; account: A}
-    | {status: "authenticated"; account: A};
+import {AuthStateMap} from "@/core/auth/auth.type.ts";
 
+export type AuthState<A> =
+    | {status: AuthStateMap.NoAccount}
+    | {status: AuthStateMap.HasAccountNotAuthenticated; account: A}
+    | {status: AuthStateMap.Authenticated; account: A};
 export interface AuthAdapter<A> {
     loadAccount: () => Promise<A | null>;
     saveAccount: (account: A) => Promise<unknown>;
@@ -22,28 +23,28 @@ export interface AuthMachine<A> {
 }
 
 export function createAuthCore<A>(adapter: AuthAdapter<A>): AuthMachine<A> {
-    let currentState: AuthState<A> = {status: "no_account"};
+    let currentState: AuthState<A> = {status: AuthStateMap.NoAccount};
 
     async function refreshToken() {
         const account = await adapter.loadAccount();
         if (!account) {
-            currentState = {status: "no_account"};
+            currentState = {status: AuthStateMap.NoAccount};
             return currentState;
         }
 
         const ok = await adapter.testToken();
         if (ok) {
-            currentState = {status: "authenticated", account};
+            currentState = {status: AuthStateMap.Authenticated, account};
             return currentState;
         }
 
         const reLoginOk = await adapter.loginWithAccount(account);
         if (reLoginOk) {
-            currentState = {status: "authenticated", account};
+            currentState = {status: AuthStateMap.Authenticated, account};
             return currentState;
         }
 
-        currentState = {status: "has_account_not_authenticated", account};
+        currentState = {status: AuthStateMap.HasAccountNotAuthenticated, account};
         return currentState;
     }
 
@@ -66,15 +67,15 @@ export function createAuthCore<A>(adapter: AuthAdapter<A>): AuthMachine<A> {
     async function loginWithAccount(account: A) {
         const ok = await adapter.loginWithAccount(account);
         currentState = ok
-            ? {status: "authenticated", account}
-            : {status: "has_account_not_authenticated", account};
+            ? {status: AuthStateMap.Authenticated, account}
+            : {status: AuthStateMap.HasAccountNotAuthenticated, account};
         return currentState;
     }
 
     async function loginWithStoredAccount() {
         const account = await adapter.loadAccount();
         if (!account) {
-            currentState = {status: "no_account"};
+            currentState = {status: AuthStateMap.NoAccount};
             return currentState;
         }
         return loginWithAccount(account);
