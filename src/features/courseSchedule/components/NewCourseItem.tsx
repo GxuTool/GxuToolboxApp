@@ -7,6 +7,8 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
+import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
+import {AttendanceStateIcon} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
 
 interface NewCourseItemProps {
     item: ScheduleTableItem;
@@ -60,11 +62,15 @@ export const NewCourseItem = memo(({item, onPress}: NewCourseItemProps) => {
         <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={userConfig.theme.ripple}>
             <Flex direction="column" gap={2} style={{padding: 4, height: "100%", overflow: "hidden"}} align="center">
                 <Text style={[styles.text, {fontWeight: "bold"}]} numberOfLines={5}>
+                    {item.status && (
+                        <AttendanceStateIcon
+                            defaultColor={styles.text.color}
+                            state={item.status ?? AST.AttendanceState.NotStarted}
+                        />
+                    )}
                     {item.title}
                 </Text>
-                <Text style={styles.text}>
-                    {item.subtitle}
-                </Text>
+                <Text style={styles.text}>{item.subtitle}</Text>
 
                 {!!item.location && (
                     <Text style={styles.text}>

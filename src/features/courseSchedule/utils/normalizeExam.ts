@@ -21,8 +21,6 @@ const timeSpanList = [
 export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTableItem[] {
     const items: ScheduleTableItem[] = [];
 
-    console.log(startDay);
-
     function timeToTimeSpan(time: string, endTime: boolean = false): number {
         let res = -1;
         if (endTime) {

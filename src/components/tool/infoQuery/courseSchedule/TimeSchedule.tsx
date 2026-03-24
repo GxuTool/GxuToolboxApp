@@ -34,6 +34,7 @@ export interface ScheduleTableItem {
     color?: string;
     kind?: string;
     seat?: string;
+    status?: number;
 }
 
 export interface CourseScheduleTableProps<T> {
@@ -286,9 +287,6 @@ export function TimeSchedule(props: TimeScheduleProps) {
                             }
                             }
                         )}
-
-
-
                         {currentDayItemList.map(item => props.itemRender?.(item, props.onItemPress))}
                     </View>
                 );
