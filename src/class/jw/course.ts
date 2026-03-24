@@ -32,7 +32,7 @@ export class CourseScheduleClass extends BaseClass<CourseScheduleQueryRes> imple
 
         this.kbList.forEach(course => {
             if (course.getWeeksList.includes(week)) {
-                res[parseInt(course.xqj, 10) - 1].push(course);
+                res[course.weekday].push(course);
             }
         });
         return res;
@@ -180,11 +180,25 @@ export class CourseClass extends BaseClass<Course> implements Course {
             if (!/[单双]/.test(weekSpanStr)) {
                 weekList.forEach(v => res.add(v));
             } else {
-                weekList
-                    .filter(v => v % 2 === (/单/.test(weekSpanStr) ? 1 : 0))
-                    .forEach(v => res.add(v));
+                weekList.filter(v => v % 2 === (/单/.test(weekSpanStr) ? 1 : 0)).forEach(v => res.add(v));
             }
         });
         return Array.from(res);
+    }
+    get weekday() {
+        return parseInt(this.xqj, 10);
+    }
+
+    atDay(day: moment.MomentInput, startDay: moment.MomentInput) {
+        const dateMoment = moment(day);
+        const week = Math.ceil(moment.duration(dateMoment.diff(startDay)).asWeeks()) + 1;
+        const weekday = dateMoment.weekday();
+        return weekday === this.weekday && this.getWeeksList.includes(week);
+    }
+
+    atDayWithWeek(day: moment.MomentInput, week: number) {
+        const dateMoment = moment(day);
+        const weekday = dateMoment.weekday();
+        return weekday === this.weekday && this.getWeeksList.includes(week);
     }
 }

@@ -13,7 +13,6 @@ interface Props {
     style?: ViewStyle;
     course: Course;
     attendanceState?: AST.AttendanceState;
-    index: number;
     onCoursePress?: (course: Course) => void;
 }
 
@@ -21,7 +20,7 @@ export function CourseItem(props: Props) {
     const {userConfig} = useUserConfig();
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
-    const {course, index} = props;
+    const {course} = props;
     const span = parseInt(course.jcs.split("-")[1], 10) - parseInt(course.jcs.split("-")[0], 10) + 1;
     const y = +course.jcs.split("-")[0] - 1;
     const itemStyle = useMemo(() => {

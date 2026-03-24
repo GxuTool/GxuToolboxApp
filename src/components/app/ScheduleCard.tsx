@@ -14,7 +14,7 @@ import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/Cour
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import {ExamInfoQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
 import {courseApi} from "@/js/jw/course.ts";
-import {CourseScheduleClass} from "@/class/jw/course.ts";
+import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
 import {examApi} from "@/js/jw/exam.ts";
 import {useNavigation} from "@react-navigation/native";
 import {IActivity} from "@/type/app/activity.ts";
@@ -34,6 +34,10 @@ import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/T
 import {CourseScheduleExamItem} from "../tool/infoQuery/examInfo/CourseScheduleExamItem.tsx";
 import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
 import {EngTrainingItem} from "@/components/tool/infoQuery/EngTraining/EngTrainingItem.tsx";
+import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
+import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
+import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
+import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
 
 /**
  * 课表
@@ -330,56 +334,70 @@ export function ScheduleCard() {
         init();
     }, [year, term]);
 
-    const itemList: TimeScheduleItemData[] = [
-        // {
-        //     data: courseSchedule?.kbList,
-        //     itemRender(item) {
-        //         return <CourseScheduleExamItem examInfo={item} onPress={() => {}} />;
-        //     },
-        // } as TimeScheduleItemData<CourseClass>,
-        {
-            data: examList,
-            isItemShow(item, day) {
-                return moment(item.kssj.replace(/\(.*?\)/, "")).isSame(day, "d");
-            },
-            itemRender(item) {
-                return <CourseScheduleExamItem examInfo={item} onPress={() => {}} />;
-            },
-        } as TimeScheduleItemData<ExamInfo>,
-        {
-            data: activityList,
-            isItemShow(item, day, week) {
-                return (
-                    (item as IActivity).weekday === day.weekday() &&
-                    week >= (item as IActivity).weekSpan[0] &&
-                    week <= (item as IActivity).weekSpan[1]
-                );
-            },
-            itemRender(item) {
-                return <ActivityItem item={item} onPress={() => {}} />;
-            },
-        } as TimeScheduleItemData<IActivity>,
-        {
-            data: engTrainingExpList,
-            isItemShow(item, day, week) {
-                return moment(item.date, "MM月D日").isSame(day, "d");
-            },
-            itemRender(item) {
-                return <EngTrainingItem item={item} />;
-            },
-        } as TimeScheduleItemData<EngTrainingExp>,
-    ];
-    // // 自定义元素详情渲染
-    // const itemDetailRender: ScheduleViewType["itemDetailRender"] = item => {
-    //     switch (true) {
-    //         case item.hasOwnProperty("xh_id"):
-    //             return <ExamDetail examInfo={item as ExamInfo} />;
-    //         case item.hasOwnProperty("weekSpan"):
-    //             return <ActivityDetail activity={item as IActivity} />;
-    //         default:
-    //             return <></>;
-    //     }
-    // };
+    type detailType = "course" | "exam" | "activity";
+    const [itemDetailShow, setItemDetailShow] = useState(false);
+    const [itemDetail, setItemDetail] = useState<{type: detailType; data: any}>();
+    const itemList: TimeScheduleItemData[] = useMemo(
+        () => [
+            {
+                data: courseSchedule?.kbList ?? [],
+                isItemShow(item, day, week) {
+                    return item.atDayWithWeek(day, week);
+                },
+                itemRender: item => (
+                    <CourseItem
+                        course={item}
+                        onCoursePress={() => {
+                            setItemDetailShow(true);
+                            setItemDetail({type: "course", data: item});
+                        }}
+                    />
+                ),
+            } as TimeScheduleItemData<CourseClass>,
+            {
+                data: examList,
+                isItemShow(item, day) {
+                    return moment(item.kssj.replace(/\(.*?\)/, "")).isSame(day, "d");
+                },
+                itemRender: item => (
+                    <CourseScheduleExamItem
+                        examInfo={item}
+                        onPress={() => {
+                            setItemDetailShow(true);
+                            setItemDetail({type: "exam", data: item});
+                        }}
+                    />
+                ),
+            } as TimeScheduleItemData<ExamInfo>,
+            {
+                data: activityList,
+                isItemShow(item, day, week) {
+                    return (
+                        (item as IActivity).weekday === day.weekday() &&
+                        week >= (item as IActivity).weekSpan[0] &&
+                        week <= (item as IActivity).weekSpan[1]
+                    );
+                },
+                itemRender: item => (
+                    <ActivityItem
+                        item={item}
+                        onPress={() => {
+                            setItemDetailShow(true);
+                            setItemDetail({type: "activity", data: item});
+                        }}
+                    />
+                ),
+            } as TimeScheduleItemData<IActivity>,
+            {
+                data: engTrainingExpList,
+                isItemShow(item, day, week) {
+                    return moment(item.date, "MM月D日").isSame(day, "d");
+                },
+                itemRender: item => <EngTrainingItem item={item} />,
+            } as TimeScheduleItemData<EngTrainingExp>,
+        ],
+        [courseSchedule?.kbList, examList, activityList, engTrainingExpList],
+    );
 
     return (
         <View>
@@ -438,14 +456,19 @@ export function ScheduleCard() {
                 </Flex>
             </Flex>
             <Divider />
-            <TimeScheduleView
-                showDate
-                showTimeSpanHighlight
-                showDayHighlight
-                startDay={startDay}
-                pageView={pagerView}
-                itemList={itemList}
-            />
+            {useMemo(
+                () => (
+                    <TimeScheduleView
+                        showDate
+                        showTimeSpanHighlight
+                        showDayHighlight
+                        startDay={startDay}
+                        pageView={pagerView}
+                        itemList={itemList}
+                    />
+                ),
+                [startDay, itemList],
+            )}
             {courseSchedule?.sjkList && (
                 <>
                     <Divider />
@@ -453,6 +476,27 @@ export function ScheduleCard() {
                 </>
             )}
             {/* 课表卡片设置 */}
+            <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
+                <View
+                    style={{
+                        backgroundColor: theme.colors.background,
+                        borderTopLeftRadius: 8,
+                        borderTopRightRadius: 8,
+                        borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
+                        borderWidth: 1,
+                        padding: "2.5%",
+                    }}>
+                    {useMemo(
+                        () =>
+                            ({
+                                activity: <ActivityDetail activity={itemDetail?.data} />,
+                                course: <CourseDetail course={itemDetail?.data} />,
+                                exam: <ExamDetail examInfo={itemDetail?.data} />,
+                            })[itemDetail?.type ?? "course"],
+                        [itemDetail],
+                    )}
+                </View>
+            </BottomSheet>
             <BottomSheet
                 isVisible={courseScheduleSettingVisible}
                 onBackdropPress={() => setCourseScheduleSettingVisible(false)}>
