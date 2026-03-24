@@ -256,7 +256,9 @@ export function ClassCourseSchedule() {
                         <TimeScheduleView
                             itemList={[
                                 {
-                                    data: new CourseScheduleClass(classScheduleApiRes).kbList,
+                                    data: classScheduleApiRes
+                                        ? new CourseScheduleClass(classScheduleApiRes).kbList
+                                        : [],
                                     isItemShow(item, day, week) {
                                         return item.atDayWithWeek(day, week);
                                     },

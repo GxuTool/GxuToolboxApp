@@ -147,7 +147,7 @@ export function CourseScheduleQuery() {
                     pageView={pageView}
                     itemList={[
                         {
-                            data: new CourseScheduleClass(courseScheduleApiRes).kbList,
+                            data: courseScheduleApiRes ? new CourseScheduleClass(courseScheduleApiRes).kbList : [],
                             isItemShow(item, day, week) {
                                 return item.atDayWithWeek(day, week);
                             },
