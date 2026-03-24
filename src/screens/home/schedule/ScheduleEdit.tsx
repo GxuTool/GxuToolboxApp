@@ -15,6 +15,9 @@ import {Picker} from "@react-native-picker/picker";
 import {ColorPicker} from "@/components/un-ui/ColorPicker.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
+import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
+import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
+import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
 
 export function ScheduleEdit() {
     const {userConfig, updateUserConfig} = useUserConfig();
@@ -131,6 +134,9 @@ export function ScheduleEdit() {
         },
     });
 
+    const [itemDetailShow, setItemDetailShow] = useState(false);
+    const [itemDetail, setItemDetail] = useState<IActivity>();
+
     return (
         <ScrollView contentContainerStyle={{padding: "5%"}}>
             <Flex gap={10} direction="column" align="flex-start">
@@ -160,7 +166,25 @@ export function ScheduleEdit() {
                         onValueChange={v => pageView.setPage(v - 1)}
                     />
                 </Flex>
-                <TimeScheduleView pageView={pageView} itemList={[]} />
+                <TimeScheduleView
+                    pageView={pageView}
+                    itemList={[
+                        {
+                            data: activityList,
+                            isItemShow: (item, day, week) =>
+                                item.weekday === day.weekday() && week >= item.weekSpan[0] && week <= item.weekSpan[1],
+                            itemRender: item => (
+                                <ActivityItem
+                                    item={item}
+                                    onPress={() => {
+                                        setItemDetailShow(true);
+                                        setItemDetail(item);
+                                    }}
+                                />
+                            ),
+                        } as TimeScheduleItemData<IActivity>,
+                    ]}
+                />
                 <Divider />
                 <Flex justify="space-between">
                     <Text h4>日程列表</Text>
@@ -339,6 +363,19 @@ export function ScheduleEdit() {
                         }}
                     />
                 </Flex>
+            </BottomSheet>
+            <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
+                <View
+                    style={{
+                        backgroundColor: theme.colors.background,
+                        borderTopLeftRadius: 8,
+                        borderTopRightRadius: 8,
+                        borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
+                        borderWidth: 1,
+                        padding: "2.5%",
+                    }}>
+                    <ActivityDetail activity={itemDetail} />,
+                </View>
             </BottomSheet>
         </ScrollView>
     );
