@@ -486,15 +486,13 @@ export function ScheduleCard() {
                         borderWidth: 1,
                         padding: "2.5%",
                     }}>
-                    {useMemo(
-                        () =>
-                            ({
-                                activity: <ActivityDetail activity={itemDetail?.data} />,
-                                course: <CourseDetail course={itemDetail?.data} />,
-                                exam: <ExamDetail examInfo={itemDetail?.data} />,
-                            })[itemDetail?.type ?? "course"],
-                        [itemDetail],
-                    )}
+                    {
+                        {
+                            activity: <ActivityDetail activity={itemDetail?.data} />,
+                            course: <CourseDetail course={itemDetail?.data} />,
+                            exam: <ExamDetail examInfo={itemDetail?.data} />,
+                        }[itemDetail?.type ?? "course"]
+                    }
                 </View>
             </BottomSheet>
             <BottomSheet
