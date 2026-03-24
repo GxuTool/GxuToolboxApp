@@ -68,6 +68,9 @@ export const NewCourseItem = memo(({item, onPress}: NewCourseItemProps) => {
                             state={item.status ?? AST.AttendanceState.NotStarted}
                         />
                     )}
+                    {item.isShift && (
+                        <Text style={{color: theme.colors.warning, fontSize: 12, fontWeight: "bold"}}>(调) </Text>
+                    )}
                     {item.title}
                 </Text>
                 <Text style={styles.text}>{item.subtitle}</Text>

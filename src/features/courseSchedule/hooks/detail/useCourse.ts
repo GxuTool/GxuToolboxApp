@@ -5,10 +5,12 @@ import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {useMemo} from "react";
 import {useAttendance} from "@/features/courseSchedule/hooks/detail/useAttendance.ts";
 import {Account, AuthState} from "@/core/auth/auth.type.ts";
+import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 
 export function useCourse(year: number, term: SchoolTermValue): ScheduleTableItem[] {
     const baseCourse = useBaseCourse(year, term) || [];
     const phyExpList = usePhyExp(year, term) || [];
+    const {applyShift} = useShift(year, term);
     const {
         status,
         attendanceList,
@@ -28,7 +30,7 @@ export function useCourse(year: number, term: SchoolTermValue): ScheduleTableIte
             attendanceList.map(item => [`${item.week}-${item.day}-${item.begin}-${item.end}`, item]),
         );
 
-        return baseCourse.map(course => {
+        const enriched = baseCourse.map(course => {
             let enrichedCourse = {...course};
             const searchKey = `${course.week}-${course.day}-${course.begin}-${course.end}`;
             // PART 1: 替换物理实验
@@ -53,5 +55,9 @@ export function useCourse(year: number, term: SchoolTermValue): ScheduleTableIte
 
             return enrichedCourse;
         });
-    }, [baseCourse, phyExpList]);
+
+        // PART 3: 加入调课数据
+        return applyShift(enriched);
+
+    }, [baseCourse, phyExpList,attendanceList,applyShift]);
 }

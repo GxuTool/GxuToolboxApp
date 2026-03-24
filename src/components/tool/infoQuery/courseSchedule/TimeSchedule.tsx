@@ -35,6 +35,7 @@ export interface ScheduleTableItem {
     kind?: string;
     seat?: string;
     status?: number;
+    isShift?: boolean;
 }
 
 export interface CourseScheduleTableProps<T> {
