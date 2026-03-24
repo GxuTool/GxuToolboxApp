@@ -8,7 +8,6 @@ import {infoQuery} from "@/js/jw/infoQuery.ts";
 import {Class, UserInfo} from "@/type/infoQuery/base.ts";
 import {CourseSchedule} from "@/type/infoQuery/course/course.ts";
 import {ClassScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
-import {CourseScheduleView} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleView.tsx";
 import {usePagerView} from "react-native-pager-view";
 import {PracticalCourseList} from "@/components/tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
@@ -16,9 +15,9 @@ import {UnPicker} from "@/components/un-ui/UnPicker.tsx";
 import {Picker} from "@react-native-picker/picker";
 import {courseApi} from "@/js/jw/course.ts";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
-import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {useSchoolTerm} from "@/hooks/jw.ts";
 import {useWebView} from "@/hooks/app.ts";
+import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 
 export function ClassCourseSchedule() {
     const {openInJw} = useWebView();
@@ -245,10 +244,9 @@ export function ClassCourseSchedule() {
                                 onValueChange={v => pageView.setPage(v - 1)}
                             />
                         </Flex>
-                        <CourseScheduleView
+                        <TimeScheduleView
                             startDay={classScheduleApiRes.weekNum[0]?.rq?.split("/")[0]}
                             pageView={pageView}
-                            courseSchedule={new CourseScheduleClass(classScheduleApiRes)}
                         />
                         {classScheduleApiRes?.sjkList && (
                             <>

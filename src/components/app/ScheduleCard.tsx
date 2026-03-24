@@ -2,34 +2,24 @@ import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
 import {Pressable, StyleSheet, ToastAndroid, View} from "react-native";
 import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {PracticalCourseList} from "../tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import moment from "moment";
-import {Schools, SchoolTermValue} from "@/type/global.ts";
+import {SchoolTermValue} from "@/type/global.ts";
 import {Color} from "@/shared/color.ts";
 import {usePagerView} from "react-native-pager-view";
 import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/CourseCardSetting.tsx";
-import {
-    CourseScheduleView,
-    CourseScheduleViewProps,
-} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleView.tsx";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import {ExamInfoQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
 import {courseApi} from "@/js/jw/course.ts";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {examApi} from "@/js/jw/exam.ts";
-import {UserInfo} from "@/type/infoQuery/base.ts";
 import {useNavigation} from "@react-navigation/native";
-import {CourseScheduleExamItem} from "@/components/tool/infoQuery/examInfo/CourseScheduleExamItem.tsx";
-import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
 import {IActivity} from "@/type/app/activity.ts";
-import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
-import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
 import {PhyExp} from "@/type/infoQuery/course/course.ts";
 import {http} from "@/core/http.ts";
-import {EngTrainingItem} from "@/components/tool/infoQuery/EngTraining/EngTrainingItem.tsx";
 import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
@@ -39,6 +29,11 @@ import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
 import {JwCore} from "@/core/auth/JwCore.ts";
 import {JwAuthStateMap} from "@/core/auth/JwAuth.ts";
 import {useCourseSchedule} from "@/features/courseSchedule/hooks/useCourseSchedule.ts";
+import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
+import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
+import {CourseScheduleExamItem} from "../tool/infoQuery/examInfo/CourseScheduleExamItem.tsx";
+import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
+import {EngTrainingItem} from "@/components/tool/infoQuery/EngTraining/EngTrainingItem.tsx";
 
 /**
  * 课表
@@ -54,7 +49,7 @@ export function ScheduleCard() {
 
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
-    const {startDay} = useCourseSchedule(year,term);
+    const {startDay} = useCourseSchedule(year, term);
 
     const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
     // const startDay = moment(userConfig.jw.startDay);
@@ -63,7 +58,6 @@ export function ScheduleCard() {
 
     const [courseScheduleSettingVisible, setCourseScheduleSettingVisible] = useState(false);
     const [scheduleShareVisible, setScheduleShareVisible] = useState(false);
-
 
     const style = useMemo(
         () =>
@@ -336,50 +330,56 @@ export function ScheduleCard() {
         init();
     }, [year, term]);
 
-    type ExtendItemType = ExamInfo | IActivity | EngTrainingExp;
-    type ScheduleViewType = CourseScheduleViewProps<ExtendItemType>;
-    const itemList = [...examList, ...activityList, ...engTrainingExpList];
-    // 自定义元素渲染
-    const itemRender: ScheduleViewType["itemRender"] = (item, onPressHook) => {
-        switch (true) {
-            case (item as EngTrainingExp).type === "engTrainingExp":
-                return <EngTrainingItem item={item as EngTrainingExp} />;
-            case item.hasOwnProperty("xh_id"):
-                return <CourseScheduleExamItem examInfo={item as ExamInfo} onPress={onPressHook} />;
-            case item.hasOwnProperty("weekSpan"):
-                return <ActivityItem item={item as IActivity} onPress={onPressHook} />;
-            default:
-                return <></>;
-        }
-    };
-    // 自定义元素详情渲染
-    const itemDetailRender: ScheduleViewType["itemDetailRender"] = item => {
-        switch (true) {
-            case item.hasOwnProperty("xh_id"):
-                return <ExamDetail examInfo={item as ExamInfo} />;
-            case item.hasOwnProperty("weekSpan"):
-                return <ActivityDetail activity={item as IActivity} />;
-            default:
-                return <></>;
-        }
-    };
-    // 判断元素是否显示
-    const isItemShow: ScheduleViewType["isItemShow"] = (item, day, week) => {
-        switch (true) {
-            case (item as EngTrainingExp).type === "engTrainingExp":
-                return moment((item as EngTrainingExp).date, "MM月D日").isSame(day, "d");
-            case item.hasOwnProperty("xh_id"):
-                return moment((item as ExamInfo).kssj.replace(/\(.*?\)/, "")).isSame(day, "d");
-            case item.hasOwnProperty("weekSpan"):
+    const itemList: TimeScheduleItemData[] = [
+        // {
+        //     data: courseSchedule?.kbList,
+        //     itemRender(item) {
+        //         return <CourseScheduleExamItem examInfo={item} onPress={() => {}} />;
+        //     },
+        // } as TimeScheduleItemData<CourseClass>,
+        {
+            data: examList,
+            isItemShow(item, day) {
+                return moment(item.kssj.replace(/\(.*?\)/, "")).isSame(day, "d");
+            },
+            itemRender(item) {
+                return <CourseScheduleExamItem examInfo={item} onPress={() => {}} />;
+            },
+        } as TimeScheduleItemData<ExamInfo>,
+        {
+            data: activityList,
+            isItemShow(item, day, week) {
                 return (
                     (item as IActivity).weekday === day.weekday() &&
                     week >= (item as IActivity).weekSpan[0] &&
                     week <= (item as IActivity).weekSpan[1]
                 );
-            default:
-                return false;
-        }
-    };
+            },
+            itemRender(item) {
+                return <ActivityItem item={item} onPress={() => {}} />;
+            },
+        } as TimeScheduleItemData<IActivity>,
+        {
+            data: engTrainingExpList,
+            isItemShow(item, day, week) {
+                return moment(item.date, "MM月D日").isSame(day, "d");
+            },
+            itemRender(item) {
+                return <EngTrainingItem item={item} />;
+            },
+        } as TimeScheduleItemData<EngTrainingExp>,
+    ];
+    // // 自定义元素详情渲染
+    // const itemDetailRender: ScheduleViewType["itemDetailRender"] = item => {
+    //     switch (true) {
+    //         case item.hasOwnProperty("xh_id"):
+    //             return <ExamDetail examInfo={item as ExamInfo} />;
+    //         case item.hasOwnProperty("weekSpan"):
+    //             return <ActivityDetail activity={item as IActivity} />;
+    //         default:
+    //             return <></>;
+    //     }
+    // };
 
     return (
         <View>
@@ -438,20 +438,13 @@ export function ScheduleCard() {
                 </Flex>
             </Flex>
             <Divider />
-            <CourseScheduleView<ExtendItemType>
+            <TimeScheduleView
                 showDate
-                showNextCourse
                 showTimeSpanHighlight
                 showDayHighlight
                 startDay={startDay}
-                timeShift={timeShift}
-                courseSchedule={courseSchedule}
                 pageView={pagerView}
-                phyExpList={phyExpList}
                 itemList={itemList}
-                itemRender={itemRender}
-                itemDetailRender={itemDetailRender}
-                isItemShow={isItemShow}
             />
             {courseSchedule?.sjkList && (
                 <>

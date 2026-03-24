@@ -4,7 +4,6 @@ import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
-import {CourseScheduleView} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleView.tsx";
 import {PracticalCourseList} from "@/components/tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {usePagerView} from "react-native-pager-view";
@@ -14,6 +13,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useUserConfig, useWebView} from "@/hooks/app.ts";
 import {UnTable, UnTableCols} from "@/components/un-ui";
+import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
@@ -135,11 +135,7 @@ export function CourseScheduleQuery() {
                         onValueChange={v => pageView.setPage(v - 1)}
                     />
                 </Flex>
-                <CourseScheduleView
-                    startDay={userConfig.jw.startDay}
-                    pageView={pageView}
-                    courseSchedule={courseScheduleApiRes}
-                />
+                <TimeScheduleView startDay={userConfig.jw.startDay} pageView={pageView} />
                 {courseScheduleApiRes?.sjkList && (
                     <>
                         <Card.Divider />

@@ -5,18 +5,16 @@ import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import React, {useEffect, useState} from "react";
 import {courseApi, CourseScheduleData} from "@/js/jw/course.ts";
 import {CourseScheduleClass} from "@/class/jw/course.ts";
-import {CourseScheduleView} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleView.tsx";
 import {usePagerView} from "react-native-pager-view";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {IActivity} from "@/type/app/activity.ts";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {Color} from "@/shared/color.ts";
-import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 import {Picker} from "@react-native-picker/picker";
 import {ColorPicker} from "@/components/un-ui/ColorPicker.tsx";
-import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
+import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 
 export function ScheduleEdit() {
     const {userConfig, updateUserConfig} = useUserConfig();
@@ -162,17 +160,7 @@ export function ScheduleEdit() {
                         onValueChange={v => pageView.setPage(v - 1)}
                     />
                 </Flex>
-                <CourseScheduleView<IActivity>
-                    pageView={pageView}
-                    courseSchedule={courseRes}
-                    courseStyle={{opacity: 0.25}}
-                    itemList={activityList}
-                    isItemShow={(item, day, week) =>
-                        item.weekday === day.weekday() && week >= item.weekSpan[0] && week <= item.weekSpan[1]
-                    }
-                    itemDetailRender={item => <ActivityDetail activity={item} />}
-                    itemRender={(item, onPressHook) => <ActivityItem item={item} onPress={onPressHook} />}
-                />
+                <TimeScheduleView pageView={pageView} itemList={[]} />
                 <Divider />
                 <Flex justify="space-between">
                     <Text h4>日程列表</Text>

@@ -1,7 +1,7 @@
 import {ScrollView, StyleSheet, ToastAndroid} from "react-native";
 import {Button, Tab, TabView, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
-import {CourseScheduleTable} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
+import {TimeSchedule} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {
     Flex,
     NumberInput,
@@ -160,7 +160,7 @@ function TableScreen(props: ScreenType) {
                 </Flex>
                 <NumberInput value={week} onChange={setWeek} max={20} min={1} />
             </Flex>
-            <CourseScheduleTable<AttendanceCourseClass>
+            <TimeSchedule<AttendanceCourseClass>
                 currentWeek={week}
                 itemList={courseList}
                 isItemShow={(item, day) => moment(item.weekDay).isSame(day, "d")}
