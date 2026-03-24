@@ -1,0 +1,76 @@
+import {http} from "@/core/http.ts";
+import {userMgr} from "@/js/mgr/user.ts";
+import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
+import CryptoJS from "crypto-js";
+import {attendanceApi} from "@/features/attendance/api";
+import axios from "axios";
+
+const BASE_URL = "https://yktuipweb.gxu.edu.cn";
+
+// ─── 登录相关 ───
+
+async function getCaptchaCode(): Promise<{uri: string; code: string}> {
+    const res = await http.get(`${BASE_URL}/api/account/getVerify?num=${Date.now()}`, {
+        responseType: "arraybuffer",
+    });
+    const base64 = btoa(new Uint8Array(res.data).reduce((data, byte) => data + String.fromCharCode(byte), ""));
+    const dataUri = `data:image/jpeg;base64,${base64}`;
+    const res2 = await axios.post("https://acm.gxu.edu.cn/ocr/ocr/classify_base64", {
+        image_base64: dataUri,
+    });
+
+    let code = "";
+    console.log(res2.data);
+    if (res2.data.message === "识别成功") {
+        code = res2.data.data.text;
+    }
+
+    return {
+        uri: dataUri,
+        code: code,
+    };
+}
+
+async function login(username: string, password: string, captchaCode: string): Promise<AST.ResRoot<AST.LoginData>> {
+    const key = CryptoJS.enc.Utf8.parse("k;)*(+nmjdsf$#@d");
+    const encodePwd = CryptoJS.enc.Utf8.parse(password);
+    const encryptedPwd = CryptoJS.AES.encrypt(encodePwd, key, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7,
+    }).toString();
+
+    const data = {
+        client: "web_atd",
+        loginName: username,
+        pwd: encryptedPwd,
+        type: "1",
+        verificationCode: captchaCode,
+    };
+
+    const res = await http.post<AST.ResRoot<AST.LoginData>>(`${BASE_URL}/api/account/loginCheck`, data, {
+        headers: {"Content-Type": "application/json;charset=UTF-8"},
+    });
+
+    await userMgr.attendanceSystem.storeLoginRes(res.data);
+    if (res.data.code === 600) {
+        await attendanceApi.getMenuData();
+    }
+    return res.data;
+}
+
+// ─── Token 检测 ───
+
+async function testToken(): Promise<boolean> {
+    try {
+        const res = await attendanceApi.getMenuData();
+        return res?.code === 600;
+    } catch {
+        return false;
+    }
+}
+
+export const attendanceAuthApi = {
+    login,
+    getCaptchaImage: getCaptchaCode,
+    testToken,
+};

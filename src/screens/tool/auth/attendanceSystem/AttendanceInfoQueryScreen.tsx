@@ -47,7 +47,7 @@ export default function AttendanceInfoQueryScreen() {
         const testRes = await attendanceSystemApi.testTokenExpired();
         if (!testRes) {
             setQuickLoginShow(true);
-            ToastAndroid.show("考勤系统Token已过期，请输入验证码进行快速登录", ToastAndroid.SHORT);
+            ToastAndroid.show("考勤系统Token已过期，请输入验证码快速登录", ToastAndroid.SHORT);
         }
         return testRes;
     }

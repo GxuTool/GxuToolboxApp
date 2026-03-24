@@ -33,14 +33,9 @@ export function JWAccountScreen() {
 
     async function handleLogin() {
         clearResult();
-
         await saveAccount(username, password);
-
-        ToastAndroid.show("开始尝试登录", ToastAndroid.SHORT);
-
         const r = await login(username, password);
         if (r.ok) return;
-
         ToastAndroid.show("登录失败", ToastAndroid.SHORT);
     }
 
