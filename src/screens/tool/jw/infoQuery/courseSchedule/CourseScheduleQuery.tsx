@@ -1,6 +1,6 @@
 import {Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
+import {BottomSheet, Button, Card, Divider, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
@@ -14,6 +14,11 @@ import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useUserConfig, useWebView} from "@/hooks/app.ts";
 import {UnTable, UnTableCols} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
+import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
+import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
+import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
+import {Color} from "@/shared/color.ts";
+import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
@@ -45,7 +50,6 @@ export function CourseScheduleQuery() {
                     courseList.push(course);
                 }
             });
-            console.log(courseList);
             setCourseScheduleList(courseList);
         }
     }
@@ -94,6 +98,9 @@ export function CourseScheduleQuery() {
         },
     ];
 
+    const [itemDetailShow, setItemDetailShow] = useState(false);
+    const [itemDetail, setItemDetail] = useState<CourseClass>();
+
     return (
         <ScrollView>
             <View style={style.container}>
@@ -135,7 +142,27 @@ export function CourseScheduleQuery() {
                         onValueChange={v => pageView.setPage(v - 1)}
                     />
                 </Flex>
-                <TimeScheduleView startDay={userConfig.jw.startDay} pageView={pageView} />
+                <TimeScheduleView
+                    startDay={userConfig.jw.startDay}
+                    pageView={pageView}
+                    itemList={[
+                        {
+                            data: new CourseScheduleClass(courseScheduleApiRes).kbList,
+                            isItemShow(item, day, week) {
+                                return item.atDayWithWeek(day, week);
+                            },
+                            itemRender: item => (
+                                <CourseItem
+                                    course={item}
+                                    onCoursePress={() => {
+                                        setItemDetailShow(true);
+                                        setItemDetail(item);
+                                    }}
+                                />
+                            ),
+                        } as TimeScheduleItemData<CourseClass>,
+                    ]}
+                />
                 {courseScheduleApiRes?.sjkList && (
                     <>
                         <Card.Divider />
@@ -148,6 +175,19 @@ export function CourseScheduleQuery() {
                     <UnTable<Course> data={courseScheduleList} cols={cols} />
                 </ScrollView>
             </View>
+            <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
+                <View
+                    style={{
+                        backgroundColor: theme.colors.background,
+                        borderTopLeftRadius: 8,
+                        borderTopRightRadius: 8,
+                        borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
+                        borderWidth: 1,
+                        padding: "2.5%",
+                    }}>
+                    <CourseDetail course={itemDetail} />
+                </View>
+            </BottomSheet>
         </ScrollView>
     );
 }

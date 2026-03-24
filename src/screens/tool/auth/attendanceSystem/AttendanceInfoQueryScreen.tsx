@@ -1,7 +1,7 @@
 import {ScrollView, StyleSheet, ToastAndroid} from "react-native";
 import {Button, Tab, TabView, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
-import {TimeSchedule} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
+import {TimeSchedule, TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {
     Flex,
     NumberInput,
@@ -160,11 +160,15 @@ function TableScreen(props: ScreenType) {
                 </Flex>
                 <NumberInput value={week} onChange={setWeek} max={20} min={1} />
             </Flex>
-            <TimeSchedule<AttendanceCourseClass>
+            <TimeSchedule
                 currentWeek={week}
-                itemList={courseList}
-                isItemShow={(item, day) => moment(item.weekDay).isSame(day, "d")}
-                itemRender={item => <AttendanceCourseItem attendanceData={attendanceData} course={item} />}
+                itemList={[
+                    {
+                        data: courseList,
+                        isItemShow: (item, day) => moment(item.weekDay).isSame(day, "d"),
+                        itemRender: item => <AttendanceCourseItem attendanceData={attendanceData} course={item} />,
+                    } as TimeScheduleItemData<AttendanceCourseClass>,
+                ]}
                 startDay={props.calender?.firstWeekBegin}
                 showDate
                 showDayHighlight
