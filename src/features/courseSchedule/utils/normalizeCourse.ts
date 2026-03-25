@@ -20,6 +20,7 @@ export function normalizeCourse(data: ICourse): ScheduleTableItem[] {
                 title: course.title,
                 location: course.location,
                 teacher: course.teacher,
+                raw: course.raw,
                 // color: undefined,
             });
         });

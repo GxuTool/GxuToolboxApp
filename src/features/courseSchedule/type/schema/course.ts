@@ -16,7 +16,7 @@ const TheoryCourseSchema = z.object({
     zcd: z.string(),
     xqj: z.string().transform(Number),
     xm: z.string(),
-});
+}).loose();
 
 const rawCourse = z.object({
     sjkList: z.array(PracticeCourseSchema).default([]),
@@ -40,6 +40,7 @@ export const ICourse = rawCourse.transform(i => ({
         teacher: c.xm,
         day: c.xqj,
         source: "jw",
+        raw: c,
     })),
 }));
 

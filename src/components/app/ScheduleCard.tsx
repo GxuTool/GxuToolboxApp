@@ -1,9 +1,6 @@
 import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
-import {Pressable, StyleSheet, ToastAndroid, View} from "react-native";
-import {store} from "@/core/store.ts";
-import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
-import React, {useEffect, useMemo, useState} from "react";
-import {PracticalCourseList} from "../tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
+import {Pressable, StyleSheet, View} from "react-native";
+import React, {useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import moment from "moment";
@@ -11,41 +8,26 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {Color} from "@/shared/color.ts";
 import {usePagerView} from "react-native-pager-view";
 import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/CourseCardSetting.tsx";
-import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
-import {ExamInfoQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
-import {courseApi} from "@/js/jw/course.ts";
-import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
-import {examApi} from "@/js/jw/exam.ts";
 import {useNavigation} from "@react-navigation/native";
-import {IActivity} from "@/type/app/activity.ts";
-import {PhyExp} from "@/type/infoQuery/course/course.ts";
-import {http} from "@/core/http.ts";
-import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
-import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
-import {useUnToast} from "@/components/un-ui/UnToast.tsx";
 import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
-import {AuthStateMap} from "@/core/auth/auth.type.ts";
-import {useCourseSchedule} from "@/features/courseSchedule/hooks/useCourseSchedule.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
-import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
-import {CourseScheduleExamItem} from "../tool/infoQuery/examInfo/CourseScheduleExamItem.tsx";
-import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
-import {EngTrainingItem} from "@/components/tool/infoQuery/EngTraining/EngTrainingItem.tsx";
-import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
-import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
+import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
+import {useExam} from "@/features/courseSchedule/hooks/detail/useExam.ts";
+import {useNextCourse} from "@/features/courseSchedule/hooks/detail/useNextCourse.ts";
+import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
+import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
-import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
-import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 
 /**
  * 课表
  * @constructor
  */
 export function ScheduleCard() {
-    const {createToast} = useUnToast();
-    const {userConfig, updateUserConfig} = useUserConfig();
+    const {userConfig} = useUserConfig();
     const navigation = useNavigation();
     const {theme} = useTheme();
     const pagerView = usePagerView({pagesAmount: 20});
@@ -53,39 +35,29 @@ export function ScheduleCard() {
 
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
-    const {startDay} = useCourseSchedule(year, term);
+    const startDay = useStartDay(year, term);
 
-    const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
-    // const startDay = moment(userConfig.jw.startDay);
+    const courseItems = useCourse(year, term) ?? [];
+    const examItems = useExam(year, term) ?? [];
+    const practiceItems = usePractice(year, term) ?? [];
+
+    const scheduleItems: ScheduleTableItem[] = useMemo(() => [...courseItems, ...examItems], [courseItems, examItems]);
+    const nextCourse = useNextCourse(scheduleItems, startDay);
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 
     const [courseScheduleSettingVisible, setCourseScheduleSettingVisible] = useState(false);
     const [scheduleShareVisible, setScheduleShareVisible] = useState(false);
 
+    const [selectedItem, setSelectedItem] = useState<ScheduleTableItem | null>(null);
+
+    const baseColor = theme.colors.primary;
+    const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString;
+    const textColor = Color.mix(baseColor, theme.colors.black, 0.5).rgbaString;
+
     const style = useMemo(
         () =>
             StyleSheet.create({
-                card: {
-                    backgroundColor: Color(
-                        theme.mode === "light" ? theme.colors.background : theme.colors.grey5,
-                    ).setAlpha(0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100)
-                        .rgbaString,
-                    borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.7).rgbaString,
-                    borderRadius: 16,
-                    paddingHorizontal: 0,
-                    marginHorizontal: 5,
-                    elevation: 0, // Android 去除阴影
-                    shadowOpacity: 0, // iOS 去除阴影
-                    overflow: "hidden",
-                },
-                cardTitle: {
-                    paddingHorizontal: 12,
-                },
-                pagerView: {
-                    width: "100%",
-                    height: userConfig.theme.course.timeSpanHeight * 13 + userConfig.theme.course.weekdayHeight + 50,
-                },
                 bottomSheetContainer: {
                     backgroundColor: theme.colors.background,
                     padding: "5%",
@@ -94,6 +66,9 @@ export function ScheduleCard() {
                     borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
                     borderWidth: 1,
                 },
+                cardTitle: {
+                    paddingHorizontal: 12,
+                },
                 menuItem: {
                     flexDirection: "row",
                     gap: 8,
@@ -101,302 +76,17 @@ export function ScheduleCard() {
                     padding: 4,
                     alignItems: "center",
                 },
+                nextCourse: {
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    borderRadius: 8,
+                    marginHorizontal: 6,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: backgroundColor,
+                },
             }),
-        [theme, userConfig.theme.bgOpacity, userConfig.theme.course],
-    );
-
-    // 获取考试
-    const [examList, setExamList] = useState<ExamInfo[]>([]);
-
-    async function getExamList() {
-        const data = await examApi.getExamInfo(year, term);
-        if (data?.items) {
-            setExamList(data.items);
-            await store.save({key: "examInfo", data});
-        } else {
-        }
-    }
-
-    // 获取自定义事件
-    const [activityList, setActivityList] = useState<IActivity[]>([]);
-
-    function getActivityList() {
-        console.log(userConfig);
-        const activityDataIndex = userConfig.activity.data.findIndex(item => +item.year === year && item.term === term);
-        if (activityDataIndex > -1) {
-            setActivityList(userConfig.activity.data[activityDataIndex].list);
-        } else {
-            setActivityList([]);
-        }
-    }
-
-    const [attendanceData, setAttendanceData] = useState<AttendanceDataClass>();
-    useEffect(() => {
-        if (attendanceData instanceof AttendanceDataClass && courseSchedule) {
-            courseSchedule.setTermAttendanceData = attendanceData;
-            setCourseSchedule(new CourseScheduleClass(courseSchedule));
-        }
-    }, [attendanceData]);
-
-    async function getAttendanceData() {
-        const calender = await attendanceSystemApi.calenderData.get(userConfig.jw.startDay);
-        const attendanceDataRes = await attendanceSystemApi.getPersonalData(calender?.calendarId, {page_size: 1000});
-        if (attendanceDataRes?.data && calender) {
-            setAttendanceData(new AttendanceDataClass(attendanceDataRes.data.records, calender));
-        }
-    }
-
-    // 获取课表
-    async function getCourseSchedule() {
-        const data = await courseApi.getCourseSchedule(year, term);
-        if (data?.kbList) {
-            if (attendanceData instanceof AttendanceDataClass) {
-                data.setTermAttendanceData = attendanceData;
-            }
-            setCourseSchedule(data);
-            await store.save({key: "courseRes", data});
-            if (data.kbList.findIndex(item => item.kcmc === "大学物理实验") > -1) {
-                getPhyExp();
-            }
-        } else {
-        }
-    }
-
-    // 物理实验
-    const [phyExpList, setPhyExpList] = useState<PhyExp[]>([]);
-
-    async function getPhyExp() {
-        const {data} = await courseApi.getPhyExpList();
-        setPhyExpList(data);
-        await store.save({
-            key: "phyExpList",
-            data,
-        });
-    }
-
-    // 金工实训
-    type EngTrainingExp = {
-        date: string;
-        name: string;
-        y: number;
-        span: number;
-        backgroundColor: string;
-        type: "engTrainingExp";
-    };
-    const [engTrainingExpList, setEngTrainingExpList] = useState<EngTrainingExp[]>([]);
-
-    async function getEngTrainingSchedule() {
-        const res = await courseApi.engTraining.getPersonalExpList();
-        if (!res) return;
-        const datas = res.datas;
-        const dateList = datas[0].filter(item => item.startRow === 2);
-        // 根据日期获取实训
-        // TODO: 判断节数
-        const expList = dateList.map<EngTrainingExp>(date => {
-            const exp = datas[0].find(
-                item =>
-                    item.startRow === 9 &&
-                    item.startCol <= date.startCol &&
-                    item.startCol + item.colNumber >= date.startCol + date.colNumber,
-            );
-            return {
-                date: date.content,
-                type: "engTrainingExp",
-                name: exp?.content ?? "",
-                y: 0,
-                span: 8,
-                backgroundColor: theme.colors.primary,
-            };
-        });
-        await store.save({
-            key: "engTrainingExpList",
-            data: expList,
-        });
-        setEngTrainingExpList(expList);
-    }
-
-    // 调休信息
-    const [timeShift, setTimeShift] = useState<[string, string][]>([]);
-
-    async function getTimeShift() {
-        const {data} = await http.get("https://file.unde.site/GxuToolApp/data.json");
-        if (data) setTimeShift(data.timeShift);
-    }
-
-    async function init() {
-        // 从内存中加载课程缓存
-        const courseData: CourseScheduleQueryRes = await store.load({key: "courseRes"}).catch(e => {
-            console.warn(e);
-            return {};
-        });
-        if (courseData.kbList) setCourseSchedule(new CourseScheduleClass(courseData));
-        // 从内存中加载考试缓存
-        const examData: ExamInfoQueryRes = await store.load({key: "examInfo"}).catch(e => {
-            console.warn(e);
-            return {};
-        });
-        if (examData.items) setExamList(examData.items);
-        // 从内存中加载物理实验缓存
-        const phyExpList = await store.load({key: "phyExpList"}).catch(e => {
-            console.warn(e);
-            return [];
-        });
-        if (phyExpList) setPhyExpList(phyExpList);
-        // 从内存中加载金工实训缓存
-        const engTrainingExpData = await store
-            .load({
-                key: "engTrainingExpList",
-            })
-            .catch(e => {
-                console.warn(e);
-                return [];
-            });
-        if (engTrainingExpData) setEngTrainingExpList(engTrainingExpData);
-
-        loadData();
-    }
-
-    const [loading, setLoading] = useState(false);
-    async function loadData() {
-        if (loading) {
-            ToastAndroid.show("请等待数据刷新完成再点击噢", ToastAndroid.SHORT);
-            return;
-        }
-        setLoading(true);
-        let count = 0;
-        const totalTaskCount = 6;
-
-        const toast = createToast(`检测登录状态 [0/${totalTaskCount}]`, "刷新日程表");
-        toast.setProgress(0);
-
-        const {status} = await JwMachine.refreshToken();
-
-        switch (status) {
-            case AuthStateMap.NoAccount:
-                toast.setData({
-                    color: "error",
-                    content: "请进入设置页面，填写教务账号并登录",
-                    progress: 1,
-                });
-                setLoading(false);
-                toast.close();
-                return;
-            case AuthStateMap.HasAccountNotAuthenticated:
-                if (moment().hour() < 7 || moment().hour() >= 23) {
-                    toast.setData({
-                        color: "error",
-                        content: "该时段暂时无法连接校园网，请早上七点后再试",
-                        progress: 1,
-                    });
-                } else {
-                    toast.setData({
-                        color: "error",
-                        content: "获取课表失败，请检查账号状态",
-                        progress: 1,
-                    });
-                }
-                setLoading(false);
-                toast.close();
-                return;
-        }
-
-        count++;
-        toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
-        toast.setProgress(+(count / totalTaskCount).toFixed(1));
-
-        const taskList: Promise<any>[] = [
-            getAttendanceData(),
-            getTimeShift(),
-            getCourseSchedule(),
-            getExamList(),
-            getEngTrainingSchedule(),
-        ];
-
-        taskList.forEach(task =>
-            task.finally(() => {
-                count++;
-                toast.setProgress(+(count / totalTaskCount).toFixed(1));
-                toast.setContent(`尝试刷新数据中 [${count}/${totalTaskCount}]`);
-                if (count === totalTaskCount) {
-                    toast.setData({
-                        color: "success",
-                        content: "刷新完毕",
-                        progress: 1,
-                    });
-                    toast.close(2000, () => setLoading(false));
-                }
-            }),
-        );
-        getActivityList();
-    }
-
-    useEffect(() => {
-        init();
-    }, [year, term]);
-
-    type detailType = "course" | "exam" | "activity";
-    const [itemDetailShow, setItemDetailShow] = useState(false);
-    const [itemDetail, setItemDetail] = useState<{type: detailType; data: any}>();
-    const itemList: TimeScheduleItemData[] = useMemo(
-        () => [
-            {
-                data: courseSchedule?.kbList ?? [],
-                isItemShow(item, day, week) {
-                    return item.atDayWithWeek(day, week);
-                },
-                itemRender: item => (
-                    <CourseItem
-                        course={item}
-                        onCoursePress={() => {
-                            setItemDetailShow(true);
-                            setItemDetail({type: "course", data: item});
-                        }}
-                    />
-                ),
-            } as TimeScheduleItemData<CourseClass>,
-            {
-                data: examList,
-                isItemShow(item, day) {
-                    return moment(item.kssj.replace(/\(.*?\)/, "")).isSame(day, "d");
-                },
-                itemRender: item => (
-                    <CourseScheduleExamItem
-                        examInfo={item}
-                        onPress={() => {
-                            setItemDetailShow(true);
-                            setItemDetail({type: "exam", data: item});
-                        }}
-                    />
-                ),
-            } as TimeScheduleItemData<ExamInfo>,
-            {
-                data: activityList,
-                isItemShow(item, day, week) {
-                    return (
-                        (item as IActivity).weekday === day.weekday() &&
-                        week >= (item as IActivity).weekSpan[0] &&
-                        week <= (item as IActivity).weekSpan[1]
-                    );
-                },
-                itemRender: item => (
-                    <ActivityItem
-                        item={item}
-                        onPress={() => {
-                            setItemDetailShow(true);
-                            setItemDetail({type: "activity", data: item});
-                        }}
-                    />
-                ),
-            } as TimeScheduleItemData<IActivity>,
-            {
-                data: engTrainingExpList,
-                isItemShow(item, day, week) {
-                    return moment(item.date, "MM月D日").isSame(day, "d");
-                },
-                itemRender: item => <EngTrainingItem item={item} />,
-            } as TimeScheduleItemData<EngTrainingExp>,
-        ],
-        [courseSchedule?.kbList, examList, activityList, engTrainingExpList],
+        [theme],
     );
 
     return (
@@ -407,9 +97,7 @@ export function ScheduleCard() {
                     {rest.activePage + 1 !== realCurrentWeek && (
                         <Pressable
                             android_ripple={userConfig.theme.ripple}
-                            onPress={() => {
-                                rest.setPage(realCurrentWeek - 1);
-                            }}>
+                            onPress={() => rest.setPage(realCurrentWeek - 1)}>
                             <Icon name="history" size={24} />
                         </Pressable>
                     )}
@@ -446,55 +134,28 @@ export function ScheduleCard() {
                         }>
                         <Icon name="menu" size={24} />
                     </UnTooltip>
-                    <Pressable
-                        android_ripple={userConfig.theme.ripple}
-                        onPress={() => {
-                            loadData();
-                        }}>
-                        <Icon name="sync" size={24} />
-                    </Pressable>
                 </Flex>
             </Flex>
             <Divider />
-            {useMemo(
-                () => (
-                    <TimeScheduleView
-                        showDate
-                        showTimeSpanHighlight
-                        showDayHighlight
-                        startDay={startDay}
-                        pageView={pagerView}
-                        itemList={itemList}
-                    />
-                ),
-                [startDay, itemList],
-            )}
-            {courseSchedule?.sjkList && (
-                <>
-                    <Divider />
-                    <PracticalCourseList courseList={courseSchedule.sjkList} />
-                </>
-            )}
-            {/* 课表卡片设置 */}
-            <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
-                <View
-                    style={{
-                        backgroundColor: theme.colors.background,
-                        borderTopLeftRadius: 8,
-                        borderTopRightRadius: 8,
-                        borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
-                        borderWidth: 1,
-                        padding: "2.5%",
-                    }}>
-                    {
-                        {
-                            activity: <ActivityDetail activity={itemDetail?.data} />,
-                            course: <CourseDetail course={itemDetail?.data} />,
-                            exam: <ExamDetail examInfo={itemDetail?.data} />,
-                        }[itemDetail?.type ?? "course"]
-                    }
+            {nextCourse && (
+                <View style={style.nextCourse}>
+                    <Text style={{fontSize: 18, color: textColor}}>
+                        下一节课：{nextCourse.item.title}
+                        {nextCourse.item.location ? ` · ${nextCourse.item.location}` : ""}
+                    </Text>
                 </View>
-            </BottomSheet>
+            )}
+            <TimeScheduleView
+                showDate
+                showTimeSpanHighlight
+                showDayHighlight
+                startDay={startDay}
+                pageView={pagerView}
+                scheduleItems={scheduleItems}
+                onItemPress={setSelectedItem}
+            />
+            <Divider />
+            <PracticalCourseList courseList={practiceItems} />
             <BottomSheet
                 isVisible={courseScheduleSettingVisible}
                 onBackdropPress={() => setCourseScheduleSettingVisible(false)}>
@@ -506,6 +167,13 @@ export function ScheduleCard() {
                     onYearChange={setYear}
                     onTermChange={setTerm}
                 />
+            </BottomSheet>
+            <BottomSheet
+                isVisible={!!selectedItem}
+                onBackdropPress={() => setSelectedItem(null)}>
+                {selectedItem?.raw && (
+                    <CourseDetail style={style.bottomSheetContainer} course={selectedItem.raw} />
+                )}
             </BottomSheet>
             <BottomSheet isVisible={scheduleShareVisible} onBackdropPress={() => setScheduleShareVisible(false)}>
                 <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setScheduleShareVisible(false)} />
