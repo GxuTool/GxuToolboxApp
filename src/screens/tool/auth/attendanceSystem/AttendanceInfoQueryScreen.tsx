@@ -1,7 +1,7 @@
 import {ScrollView, StyleSheet, ToastAndroid} from "react-native";
 import {Button, Tab, TabView, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
-import {TimeSchedule, TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
+import {TimeSchedule} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {
     Flex,
     NumberInput,
@@ -17,9 +17,11 @@ import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {AttendanceCourseClass, AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import moment from "moment/moment";
-import {AttendanceCourseItem, AttendanceStateIcon} from "@/components/tool/auth/AttendanceCourseItem.tsx";
+import {AttendanceCourseItem} from "@/components/tool/auth/AttendanceCourseItem.tsx";
 import {useSchoolTerm} from "@/hooks/jw.ts";
 import {useWebView} from "@/hooks/app.ts";
+import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
+import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
 
 const style = StyleSheet.create({
     container: {
