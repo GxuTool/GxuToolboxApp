@@ -1,16 +1,15 @@
 import {SchoolTermValue} from "@/type/global.ts";
 import {useUserConfig} from "@/hooks/app.ts";
 import moment from "moment";
-import {useCallback, useEffect} from "react";
+import {useCallback, useEffect, useMemo} from "react";
 import {store} from "@/core/store.ts";
 import {UserInfo} from "@/type/infoQuery/base.ts";
-import {JwCore} from "@/core/auth/Jw/JwCore.ts";
 import {courseApi} from "@/js/jw/course.ts";
 import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 
 export function useStartDay(year: number, term: SchoolTermValue) {
     const {userConfig, updateUserConfig} = useUserConfig();
-    const startDay = moment(userConfig.jw.startDay);
+    const startDay = useMemo(() => moment(userConfig.jw.startDay), [userConfig.jw.startDay]);
 
     const getStartDay = useCallback(async () => {
         const userInfo = await store
