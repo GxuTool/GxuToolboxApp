@@ -16,8 +16,8 @@ import {ColorPicker} from "@/components/un-ui/ColorPicker.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
-import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
+import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 
 export function ScheduleEdit() {
     const {userConfig, updateUserConfig} = useUserConfig();

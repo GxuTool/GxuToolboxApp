@@ -9,7 +9,7 @@ import {Class, UserInfo} from "@/type/infoQuery/base.ts";
 import {CourseSchedule} from "@/type/infoQuery/course/course.ts";
 import {ClassScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {usePagerView} from "react-native-pager-view";
-import {PracticalCourseList} from "@/components/tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
+import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {UnPicker} from "@/components/un-ui/UnPicker.tsx";
 import {Picker} from "@react-native-picker/picker";
@@ -18,11 +18,11 @@ import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useSchoolTerm} from "@/hooks/jw.ts";
 import {useWebView} from "@/hooks/app.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
-import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
 import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
 import {Color} from "@/shared/color.ts";
 import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
+import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 
 export function ClassCourseSchedule() {
     const {openInJw} = useWebView();

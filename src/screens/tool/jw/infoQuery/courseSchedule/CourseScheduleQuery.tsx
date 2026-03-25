@@ -4,7 +4,7 @@ import {BottomSheet, Button, Card, Divider, Text, useTheme} from "@rneui/themed"
 import React, {useEffect, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
-import {PracticalCourseList} from "@/components/tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
+import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {usePagerView} from "react-native-pager-view";
 import {courseApi} from "@/js/jw/course.ts";
@@ -16,9 +16,9 @@ import {UnTable, UnTableCols} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
 import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
-import {TimeScheduleItemData} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {Color} from "@/shared/color.ts";
 import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
+import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();

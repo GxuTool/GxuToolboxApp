@@ -4,7 +4,7 @@ import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
 import {courseApi} from "@/js/jw/course.ts";
 import {SchoolTermValue} from "@/type/global.ts";
 import {normalizeCourse} from "@/features/courseSchedule/utils/normalizeCourse.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export function useBaseCourse(year: number, term: SchoolTermValue):ScheduleTableItem[] {
     const [courseSchedule, setCourseSchedule] = useState<ScheduleTableItem[]>();

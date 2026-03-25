@@ -1,6 +1,6 @@
 import {Pressable, StyleSheet} from "react-native";
 import {useUserConfig} from "@/hooks/app.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
+
 import React, {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
@@ -8,7 +8,9 @@ import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
-import {AttendanceStateIcon} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
+import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+
 
 interface NewCourseItemProps {
     item: ScheduleTableItem;

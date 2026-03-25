@@ -1,11 +1,11 @@
 import {SchoolTermValue} from "@/type/global.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {useBaseCourse} from "@/features/courseSchedule/hooks/detail/useBaseCourse.ts";
 import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {useMemo} from "react";
 import {useAttendance} from "@/features/courseSchedule/hooks/detail/useAttendance.ts";
-import {Account, AuthState} from "@/core/auth/auth.type.ts";
+import {AuthState} from "@/core/auth/auth.type.ts";
 import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export function useCourse(year: number, term: SchoolTermValue): ScheduleTableItem[] {
     const baseCourse = useBaseCourse(year, term) || [];
@@ -58,6 +58,5 @@ export function useCourse(year: number, term: SchoolTermValue): ScheduleTableIte
 
         // PART 3: 加入调课数据
         return applyShift(enriched);
-
-    }, [baseCourse, phyExpList,attendanceList,applyShift]);
+    }, [baseCourse, phyExpList, attendanceList, applyShift]);
 }
