@@ -1,6 +1,6 @@
 import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
 import {Pressable, StyleSheet, View} from "react-native";
-import React, {useMemo, useState} from "react";
+import React, {useCallback, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import moment from "moment";
@@ -11,7 +11,7 @@ import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/Cour
 import {useNavigation} from "@react-navigation/native";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
-import {UnText, UnTooltip} from "@/components/un-ui/index.ts";
+import {UnText} from "@/components/un-ui/index.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
@@ -20,8 +20,15 @@ import {useExam} from "@/features/courseSchedule/hooks/detail/useExam.ts";
 import {useNextCourse} from "@/features/courseSchedule/hooks/detail/useNextCourse.ts";
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
-import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
+import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
 
+// 菜单的类型
+type SheetState =
+    | {type: "closed"}
+    | {type: "menu"}
+    | {type: "setting"}
+    | {type: "share"}
+    | {type: "itemDetail"; item: ScheduleTableItem};
 /**
  * 课表
  * @constructor
@@ -46,10 +53,7 @@ export function ScheduleCard() {
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 
-    const [courseScheduleSettingVisible, setCourseScheduleSettingVisible] = useState(false);
-    const [scheduleShareVisible, setScheduleShareVisible] = useState(false);
-
-    const [selectedItem, setSelectedItem] = useState<ScheduleTableItem | null>(null);
+    const [sheet, setSheet] = useState<SheetState>({type: "closed"});
 
     const baseColor = theme.colors.primary;
     const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString;
@@ -71,10 +75,12 @@ export function ScheduleCard() {
                 },
                 menuItem: {
                     flexDirection: "row",
-                    gap: 8,
-                    width: 140,
-                    padding: 4,
+                    gap: 16,
+                    paddingVertical: 14,
+                    paddingHorizontal: 8,
                     alignItems: "center",
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    borderBottomColor: theme.colors.greyOutline,
                 },
                 nextCourse: {
                     paddingHorizontal: 12,
@@ -89,6 +95,11 @@ export function ScheduleCard() {
         [theme],
     );
 
+    const onItemPress = useCallback(
+        (item: ScheduleTableItem) => setSheet({type: "itemDetail", item}),
+        [], // setSheet 是稳定引用
+    );
+
     return (
         <View>
             <Flex justify="space-between" style={style.cardTitle}>
@@ -101,39 +112,42 @@ export function ScheduleCard() {
                             <Icon name="history" size={24} />
                         </Pressable>
                     )}
-                    <UnTooltip
-                        width={150}
-                        height={120}
-                        popover={
-                            <View style={{gap: 4}}>
-                                <Pressable
-                                    android_ripple={userConfig.theme.ripple}
-                                    onPress={() => navigation.navigate("ScheduleEdit")}>
-                                    <View style={style.menuItem}>
-                                        <Icon name="table-edit" size={24} />
-                                        <UnText>事件编辑</UnText>
-                                    </View>
-                                </Pressable>
-                                <Pressable
-                                    android_ripple={userConfig.theme.ripple}
-                                    onPress={() => setScheduleShareVisible(true)}>
-                                    <View style={style.menuItem}>
-                                        <Icon type="antdesign" name="share-alt" size={24} />
-                                        <UnText>分享课表</UnText>
-                                    </View>
-                                </Pressable>
-                                <Pressable
-                                    android_ripple={userConfig.theme.ripple}
-                                    onPress={() => setCourseScheduleSettingVisible(true)}>
-                                    <View style={style.menuItem}>
-                                        <Icon name="cog" size={24} />
-                                        <UnText>课表设置</UnText>
-                                    </View>
-                                </Pressable>
-                            </View>
-                        }>
+                    {/*<UnTooltip*/}
+                    {/*    width={150}*/}
+                    {/*    height={120}*/}
+                    {/*    popover={*/}
+                    {/*        <View style={{gap: 4}}>*/}
+                    {/*            <Pressable*/}
+                    {/*                android_ripple={userConfig.theme.ripple}*/}
+                    {/*                onPress={() => navigation.navigate("ScheduleEdit")}>*/}
+                    {/*                <View style={style.menuItem}>*/}
+                    {/*                    <Icon name="table-edit" size={24} />*/}
+                    {/*                    <UnText>事件编辑</UnText>*/}
+                    {/*                </View>*/}
+                    {/*            </Pressable>*/}
+                    {/*            <Pressable*/}
+                    {/*                android_ripple={userConfig.theme.ripple}*/}
+                    {/*                onPress={() => setScheduleShareVisible(true)}>*/}
+                    {/*                <View style={style.menuItem}>*/}
+                    {/*                    <Icon type="antdesign" name="share-alt" size={24} />*/}
+                    {/*                    <UnText>分享课表</UnText>*/}
+                    {/*                </View>*/}
+                    {/*            </Pressable>*/}
+                    {/*            <Pressable*/}
+                    {/*                android_ripple={userConfig.theme.ripple}*/}
+                    {/*                onPress={() => setCourseScheduleSettingVisible(true)}>*/}
+                    {/*                <View style={style.menuItem}>*/}
+                    {/*                    <Icon name="cog" size={24} />*/}
+                    {/*                    <UnText>课表设置</UnText>*/}
+                    {/*                </View>*/}
+                    {/*            </Pressable>*/}
+                    {/*        </View>*/}
+                    {/*    }>*/}
+                    {/*    <Icon name="menu" size={24} />*/}
+                    {/*</UnTooltip>*/}
+                    <Pressable android_ripple={userConfig.theme.ripple} onPress={() => setSheet({type: "menu"})}>
                         <Icon name="menu" size={24} />
-                    </UnTooltip>
+                    </Pressable>
                 </Flex>
             </Flex>
             <Divider />
@@ -152,32 +166,75 @@ export function ScheduleCard() {
                 startDay={startDay}
                 pageView={pagerView}
                 scheduleItems={scheduleItems}
-                onItemPress={setSelectedItem}
+                onItemPress={onItemPress}
             />
             <Divider />
             <PracticalCourseList courseList={practiceItems} />
-            <BottomSheet
-                isVisible={courseScheduleSettingVisible}
-                onBackdropPress={() => setCourseScheduleSettingVisible(false)}>
-                <CourseCardSetting
-                    containerStyle={style.bottomSheetContainer}
-                    year={year}
-                    term={term}
-                    pageViewRest={rest}
-                    onYearChange={setYear}
-                    onTermChange={setTerm}
-                />
+            <BottomSheet isVisible={sheet.type !== "closed"} onBackdropPress={() => setSheet({type: "closed"})}>
+                <View style={style.bottomSheetContainer}>
+                    {sheet.type === "menu" && (
+                        <>
+                            <Pressable
+                                onPress={() => {
+                                    setSheet({type: "closed"});
+                                    navigation.navigate("ScheduleEdit");
+                                }}>
+                                <View style={style.menuItem}>
+                                    <Icon name="table-edit" size={22} />
+                                    <UnText>事件编辑</UnText>
+                                </View>
+                            </Pressable>
+                            <Pressable onPress={() => setSheet({type: "share"})}>
+                                <View style={style.menuItem}>
+                                    <Icon type="antdesign" name="share-alt" size={22} />
+                                    <UnText>分享课表</UnText>
+                                </View>
+                            </Pressable>
+                            <Pressable onPress={() => setSheet({type: "setting"})}>
+                                <View style={style.menuItem}>
+                                    <Icon name="cog" size={22} />
+                                    <UnText>课表设置</UnText>
+                                </View>
+                            </Pressable>
+                        </>
+                    )}
+                    {sheet.type === "setting" && (
+                        <CourseCardSetting
+                            year={year}
+                            term={term}
+                            pageViewRest={rest}
+                            onYearChange={setYear}
+                            onTermChange={setTerm}
+                        />
+                    )}
+                    {sheet.type === "itemDetail" && sheet.item?.raw && <CourseDetail course={sheet.item.raw} />}
+                    {sheet.type === "share" && (
+                        <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
+                    )}
+                </View>
             </BottomSheet>
-            <BottomSheet
-                isVisible={!!selectedItem}
-                onBackdropPress={() => setSelectedItem(null)}>
-                {selectedItem?.raw && (
-                    <CourseDetail style={style.bottomSheetContainer} course={selectedItem.raw} />
-                )}
-            </BottomSheet>
-            <BottomSheet isVisible={scheduleShareVisible} onBackdropPress={() => setScheduleShareVisible(false)}>
-                <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setScheduleShareVisible(false)} />
-            </BottomSheet>
+            {/*<BottomSheet*/}
+            {/*    isVisible={courseScheduleSettingVisible}*/}
+            {/*    onBackdropPress={() => setCourseScheduleSettingVisible(false)}>*/}
+            {/*    <CourseCardSetting*/}
+            {/*        containerStyle={style.bottomSheetContainer}*/}
+            {/*        year={year}*/}
+            {/*        term={term}*/}
+            {/*        pageViewRest={rest}*/}
+            {/*        onYearChange={setYear}*/}
+            {/*        onTermChange={setTerm}*/}
+            {/*    />*/}
+            {/*</BottomSheet>*/}
+            {/*<BottomSheet*/}
+            {/*    isVisible={!!selectedItem}*/}
+            {/*    onBackdropPress={() => setSelectedItem(null)}>*/}
+            {/*    {selectedItem?.raw && (*/}
+            {/*        <CourseDetail style={style.bottomSheetContainer} course={selectedItem.raw} />*/}
+            {/*    )}*/}
+            {/*</BottomSheet>*/}
+            {/*<BottomSheet isVisible={scheduleShareVisible} onBackdropPress={() => setScheduleShareVisible(false)}>*/}
+            {/*    <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setScheduleShareVisible(false)} />*/}
+            {/*</BottomSheet>*/}
         </View>
     );
 }
