@@ -1,5 +1,6 @@
 import {BaseColor} from "@/shared/color.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+
 
 export type PaletteName = "default" | "macaron" | "morandi" | "vivid";
 

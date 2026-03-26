@@ -89,8 +89,7 @@ export function CourseDetail(props: Props) {
                     label,
                 } as Info),
         );
-
-    const style = StyleSheet.create({
+    StyleSheet.create({
         infoIcon: {
             width: 20,
         },
@@ -102,11 +101,10 @@ export function CourseDetail(props: Props) {
             fontSize: 16,
         },
     });
-
     return (
         <View {...props}>
             <Flex justify="center">
-                <Text>点击属性复制到剪切板</Text>
+                <Text>点击属性，复制到剪切板</Text>
             </Flex>
             {infoList.map((item, index) => (
                 <ListItem bottomDivider={index !== infoList.length - 1} key={index}>
@@ -114,23 +112,23 @@ export function CourseDetail(props: Props) {
                 </ListItem>
             ))}
             <ListItem>
-                <Flex justify="space-between" gap={30}>
-                    <Flex gap={10} inline>
-                        <Flex inline justify="center" style={style.infoIcon}>
-                            <Icon type="fontawesome" name="code" size={20} />
-                        </Flex>
-                        <Text style={style.infoLabel}>复制课程信息JSON</Text>
-                    </Flex>
-                    <Flex justify="flex-end">
-                        <Pressable
-                            android_ripple={userConfig.theme.ripple}
-                            onPress={() =>
-                                copy(JSON.stringify(props.course, null, 4) + "" ?? "", "复制课程信息JSON成功")
-                            }>
-                            <Text style={style.infoData}>&#123; ... &#125;</Text>
-                        </Pressable>
-                    </Flex>
-                </Flex>
+                {/*<Flex justify="space-between" gap={30}>*/}
+                {/*    <Flex gap={10} inline>*/}
+                {/*        <Flex inline justify="center" style={style.infoIcon}>*/}
+                {/*            <Icon type="fontawesome" name="code" size={20} />*/}
+                {/*        </Flex>*/}
+                {/*        <Text style={style.infoLabel}>复制课程信息JSON</Text>*/}
+                {/*    </Flex>*/}
+                {/*    <Flex justify="flex-end">*/}
+                {/*        <Pressable*/}
+                {/*            android_ripple={userConfig.theme.ripple}*/}
+                {/*            onPress={() =>*/}
+                {/*                copy(JSON.stringify(props.course, null, 4) + "" ?? "", "复制课程信息JSON成功")*/}
+                {/*            }>*/}
+                {/*            <Text style={style.infoData}>&#123; ... &#125;</Text>*/}
+                {/*        </Pressable>*/}
+                {/*    </Flex>*/}
+                {/*</Flex>*/}
             </ListItem>
         </View>
     );

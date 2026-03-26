@@ -2,7 +2,7 @@
 import {useCallback} from "react";
 import {useUserConfig} from "@/hooks/app.ts";
 import {resolveEventsColor, PaletteName} from "../utils/colorPalette.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export function useBlocksColor() {
     const {userConfig, updateUserConfig} = useUserConfig();

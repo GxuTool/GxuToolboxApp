@@ -17,7 +17,7 @@ import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeS
 import {CourseClass, CourseScheduleClass} from "@/class/jw/course.ts";
 import {CourseItem} from "@/components/tool/infoQuery/courseSchedule/CourseItem.tsx";
 import {Color} from "@/shared/color.ts";
-import {CourseDetail} from "@/components/tool/infoQuery/courseSchedule/CourseDetail.tsx";
+import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
 import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 
 export function CourseScheduleQuery() {
