@@ -1,11 +1,11 @@
 import {useCallback, useEffect, useState} from "react";
 import {store} from "@/core/store.ts";
 import {SchoolTermValue} from "@/type/global.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {IExam} from "@/features/courseSchedule/type/schema/exam.ts";
 import {normalizeExam} from "@/features/courseSchedule/utils/normalizeExam.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {examApi} from "@/js/jw/exam.ts";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export function useExam(year: number, term: SchoolTermValue): ScheduleTableItem[] {
     const [examSchedule, setExamSchedule] = useState<ScheduleTableItem[]>();

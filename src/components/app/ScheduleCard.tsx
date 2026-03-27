@@ -21,6 +21,7 @@ import {useNextCourse} from "@/features/courseSchedule/hooks/detail/useNextCours
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
+import {useHoliday} from "@/features/courseSchedule/hooks/detail/useHoliday.ts";
 
 // 菜单的类型
 type SheetState =
@@ -29,6 +30,7 @@ type SheetState =
     | {type: "setting"}
     | {type: "share"}
     | {type: "itemDetail"; item: ScheduleTableItem};
+
 /**
  * 课表
  * @constructor
@@ -46,9 +48,14 @@ export function ScheduleCard() {
 
     const courseItems = useCourse(year, term) ?? [];
     const examItems = useExam(year, term) ?? [];
+    const holidayItems = useHoliday(year, term) ?? [];
+
     const practiceItems = usePractice(year, term) ?? [];
 
-    const scheduleItems: ScheduleTableItem[] = useMemo(() => [...courseItems, ...examItems], [courseItems, examItems]);
+    const scheduleItems: ScheduleTableItem[] = useMemo(
+        () => [...courseItems, ...examItems, ...holidayItems],
+        [courseItems, examItems, holidayItems],
+    );
     const nextCourse = useNextCourse(scheduleItems, startDay);
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
