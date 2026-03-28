@@ -1,12 +1,14 @@
 import {useEffect, useMemo, useState} from "react";
 import {electiveAPI} from "@/features/electiveStrategy/api";
 import {ActivityIndicator, ScrollView, StyleSheet, Text, View} from "react-native";
-import {Flex} from "@/components/un-ui";
+import {Flex, Icon} from "@/components/un-ui";
 import {useTheme} from "@rneui/themed";
 import {CourseList} from "@/features/electiveStrategy/api/schema.ts";
 import {getStrategy} from "@/features/electiveStrategy/utils";
 import {StatItem} from "@/features/electiveStrategy/component/StatItem.tsx";
 import {userProfile} from "@/core/user/profile.ts";
+import {examApi} from "@/js/jw/exam.ts";
+import {store} from "@/core/store.ts";
 
 export default function ElectiveStrategy() {
     const {theme} = useTheme();
@@ -15,6 +17,7 @@ export default function ElectiveStrategy() {
     const [error, setError] = useState<string | null>(null);
     // 唯一的数据源
     const [courses, setCourses] = useState<CourseList[]>([]);
+    const [score, setScore] = useState<any[]>([]);
     const [userGrade, setUserGrade] = useState<number>(2025);
 
     useEffect(() => {
@@ -23,13 +26,25 @@ export default function ElectiveStrategy() {
                 setLoading(true);
                 setError(null);
 
-                // 并行获取课程和用户信息
+                // 并行获取课程、成绩和用户信息
                 const coursePromise = electiveAPI
                     .getCourses()
                     .then(r => r!.items.filter((i: any) => i.selectionType === "通识选修课"));
                 const infoPromise = userProfile.loadUserInfo();
 
-                const [fetchedCourses, userInfo] = await Promise.all([coursePromise, infoPromise]);
+                // 只要已修完，出成绩，并且及格了的科目
+                const scorePromise = examApi
+                    .getExamScore("", "", 1, 1000)
+                    .then(r => r!.items.filter((i: any) => Number(i.cj) > 60));
+
+                const [fetchedCourses, userInfo, score] = await Promise.all([coursePromise, infoPromise, scorePromise]);
+
+                setScore(
+                    score.map((i: any) => ({
+                        courseName: i.kcmc,
+                        score: Number(i.cj),
+                    })),
+                );
 
                 setCourses(fetchedCourses);
 
@@ -50,7 +65,11 @@ export default function ElectiveStrategy() {
 
     const styles = useMemo(() => style(theme), []);
     const strategy = useMemo(() => getStrategy(userGrade), [userGrade]);
-    const stats = useMemo(() => strategy!.calculate(courses), [courses, strategy]);
+    const stats = useMemo(() => {
+        // 只保留统计已及格的课程
+        const passedCourses = courses.filter(c => score.some((s: any) => s.courseName === c.courseName));
+        return strategy!.calculate(passedCourses);
+    }, [courses, strategy, score]);
 
     if (loading) {
         return (
@@ -111,13 +130,38 @@ export default function ElectiveStrategy() {
             </View>
 
             <View style={styles.card}>
-                <Text style={styles.title}>已选课程列表</Text>
+                <View>
+                    <Text style={styles.title}>课程成绩</Text>
+                    <Text style={[styles.title,{fontSize:12}]}>（有图标的是网课） </Text>
+                </View>
                 <View style={styles.divider} />
-                {courses.map((c, index) => (
-                    <Text key={index} style={styles.courseItem}>
-                        {c.courseName} {c.credit}学分 {"\n"} —— {c.system}
-                    </Text>
-                ))}
+                {courses.map((c, index) => {
+                    const scoreRecord = score.find((s: any) => s.courseName === c.courseName);
+                    const isPassed = scoreRecord && scoreRecord.score >= 60;
+
+                    return (
+                        <View key={index} style={styles.courseRow}>
+                            <View style={styles.courseInfo}>
+                                <Flex direction="row" align="center" gap={6}>
+                                    {c.teacher === "网络教师" && <Icon name="cast-education" size={16} />}
+                                    <Text style={styles.courseName}>{c.courseName}</Text>
+                                </Flex>
+                                <Text style={styles.courseMeta}>
+                                    {c.system} · 学分 {c.credit}
+                                </Text>
+                            </View>
+                            <View style={styles.scoreBadge}>
+                                {scoreRecord ? (
+                                    <Text style={[styles.scoreText, isPassed ? styles.textSuccess : styles.textDanger]}>
+                                        {scoreRecord.score}分
+                                    </Text>
+                                ) : (
+                                    <Text style={styles.scorePending}>未修</Text>
+                                )}
+                            </View>
+                        </View>
+                    );
+                })}
             </View>
         </ScrollView>
     );
@@ -202,5 +246,38 @@ const style = (theme: any) =>
         },
         textDanger: {
             color: "#d9534f", // 红色
+        },
+        courseRow: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingVertical: 10,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: theme.colors.greyOutline,
+        },
+        courseInfo: {
+            flex: 1,
+        },
+        courseName: {
+            fontSize: 15,
+            fontWeight: "500",
+            color: theme.colors.black,
+            marginBottom: 2,
+        },
+        courseMeta: {
+            fontSize: 12,
+            color: theme.colors.grey2,
+        },
+        scoreBadge: {
+            minWidth: 50,
+            alignItems: "flex-end",
+        },
+        scoreText: {
+            fontSize: 15,
+            fontWeight: "bold",
+        },
+        scorePending: {
+            fontSize: 13,
+            color: theme.colors.grey3,
         },
     });

@@ -41,6 +41,3 @@ export const CourseListResScheme = z.object({
 });
 
 export type CourseList = z.infer<typeof CourseListSchema>;
-
-export type CourseListRes = z.infer<typeof CourseListResScheme>;
-

@@ -77,7 +77,6 @@ function calculate2024(courses: any): ElectiveStats {
         requiredCourses: requiredCourses.size === 0,
     };
 
-    console.log(passed);
     const isQualified = Object.values(passed).every(p => p);
 
     return {
