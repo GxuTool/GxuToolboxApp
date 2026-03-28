@@ -99,7 +99,7 @@ export const HolidayScreen = () => {
             lineHeight: 18,
             textAlign: "justify",
         },
-        tabContainer: {flexDirection: "row", marginHorizontal: 20, marginBottom: 16},
+        tabContainer: {flexDirection: "row", marginHorizontal: 20},
         tab: {flex: 1, paddingVertical: 12, alignItems: "center"},
         activeTab: {borderBottomWidth: 2, borderBottomColor: theme.colors.primary},
     });
@@ -112,7 +112,7 @@ export const HolidayScreen = () => {
                         key={tab}
                         style={[styles.tab, activeTab === tab && styles.activeTab]}
                         onPress={() => setActiveTab(tab as any)}>
-                        <Text style={activeTab === tab ? [] : []}>
+                        <Text style={[{fontSize: 16}, activeTab === tab ? {color: theme.colors.primary, fontWeight: "bold"} : []]}>
                             {tab === "national" ? "全国节假日" : "地方节假日"}
                         </Text>
                     </TouchableOpacity>

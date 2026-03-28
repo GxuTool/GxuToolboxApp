@@ -138,6 +138,7 @@ export const defaultUserConfig: IUserConfig = {
             sxbj: {label: "", show: false},
             totalResult: {label: "", show: false},
             xkbz: {label: "", show: false},
+            xkrs: {label: "选课人数", show: true},
             xnm: {label: "", show: false},
             xqdm: {label: "", show: false},
             xqh1: {label: "", show: false},
@@ -158,7 +159,7 @@ export const defaultUserConfig: IUserConfig = {
             zyfxmc: {label: "", show: false},
             zyhxkcbj: {label: "", show: false},
             zzmm: {label: "", show: false},
-            zzrl: {label: "", show: false},
+            zzrl: {label: "座位数", show: true},
         },
         examDetail: {
             kcmc: {label: "课程名称", show: true},
