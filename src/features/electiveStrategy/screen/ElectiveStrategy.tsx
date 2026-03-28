@@ -156,7 +156,7 @@ export default function ElectiveStrategy() {
                                         {scoreRecord.score}分
                                     </Text>
                                 ) : (
-                                    <Text style={styles.scorePending}>未修</Text>
+                                    <Text style={styles.scorePending}>已挂科或未出成绩</Text>
                                 )}
                             </View>
                         </View>
