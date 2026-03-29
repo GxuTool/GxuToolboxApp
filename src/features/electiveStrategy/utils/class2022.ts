@@ -14,7 +14,7 @@ function calculate2022(courses: any): ElectiveStats {
         (acc: ElectiveStats, course: CourseList) => {
             const score = Number(course.credit) || 0;
             acc.totalScore += score;
-            if (course.teacher !== "网络教师" && !course.courseName.includes("网课")) {
+            if (!course.belongTo?.includes("网络")) {
                 acc.offlineScore += score;
             }
 

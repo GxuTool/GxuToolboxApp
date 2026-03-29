@@ -22,7 +22,7 @@ export const CourseListSchema = rawItem.transform(i => {
         selectionType: i.kklxmc,
         /** 课程分类 kcfl */
         classification: i.kcfl,
-        /** 课程归属 kcgsmc */
+        /** 课程归属 kcgsmc （判断是不是网课）*/
         belongTo: i.kcgsmc,
         /** 学制 kcxzmc*/
         system: i.kcxzmc,
