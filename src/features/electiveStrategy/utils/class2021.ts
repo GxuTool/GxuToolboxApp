@@ -14,7 +14,7 @@ function calculate2021(courses: any): ElectiveStats {
         (acc: ElectiveStats, course: CourseList) => {
             const score = Number(course.credit) || 0;
             acc.totalScore += score;
-            if (course.teacher !== "网络教师") {
+            if (course.teacher !== "网络教师" && !course.courseName.includes("网课")) {
                 acc.offlineScore += score;
             }
 
@@ -77,7 +77,6 @@ function calculate2021(courses: any): ElectiveStats {
         requiredCourses: requiredCourses.size === 0,
     };
 
-    console.log(passed);
     const isQualified = Object.values(passed).every(p => p);
 
     return {
@@ -107,12 +106,12 @@ export const class2021: ElectiveStrategy = {
                 format: stats => `${stats.offlineScore} / ${REQUIREMENTS.offlineScore}  `,
                 passed: stats => stats.offlineScore >= REQUIREMENTS.offlineScore,
             },
-            {
-                key: "artScore",
-                label: `公共艺术学分 (要求: ${REQUIREMENTS.artScore})`,
-                format: stats => `${stats.modules.art.score} / ${REQUIREMENTS.artScore}  `,
-                passed: stats => stats.modules.art.score >= REQUIREMENTS.artScore,
-            },
+            // {
+            //     key: "artScore",
+            //     label: `公共艺术学分 (要求: ${REQUIREMENTS.artScore})`,
+            //     format: stats => `${stats.modules.art.score} / ${REQUIREMENTS.artScore}  `,
+            //     passed: stats => stats.modules.art.score >= REQUIREMENTS.artScore,
+            // },
             {
                 key: "hasLeadModule",
                 label: "领军模块",

@@ -14,7 +14,7 @@ function calculate2022(courses: any): ElectiveStats {
         (acc: ElectiveStats, course: CourseList) => {
             const score = Number(course.credit) || 0;
             acc.totalScore += score;
-            if (course.teacher !== "网络教师") {
+            if (course.teacher !== "网络教师" && !course.courseName.includes("网课")) {
                 acc.offlineScore += score;
             }
 
@@ -77,7 +77,6 @@ function calculate2022(courses: any): ElectiveStats {
         requiredCourses: requiredCourses.size === 0,
     };
 
-    console.log(passed);
     const isQualified = Object.values(passed).every(p => p);
 
     return {

@@ -8,7 +8,6 @@ import {getStrategy} from "@/features/electiveStrategy/utils";
 import {StatItem} from "@/features/electiveStrategy/component/StatItem.tsx";
 import {userProfile} from "@/core/user/profile.ts";
 import {examApi} from "@/js/jw/exam.ts";
-import {store} from "@/core/store.ts";
 
 export default function ElectiveStrategy() {
     const {theme} = useTheme();
@@ -132,7 +131,7 @@ export default function ElectiveStrategy() {
             <View style={styles.card}>
                 <View>
                     <Text style={styles.title}>课程成绩</Text>
-                    <Text style={[styles.title,{fontSize:12}]}>（有图标的是网课） </Text>
+                    <Text style={[styles.title, {fontSize: 12}]}>网课使用图标标记</Text>
                 </View>
                 <View style={styles.divider} />
                 {courses.map((c, index) => {
@@ -143,7 +142,7 @@ export default function ElectiveStrategy() {
                         <View key={index} style={styles.courseRow}>
                             <View style={styles.courseInfo}>
                                 <Flex direction="row" align="center" gap={6}>
-                                    {c.teacher === "网络教师" && <Icon name="cast-education" size={16} />}
+                                    {(c.teacher === "网络教师" || c.courseName.includes("网课")) && <Icon name="cast-education" size={16} />}
                                     <Text style={styles.courseName}>{c.courseName}</Text>
                                 </Flex>
                                 <Text style={styles.courseMeta}>
