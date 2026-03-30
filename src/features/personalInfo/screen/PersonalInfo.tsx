@@ -1,4 +1,4 @@
-import {ScrollView, StyleSheet, View} from "react-native";
+import {ScrollView, StyleSheet, View,ActivityIndicator} from "react-native";
 import {useEffect, useState} from "react";
 import {getPersonalInfo} from "@/features/personalInfo/api";
 import {ListItem, Text, useTheme} from "@rneui/themed";
@@ -18,10 +18,11 @@ const InfoRow = ({label, value, theme, styles}: {label: string; value?: string; 
 export const PersonalInfo = () => {
     const {theme} = useTheme();
     const [info, setInfo] = useState<any>();
-
+    const [loading,setloading]=useState(true);
     const init = async () => {
         const res = await getPersonalInfo();
         setInfo(res);
+        setloading(false);
     };
 
     useEffect(() => {
@@ -50,10 +51,38 @@ export const PersonalInfo = () => {
             fontSize: 16,
             fontWeight: "500",
         },
+        noresContainer:{
+            alignItems:"center",
+            justifyContent:"center",
+            minHeight:260,
+            gap:15,
+        },
     });
 
-    if (!info) return null;
+    if(loading){
+        return (
+            <View style={styles.container}>
+                <View style={[styles.infoContainer,styles.noresContainer]}>
+                    <ActivityIndicator size="large" color={theme.colors.primary}/>
+                    <Text style={styles.label}>
+                        加载中....
+                    </Text>
+                </View>
+            </View>
+        )
+    }
 
+    if(!info.size){
+        return (
+            <View style={styles.container}>
+                <View style={[styles.noresContainer]}>
+                    <Text style={styles.label}>
+                        暂无个人信息，请检查教务系统登录状态
+                    </Text>
+                </View>
+            </View>
+        )
+    }
     return (
         <ScrollView style={{backgroundColor: theme.colors.background}}>
             <View style={styles.container}>
