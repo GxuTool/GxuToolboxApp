@@ -9,28 +9,24 @@ const BASE_URL = "https://yktuipweb.gxu.edu.cn";
 
 // ─── 登录相关 ───
 
-async function getCaptchaCode(): Promise<{uri: string; code: string}> {
+async function getCaptchaCode(onCodeReady?: (code: string) => void): Promise<{uri: string}> {
     const res = await http.get(`${BASE_URL}/api/account/getVerify?num=${Date.now()}`, {
         responseType: "arraybuffer",
     });
     const base64 = btoa(new Uint8Array(res.data).reduce((data, byte) => data + String.fromCharCode(byte), ""));
     const dataUri = `data:image/jpeg;base64,${base64}`;
-    let code = "";
-    try {
-        const res2 = await axios.post("https://acm.gxu.edu.cn/ocr/ocr/classify_base64", {
-            image_base64: dataUri,
-        });
-        if (res2.data.message === "识别成功") {
-            code = res2.data.data.text;
-        }
-    } catch {
-        // OCR 服务不可用，图片仍正常展示，用户手动输入
-    }
 
-    return {
-        uri: dataUri,
-        code: code,
-    };
+    // OCR 后台跑，不阻塞返回
+    axios
+        .post("https://acm.gxu.edu.cn/ocr/ocr/classify_base64", {image_base64: dataUri})
+        .then(res2 => {
+            if (res2.data.message === "识别成功") {
+                onCodeReady?.(res2.data.data.text);
+            }
+        })
+        .catch(() => {});
+
+    return {uri: dataUri};
 }
 
 async function login(username: string, password: string, captchaCode: string): Promise<AST.ResRoot<AST.LoginData>> {

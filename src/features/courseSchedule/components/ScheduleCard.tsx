@@ -11,7 +11,7 @@ import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/Cour
 import {useNavigation} from "@react-navigation/native";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
-import {UnText} from "@/components/un-ui/index.ts";
+import {UnText} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
