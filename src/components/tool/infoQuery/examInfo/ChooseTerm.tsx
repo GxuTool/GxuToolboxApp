@@ -1,5 +1,4 @@
 import {ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import {store} from "@/core/store.ts";
 import {useEffect, useMemo, useState} from "react";
 import {useTheme} from "@rneui/themed";
 import {userProfile} from "@/core/user/profile.ts";
@@ -59,7 +58,7 @@ export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeY
     const init = async () => {
         const info = await userProfile.loadUserInfo();
         setEnrollmentYear(info.grade);
-    }
+    };
 
     useEffect(() => {
         init();
@@ -110,7 +109,6 @@ export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeY
     const styles = StyleSheet.create({
         container: {
             padding: 16,
-            backgroundColor: theme.colors.white,
         },
         header: {
             flexDirection: "row",

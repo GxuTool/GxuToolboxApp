@@ -1,5 +1,6 @@
 import {ReactNode} from "react";
 import moment from "moment";
+
 export interface TimeScheduleItemData<T = any> {
     /** 元素数据 */
     data: T[];
@@ -24,5 +25,6 @@ export interface ScheduleTableItem {
     seat?: string;
     status?: number;
     isShift?: boolean;
-    raw?: any;  // 原始 API 数据，暂时用于详情展示
+    qq?: string;
+    raw?: any; // 原始 API 数据，暂时用于详情展示
 }

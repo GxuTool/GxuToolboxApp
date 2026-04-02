@@ -9,14 +9,17 @@ const PracticeCourseSchema = z
     })
     .loose();
 
-const TheoryCourseSchema = z.object({
-    cdbh: z.string(),
-    jcs: z.string(),
-    kcmc: z.string(),
-    zcd: z.string(),
-    xqj: z.string().transform(Number),
-    xm: z.string(),
-}).loose();
+const TheoryCourseSchema = z
+    .object({
+        cdbh: z.string(),
+        jcs: z.string(),
+        kcmc: z.string(),
+        zcd: z.string(),
+        xqj: z.string().transform(Number),
+        xm: z.string(),
+        qqqh: z.string(),
+    })
+    .loose();
 
 const rawCourse = z.object({
     sjkList: z.array(PracticeCourseSchema).default([]),
@@ -39,6 +42,7 @@ export const ICourse = rawCourse.transform(i => ({
         week: parseWeeks(c.zcd),
         teacher: c.xm,
         day: c.xqj,
+        qq: c.qqqh,
         source: "jw",
         raw: c,
     })),

@@ -6,8 +6,16 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {normalizeCourse} from "@/features/courseSchedule/utils/normalizeCourse.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
-export function useBaseCourse(year: number, term: SchoolTermValue): {item: ScheduleTableItem[]; refresh: () => void} {
+export function useBaseCourse(
+    year: number,
+    term: SchoolTermValue,
+): {
+    item: ScheduleTableItem[];
+    refresh: () => void;
+    loading: boolean;
+} {
     const [courseSchedule, setCourseSchedule] = useState<ScheduleTableItem[]>();
+    const [loading, setLoading] = useState<boolean>(false);
 
     const fetchCourse = useCallback(async () => {
         const processAndSet = (raw: any, shouldCache: boolean) => {
@@ -31,6 +39,7 @@ export function useBaseCourse(year: number, term: SchoolTermValue): {item: Sched
                 return newModel;
             });
         };
+        setLoading(true);
 
         // 从内存中加载课程缓存
         try {
@@ -47,6 +56,8 @@ export function useBaseCourse(year: number, term: SchoolTermValue): {item: Sched
             }
         } catch (e) {
             console.warn("网络请求失败", e);
+        } finally {
+            setLoading(false);
         }
     }, [year, term]);
 
@@ -54,5 +65,5 @@ export function useBaseCourse(year: number, term: SchoolTermValue): {item: Sched
         fetchCourse();
     }, [fetchCourse]);
 
-    return {item: courseSchedule, refresh: fetchCourse};
+    return {item: courseSchedule, refresh: fetchCourse, loading};
 }
