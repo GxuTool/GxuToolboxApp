@@ -6,10 +6,10 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {attendanceApi} from "@/features/attendance/api";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import moment from "moment";
 import {store} from "@/core/store.ts";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export const useAttendance = (year: number, term: SchoolTermValue) => {
     const [status, setStatus] = useState<AuthState<Account>>(attendanceMachine.getState());
@@ -22,8 +22,34 @@ export const useAttendance = (year: number, term: SchoolTermValue) => {
                     id: `${item.day}-${item.periodSplit}`,
                     week: moment(item.day).diff(startDay, "week") + 1,
                     day: moment(item.day).day() as 1 | 2 | 3 | 4 | 5 | 6 | 7,
-                    begin: Number(item.periodSplit.split(",")[0]) as | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
-                    end: Number(item.periodSplit.split(",")[1]) as | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
+                    begin: Number(item.periodSplit.split(",")[0]) as
+                        | 1
+                        | 2
+                        | 3
+                        | 4
+                        | 5
+                        | 6
+                        | 7
+                        | 8
+                        | 9
+                        | 10
+                        | 11
+                        | 12
+                        | 13,
+                    end: Number(item.periodSplit.split(",")[1]) as
+                        | 1
+                        | 2
+                        | 3
+                        | 4
+                        | 5
+                        | 6
+                        | 7
+                        | 8
+                        | 9
+                        | 10
+                        | 11
+                        | 12
+                        | 13,
                     title: item.courseName,
                     kind: "attendance",
                     status: item.atdStateId,
@@ -72,5 +98,5 @@ export const useAttendance = (year: number, term: SchoolTermValue) => {
         fetchAttendance();
     }, [fetchAttendance]);
 
-    return {status, attendanceList};
+    return {status, attendanceList, refresh: fetchAttendance};
 };

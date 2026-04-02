@@ -7,7 +7,10 @@ import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts
 import {examApi} from "@/js/jw/exam.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
-export function useExam(year: number, term: SchoolTermValue): ScheduleTableItem[] {
+export function useExam(year: number, term: SchoolTermValue): {
+    items: ScheduleTableItem[];
+    refresh: () => Promise<void>
+} {
     const [examSchedule, setExamSchedule] = useState<ScheduleTableItem[]>();
     const startDay = useStartDay(year, term);
 
@@ -55,5 +58,5 @@ export function useExam(year: number, term: SchoolTermValue): ScheduleTableItem[
         fetchExam();
     }, [fetchExam]);
 
-    return examSchedule;
+    return {items: examSchedule, refresh: fetchExam};
 }

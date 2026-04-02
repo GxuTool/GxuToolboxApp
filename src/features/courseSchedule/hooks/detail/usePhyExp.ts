@@ -8,7 +8,7 @@ import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts
 import moment from "moment";
 
 export function usePhyExp(year: number, term: SchoolTermValue): any[] {
-    const courseSchedule = useBaseCourse(year, term);
+    const { item: courseSchedule } = useBaseCourse(year, term);
     const [phyExpList, setPhyExpList] = useState<any[]>([]);
     const startDay = useStartDay(year, term);
 

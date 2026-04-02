@@ -21,7 +21,7 @@ const TIME_SPAN_START = [
 
 export function useNextCourse(scheduleItems: ScheduleTableItem[], startDay: moment.Moment) {
     const {authState} = useJwAuth();
-    if (authState.status !== "authenticated") {
+    if (authState.status !== "authenticated" && scheduleItems === null) {
         return null;
     }
 

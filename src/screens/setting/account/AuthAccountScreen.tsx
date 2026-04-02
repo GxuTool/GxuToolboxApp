@@ -5,6 +5,7 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {unifiedMachine} from "@/core/auth/unified/unifiedMachine.ts";
 import {Account, AuthStateMap} from "@/core/auth/auth.type.ts";
 import {AuthState} from "@/core/auth/createAuthCore.ts";
+import {useUnifiedAccount} from "@/core/auth/unified/hook/useUnifiedAccount.ts";
 
 function statusMeta(state: AuthState<Account>) {
     switch (state.status) {
@@ -20,16 +21,15 @@ function statusMeta(state: AuthState<Account>) {
 }
 
 export function AuthAccountScreen() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [hydrating, setHydrating] = useState(true);
     const [authState, setAuthState] = useState<AuthState<Account>>(unifiedMachine.getState());
     const [result, setResult] = useState<{kind: "idle" | "success" | "error"; title: string; message?: string}>({
         kind: "idle",
         title: "",
     });
+
+    const {username, setUsername, password, setPassword, hydrating, saveAccount} = useUnifiedAccount();
 
     const meta = useMemo(() => statusMeta(authState), [authState]);
     const busy = hydrating || loading;
@@ -43,7 +43,6 @@ export function AuthAccountScreen() {
                     setPassword(account.password);
                 }
             } finally {
-                setHydrating(false);
             }
         })();
     }, []);
@@ -60,7 +59,7 @@ export function AuthAccountScreen() {
         setResult({kind: "idle", title: ""});
 
         try {
-            await unifiedMachine.saveAccount({username: u, password: p});
+            await saveAccount(u, p);
             const state = await unifiedMachine.loginWithAccount({username: u, password: p});
             setAuthState(state);
 

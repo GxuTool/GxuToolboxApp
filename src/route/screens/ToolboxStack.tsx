@@ -16,13 +16,14 @@ import {PhyExpScreen} from "@/screens/tool/jw/infoQuery/praticalCourse/PhyExpScr
 import {EngTrainingScheduleScreen} from "@/screens/tool/jw/infoQuery/praticalCourse/EngTrainingScheduleScreen.tsx";
 import {SelfCourseSelection} from "@/screens/tool/jw/courseSelection/SelfCourseSelection.tsx";
 import {GPAcalculator} from "@/screens/tool/jw/GPAcalculator/GPAcalculator.tsx";
-// import {RescheduleNotificationScreen} from "@/features/notification/screen/RescheduleNotificationScreen.tsx";
 import {TimeShiftScreen} from "@/screens/tool/jw/notification/TimeShiftScreen.tsx";
 import AttendanceInfoQueryScreen from "@/screens/tool/auth/attendanceSystem/AttendanceInfoQueryScreen.tsx";
 import WebViewScreen from "@/screens/WebViewScreen.tsx";
 import {useUserConfig, useWebView} from "@/hooks/app.ts";
 import {EvaluationTemplate} from "@/features/evaluation/screens/EvaluationTemplate.tsx";
 import {HolidayScreen} from "@/features/holidays/screen/HolidayScreen.tsx";
+import {TestPage} from "@/features/TestPage.tsx";
+import {RescheduleNotificationScreen} from "@/features/notification/screen/RescheduleNotificationScreen.tsx";
 
 const Stack = createNativeStackNavigator();
 
@@ -112,11 +113,11 @@ export function ToolboxStack() {
                 options={{title: "金工实训查询"}}
             />
 
-            {/*<Stack.Screen*/}
-            {/*    name="reschedulingNews"*/}
-            {/*    component={RescheduleNotificationScreen}*/}
-            {/*    options={{title: "调课信息查询"}}*/}
-            {/*/>*/}
+            <Stack.Screen
+                name="reschedulingNews"
+                component={RescheduleNotificationScreen}
+                options={{title: "调课信息查询"}}
+            />
             <Stack.Screen name="timeShiftScreen" component={TimeShiftScreen} options={{title: "调休信息查询"}} />
             <Stack.Screen name="HolidayScreen" component={HolidayScreen} options={{title: "假期安排"}} />
 
@@ -124,6 +125,8 @@ export function ToolboxStack() {
             <Stack.Screen name="EvaluationDetail" component={EvaluationDetail} options={{title: "学生评价细节"}} />
             <Stack.Screen name="EvaluationComment" component={EvaluationComment} options={{title: "填写评语"}} />
             <Stack.Screen name="EvaluationTemplate" component={EvaluationTemplate} options={{title: "评价模板"}} />
+
+            <Stack.Screen name="TestPage" component={TestPage} options={{title:"测试页"}} />
 
             <Stack.Screen name="PositionListScreen" component={BuildingListScreen} options={{title: "地图导航"}} />
             <Stack.Screen name="WidgetPreviewScreen" component={WidgetPreviewScreen} options={{title: "小部件预览"}} />

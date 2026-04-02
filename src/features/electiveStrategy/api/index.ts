@@ -1,6 +1,5 @@
 import {http} from "@/core/http.ts";
 import {CourseListResScheme} from "@/features/electiveStrategy/api/schema.ts";
-import {ExamApiResScheme} from "@/features/examInfo/api/schema.ts";
 import {ToastAndroid} from "react-native";
 
 export const electiveAPI = {
@@ -21,7 +20,7 @@ export const electiveAPI = {
             }
             return valiRes.data;
         } else {
-            ToastAndroid.show("获取考试信息失败", ToastAndroid.SHORT);
+            ToastAndroid.show("获取信息失败", ToastAndroid.SHORT);
             return null;
         }
     },

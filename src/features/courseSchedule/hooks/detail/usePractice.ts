@@ -4,7 +4,10 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
 import {courseApi} from "@/js/jw/course.ts";
 
-export function usePractice(year: number, term: SchoolTermValue): ICourse["practiceList"] {
+export function usePractice(year: number, term: SchoolTermValue): {
+    items: ICourse["practiceList"];
+    refresh: () => Promise<void>
+} {
     const [practiceList, setPracticeList] = useState<ICourse["practiceList"]>();
 
     const fetchPractice = useCallback(async () => {
@@ -52,5 +55,5 @@ export function usePractice(year: number, term: SchoolTermValue): ICourse["pract
         fetchPractice();
     }, [fetchPractice]);
 
-    return practiceList;
+    return {items: practiceList, refresh: fetchPractice};
 }

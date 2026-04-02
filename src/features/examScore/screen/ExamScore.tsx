@@ -1,4 +1,4 @@
-import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {ScrollView, StyleSheet, View} from "react-native";
 import {Button, Divider, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
@@ -12,7 +12,6 @@ import {examApi} from "@/js/jw/exam.ts";
 import {useNavigation} from "@react-navigation/native";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
 import {electiveAPI} from "@/features/electiveStrategy/api";
-import {CourseListResScheme} from "@/features/electiveStrategy/api/schema.ts";
 import {useUserConfig} from "@/hooks/app.ts";
 
 export function ExamScore() {
@@ -64,7 +63,6 @@ export function ExamScore() {
     async function query() {
         const res = await examApi.getExamScore(year, term, page);
         if (res) {
-            ToastAndroid.show("获取考试成绩成功", ToastAndroid.SHORT);
             setApiRes(res);
             await store.save({key: "examScore", data: res});
             await getCourse(year, term, res);
@@ -74,12 +72,7 @@ export function ExamScore() {
     async function getCourse(year: number, term: SchoolTermValue, scoreRes: ExamScoreQueryRes) {
         const courseListRes = await electiveAPI.getCourses(year, term).then(res => {
             if (typeof res?.items === "object") {
-                const valiRes = CourseListResScheme.safeParse(res);
-                if (!valiRes.success) {
-                    console.log("API 响应错误", valiRes.error);
-                    return null;
-                }
-                return valiRes.data;
+                return res;
             }
             return null;
         });
@@ -113,7 +106,7 @@ export function ExamScore() {
             />
             <View style={style.container}>
                 <Flex direction="column" gap={15} align="flex-start">
-                    {apiRes?.items?.length > 0 &&
+                    {apiRes?.items?.length > 0 && (
                         <>
                             <Flex align="flex-end" gap={5}>
                                 <Text h4>查询结果</Text>
@@ -138,7 +131,7 @@ export function ExamScore() {
                                 <Text>每页15条记录</Text>
                             </Flex>
                         </>
-                    }
+                    )}
                     {notScore.length > 0 && (
                         <View style={{width: "100%"}}>
                             <Text h4>未出分科目</Text>

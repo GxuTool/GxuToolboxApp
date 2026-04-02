@@ -209,7 +209,7 @@ export function AttendanceSystemAccountScreen() {
                             openInWeb("考勤系统", {uri: "https://yktuipweb.gxu.edu.cn/#/StudentHome"})
                         }
                         disabled={busy}>
-                        在浏览器打开考勤系统
+                        在浏览器打开考勤系统（全天需要校园网）
                     </Button>
                 </View>
 

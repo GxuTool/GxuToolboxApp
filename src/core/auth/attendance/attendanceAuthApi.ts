@@ -15,14 +15,16 @@ async function getCaptchaCode(): Promise<{uri: string; code: string}> {
     });
     const base64 = btoa(new Uint8Array(res.data).reduce((data, byte) => data + String.fromCharCode(byte), ""));
     const dataUri = `data:image/jpeg;base64,${base64}`;
-    const res2 = await axios.post("https://acm.gxu.edu.cn/ocr/ocr/classify_base64", {
-        image_base64: dataUri,
-    });
-
     let code = "";
-    console.log(res2.data);
-    if (res2.data.message === "识别成功") {
-        code = res2.data.data.text;
+    try {
+        const res2 = await axios.post("https://acm.gxu.edu.cn/ocr/ocr/classify_base64", {
+            image_base64: dataUri,
+        });
+        if (res2.data.message === "识别成功") {
+            code = res2.data.data.text;
+        }
+    } catch {
+        // OCR 服务不可用，图片仍正常展示，用户手动输入
     }
 
     return {

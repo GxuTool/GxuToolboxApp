@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from "react";
-import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
+import {unifiedMachine} from "@/core/auth/unified/unifiedMachine.ts";
 
-export function useJwAccount() {
+export function useUnifiedAccount() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [hydrating, setHydrating] = useState(true);
@@ -11,7 +11,7 @@ export function useJwAccount() {
         mountedRef.current = true;
         (async () => {
             try {
-                const account = await JwMachine.loadAccount();
+                const account = await unifiedMachine.loadAccount();
                 if (!mountedRef.current) return;
                 if (account) {
                     setUsername(account.username ?? "");
@@ -31,19 +31,12 @@ export function useJwAccount() {
         async (u?: string, p?: string) => {
             const nextUsername = (u ?? username).trim();
             const nextPassword = (p ?? password).trim();
-            await JwMachine.saveAccount({username: nextUsername, password: nextPassword});
+            await unifiedMachine.saveAccount({username: nextUsername, password: nextPassword});
             setUsername(nextUsername);
             setPassword(nextPassword);
         },
         [username, password],
     );
 
-    return {
-        username,
-        setUsername,
-        password,
-        setPassword,
-        hydrating,
-        saveAccount,
-    };
+    return {username, setUsername, password, setPassword, hydrating, saveAccount};
 }

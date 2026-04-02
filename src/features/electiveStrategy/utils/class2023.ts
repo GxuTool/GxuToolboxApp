@@ -14,7 +14,7 @@ function calculate2023(courses: any): ElectiveStats {
         (acc: ElectiveStats, course: CourseList) => {
             const score = Number(course.credit) || 0;
             acc.totalScore += score;
-            if (!course.belongTo?.includes("网络")) {
+            if (!(course.belongTo?.includes("网络") || course.teacher === "网络教师")) {
                 acc.offlineScore += score;
             }
 

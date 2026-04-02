@@ -1,4 +1,4 @@
-import {ScrollView, StyleSheet, View} from "react-native";
+import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import {useEffect, useMemo, useState} from "react";
 import {jwxt} from "@/js/jw/jwxt.ts";
 import {ButtonGroup, ListItem, Switch, Text, useTheme} from "@rneui/themed";
@@ -127,6 +127,7 @@ export function RescheduleNotificationScreen() {
                             isExpanded={expandedIndex === index}
                             onPress={() => {
                                 setExpandedIndex(expandedIndex === index ? null : index);
+                                ToastAndroid.show("操作",ToastAndroid.SHORT);
                             }}>
                             <View
                                 style={[
@@ -146,7 +147,7 @@ export function RescheduleNotificationScreen() {
                                 <ChangeDetail
                                     label="节次"
                                     oldValue={`${item.oldSection}节`}
-                                    newValue={`${item[`new${'Section'}`]}节`}
+                                    newValue={`${item.newSection}节`}
                                 />
                                 <ChangeDetail label="地点" oldValue={item.oldPlace} newValue={item.newPlace} />
                                 <Text>{`原文：${item.text}`}</Text>

@@ -27,7 +27,7 @@ const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
 };
 
 export function EvaluationOverview() {
-    const {authState} = useJwAuth();
+    const {JWauthState} = useJwAuth();
 
     const {theme} = useTheme();
     const [evaList, setEvaList] = useState<EvaTeacherList[]>([]);
@@ -179,7 +179,7 @@ export function EvaluationOverview() {
 
     async function init() {
         try {
-            if (authState.status !== AuthStateMap.Authenticated) {
+            if (JWauthState.status !== AuthStateMap.Authenticated) {
                 Alert.alert("需要登录", "此操作需要登录教务系统", [
                     {text: "知道了", onPress: () => navigation.goBack()},
                 ]);

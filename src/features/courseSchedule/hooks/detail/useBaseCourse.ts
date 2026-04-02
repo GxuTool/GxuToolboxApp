@@ -6,7 +6,7 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {normalizeCourse} from "@/features/courseSchedule/utils/normalizeCourse.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
-export function useBaseCourse(year: number, term: SchoolTermValue):ScheduleTableItem[] {
+export function useBaseCourse(year: number, term: SchoolTermValue): {item: ScheduleTableItem[]; refresh: () => void} {
     const [courseSchedule, setCourseSchedule] = useState<ScheduleTableItem[]>();
 
     const fetchCourse = useCallback(async () => {
@@ -38,9 +38,7 @@ export function useBaseCourse(year: number, term: SchoolTermValue):ScheduleTable
             if (cachedRaw) {
                 processAndSet(cachedRaw, false);
             }
-        } catch (e) {
-
-        }
+        } catch (e) {}
 
         try {
             const fetchedRaw = await courseApi.getCourseSchedule(year, term);
@@ -56,5 +54,5 @@ export function useBaseCourse(year: number, term: SchoolTermValue):ScheduleTable
         fetchCourse();
     }, [fetchCourse]);
 
-    return courseSchedule;
+    return {item: courseSchedule, refresh: fetchCourse};
 }
