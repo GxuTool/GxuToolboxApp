@@ -4,13 +4,15 @@ import {ListItem, Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
-import React from "react";
+import React, {useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {Pos} from "@/js/pos.ts";
 import {useUserConfig} from "@/hooks/app.ts";
+import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/TeacherInfoSheet.tsx";
 
 interface Props extends ViewProps {
     course: Course;
+    onClick: () => void;
 }
 
 interface Info {
@@ -67,6 +69,14 @@ function PropItem({item, ...props}: {item: Info} & Props) {
                 </Pressable>
             );
             break;
+        case "xm":
+            info.label = (
+                <Pressable android_ripple={userConfig.theme.ripple} onPress={() => props.onClick()}>
+                    <Flex gap={5} align="center">
+                        <Text style={style.infoLabel}>{label}</Text>
+                    </Flex>
+                </Pressable>
+            );
     }
     return (
         <Flex justify="space-between" gap={30}>
@@ -79,6 +89,8 @@ function PropItem({item, ...props}: {item: Info} & Props) {
 }
 
 export function CourseDetail(props: Props) {
+    const [visible, setVisible] = useState(false);
+
     const {userConfig} = useUserConfig();
     const infoList = Object.entries(userConfig.preference.courseDetail)
         .filter(prop => prop[1].show)
@@ -87,7 +99,7 @@ export function CourseDetail(props: Props) {
                 ({
                     key,
                     label,
-                } as Info),
+                }) as Info,
         );
     StyleSheet.create({
         infoIcon: {
@@ -108,7 +120,7 @@ export function CourseDetail(props: Props) {
             </Flex>
             {infoList.map((item, index) => (
                 <ListItem bottomDivider={index !== infoList.length - 1} key={index}>
-                    <PropItem item={item} {...props} />
+                    <PropItem item={item} {...props} onClick={() => setVisible(true)} />
                 </ListItem>
             ))}
             <ListItem>
@@ -130,6 +142,7 @@ export function CourseDetail(props: Props) {
                 {/*    </Flex>*/}
                 {/*</Flex>*/}
             </ListItem>
+            <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
         </View>
     );
 }
