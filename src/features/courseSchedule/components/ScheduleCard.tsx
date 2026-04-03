@@ -26,6 +26,7 @@ import {defaultItems} from "@/features/courseSchedule/utils/defaultItems.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
 import {AuthStatusSection} from "@/features/courseSchedule/components/AuthStatusSection.tsx";
 import {useUnifiedAuth} from "@/core/auth/unified/hook/useUnifiedAuth.ts";
+import {useAttendanceAuth} from "@/core/auth/attendance/hooks/useAttendanceAuth.ts";
 
 // 菜单的类型
 type SheetState =
@@ -48,6 +49,7 @@ export function ScheduleCard() {
 
     const {authState: JWauthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
+    const {authState: attendanceAuthState} = useAttendanceAuth();
 
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
@@ -131,7 +133,7 @@ export function ScheduleCard() {
             <Flex justify="space-between" style={style.cardTitle}>
                 <Flex direction="row" align="center" gap={8}>
                     <Text h4>日程表</Text>
-                    {[JWauthState, unifiedAuthState, null].map(i =>
+                    {[JWauthState, unifiedAuthState, attendanceAuthState].map(i =>
                         i?.status !== "authenticated" ? (
                             <Icon name="account-network-off-outline" size={24} color={theme.colors.error} />
                         ) : (
@@ -190,6 +192,7 @@ export function ScheduleCard() {
                             <AuthStatusSection
                                 jwAuth={JWauthState}
                                 unifiedAuth={unifiedAuthState}
+                                attendanceAuth={attendanceAuthState}
                                 menuItemStyle={style.menuItem}
                             />
                             <Pressable

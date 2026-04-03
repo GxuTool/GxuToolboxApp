@@ -8,17 +8,18 @@ import {AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
 interface Props {
     jwAuth: AuthState;
     unifiedAuth: AuthState;
+    attendanceAuth: AuthState;
     menuItemStyle: object;
 }
 
-export function AuthStatusSection({jwAuth, unifiedAuth, menuItemStyle}: Props) {
+export function AuthStatusSection({jwAuth, unifiedAuth, attendanceAuth, menuItemStyle}: Props) {
     const navigation = useNavigation();
     const {theme} = useTheme();
 
     const items = [
         {label: "教务系统", icon: "school", auth: jwAuth, screen: "jwAccount"},
         {label: "统一认证", icon: "shield-account", auth: unifiedAuth, screen: "authAccount"},
-        {label: "考勤系统", icon: "clock-check", auth: null, screen: "attendanceAccount"},
+        {label: "考勤系统", icon: "clock-check", auth: attendanceAuth, screen: "attendanceAccount"},
     ];
 
     console.log(unifiedAuth);

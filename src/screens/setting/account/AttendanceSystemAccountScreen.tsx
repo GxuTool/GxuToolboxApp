@@ -174,7 +174,7 @@ export function AttendanceSystemAccountScreen() {
                     value={captchaCode}
                     onChangeText={v => setCaptchaCode(v)}
                     label="验证码"
-                    placeholder="4位验证码（自动OCR识别）"
+                    placeholder="自动OCR识别"
                     autoCapitalize="none"
                     autoCorrect={false}
                     maxLength={4}

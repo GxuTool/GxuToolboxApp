@@ -1,8 +1,7 @@
 import {AuthAdapter} from "@/core/auth/createAuthCore.ts";
 import {Account} from "@/core/auth/auth.type.ts";
 import {userMgr} from "@/js/mgr/user.ts";
-import {authApi} from "@/js/auth/auth.ts";
-import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
+import {attendanceAuthApi} from "@/core/auth/attendance/attendanceAuthApi.ts";
 
 export const attendanceAdapter: AuthAdapter<Account> = {
     async loadAccount() {
@@ -17,16 +16,12 @@ export const attendanceAdapter: AuthAdapter<Account> = {
         return userMgr.attendanceSystem.storeAccount("", "");
     },
     async testToken() {
-        return attendanceSystemApi.testTokenExpired();
+        return attendanceAuthApi.testToken();
     },
-    async loginWithAccount(account: Account) {
-        // TODO: 集成 OCR 服务获取 captchaCode
-        // 目前考勤系统登录需要验证码，暂时无法全自动登录
-        // 后续接入 OCR 后，流程为：
-        // 1. 获取验证码图片
-        // 2. OCR 识别
-        // 3. 调用 authApi.loginAttendanceSystem(username, password, captchaCode)
-        // 4. 检查返回 code === 600
-        throw new Error("考勤系统登录需要验证码，请使用 AttendanceQuickLogin 组件");
+    async loginWithAccount(account: Account): Promise<boolean> {
+        const {code} = await attendanceAuthApi.getCaptchaImage();
+        if (!code) return false;
+        const res = await attendanceAuthApi.login(account.username, account.password, code);
+        return res.code === 600;
     },
 };
