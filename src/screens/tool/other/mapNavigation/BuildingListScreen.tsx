@@ -1,7 +1,8 @@
 import BuildingListItem from "@/screens/tool/other/mapNavigation/BuildingListItem.tsx";
-import {FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Alert, FlatList, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View} from "react-native";
+import {MapApp, Pos} from "@/js/pos.ts";
 import {BuildingList} from "@/type/pos.ts";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 
@@ -16,12 +17,87 @@ export function BuildingListScreen() {
     ).setAlpha(theme.mode === "dark" ? 0.3 : 0.8).rgbaString;
 
     const [selectedType, setSelectedType] = useState("全部");
+    const [defaultMapApp, setDefaultMapApp] = useState<MapApp | null>(null);
+
+    const loadDefaultMapApp = async () => {
+        const currentDefaultMapApp = await Pos.getDefaultMapApp();
+        setDefaultMapApp(currentDefaultMapApp);
+    };
+
+    useEffect(() => {
+        loadDefaultMapApp().catch(e => {
+            console.error(e);
+        });
+    }, []);
+
+    const defaultMapLabel = defaultMapApp === "amap"
+        ? "高德地图"
+        : defaultMapApp === "baidu"
+            ? "百度地图"
+            : "每次询问";
+
+    const changeDefaultMap = () => {
+        Alert.alert(
+            "默认地图",
+            `当前设置：${defaultMapLabel}`,
+            [
+                {
+                    text: "高德地图",
+                    onPress: () => {
+                        Pos.setDefaultMapApp("amap").then(() => {
+                            setDefaultMapApp("amap");
+                            ToastAndroid.show("默认地图已设为高德地图", ToastAndroid.SHORT);
+                        }).catch(e => {
+                            console.error(e);
+                            ToastAndroid.show("默认地图设置失败", ToastAndroid.SHORT);
+                        });
+                    },
+                },
+                {
+                    text: "百度地图",
+                    onPress: () => {
+                        Pos.setDefaultMapApp("baidu").then(() => {
+                            setDefaultMapApp("baidu");
+                            ToastAndroid.show("默认地图已设为百度地图", ToastAndroid.SHORT);
+                        }).catch(e => {
+                            console.error(e);
+                            ToastAndroid.show("默认地图设置失败", ToastAndroid.SHORT);
+                        });
+                    },
+                },
+                {
+                    text: "每次询问",
+                    onPress: () => {
+                        Pos.clearDefaultMapApp().then(() => {
+                            setDefaultMapApp(null);
+                            ToastAndroid.show("已改为每次询问", ToastAndroid.SHORT);
+                        }).catch(e => {
+                            console.error(e);
+                            ToastAndroid.show("默认地图设置失败", ToastAndroid.SHORT);
+                        });
+                    },
+                },
+                {
+                    text: "取消",
+                    style: "cancel",
+                },
+            ],
+        );
+    };
 
     const selectedData =
         selectedType === "全部" ? BuildingList : BuildingList.filter(item => item.type === selectedType);
+
     return (
         <View style={{flex: 1}}>
             <View>
+                <TouchableOpacity
+                    style={[styles.defaultMapButton, {borderColor: defaultColor, backgroundColor: defaultColor}]}
+                    onPress={changeDefaultMap}>
+                    <Text style={[styles.defaultMapTitle, {color: theme.colors.black}]}>默认地图</Text>
+                    <Text style={[styles.defaultMapValue, {color: theme.colors.black}]}>当前：{defaultMapLabel}</Text>
+                </TouchableOpacity>
+
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -57,6 +133,23 @@ export function BuildingListScreen() {
 }
 
 const styles = StyleSheet.create({
+    defaultMapButton: {
+        marginHorizontal: 12,
+        marginTop: 12,
+        marginBottom: 4,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    defaultMapTitle: {
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    defaultMapValue: {
+        marginTop: 6,
+        fontSize: 13,
+    },
     filterContainer: {
         paddingVertical: 10,
         paddingHorizontal: 8,
