@@ -10,8 +10,8 @@ import {ExamItemDetailSettingScreen} from "@/screens/setting/account/preference/
 import {useNavigation} from "@react-navigation/native";
 import {AuthAccountScreen} from "@/screens/setting/account/AuthAccountScreen.tsx";
 import {AttendanceSystemAccountScreen} from "@/screens/setting/account/AttendanceSystemAccountScreen.tsx";
-import {PersonalInfo, personalInfo} from "@/features/personalInfo/screen/PersonalInfo.tsx";
-import {useUserConfig} from "@/hooks/app.ts";
+import {PersonalInfo} from "@/features/personalInfo/screen/PersonalInfo.tsx";
+import {useUserConfig, useWebView} from "@/hooks/app.ts";
 
 const Stack = createNativeStackNavigator();
 
@@ -19,13 +19,14 @@ export function SettingStack() {
     const {theme} = useTheme();
     const {userConfig} = useUserConfig();
     const navigation = useNavigation();
+    const {openInJw} = useWebView();
     const headerRightEle = () => {
         return (
             <Button
                 type="clear"
                 containerStyle={{marginRight: 10}}
                 onPress={() => {
-                    openInJw("/xtgl/index_initMenu.html")
+                    openInJw("/xtgl/index_initMenu.html");
                 }}>
                 打开教务
             </Button>
@@ -85,7 +86,11 @@ export function SettingStack() {
             <Stack.Screen name="personalInfo" component={PersonalInfo} options={{title: "查看个人信息"}} />
             <Stack.Screen name="jwAccount" component={JWAccountScreen} options={{title: "登录教务系统"}} />
             <Stack.Screen name="authAccount" component={AuthAccountScreen} options={{title: "统一认证系统账号设置"}} />
-            <Stack.Screen name="attendanceSystemAccount" component={AttendanceSystemAccountScreen} options={{title: "考勤系统账号设置"}} />
+            <Stack.Screen
+                name="attendanceSystemAccount"
+                component={AttendanceSystemAccountScreen}
+                options={{title: "考勤系统账号设置"}}
+            />
 
             {/*  偏好设置  */}
             <Stack.Screen

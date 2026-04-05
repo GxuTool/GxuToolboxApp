@@ -27,6 +27,8 @@ import {TeachBuildingListScreen} from "@/screens/tool/other/TeachingBuildingMap/
 import {FloorlistScreen} from "@/screens/tool/other/TeachingBuildingMap/FloorlistScreen.tsx";
 import {FloorMapScreen} from "@/screens/tool/other/TeachingBuildingMap/FloorMapScreen.tsx";
 import {TeacherQueryInfoScreen} from "@/screens/tool/other/teacherInfo/TeacherInfoScreen.tsx";
+import {RescheduleNotificationScreen} from "@/features/notification/screen/RescheduleNotificationScreen.tsx";
+
 const Stack = createNativeStackNavigator();
 
 export function ToolboxStack() {
