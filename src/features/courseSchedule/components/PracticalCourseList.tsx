@@ -88,14 +88,18 @@ export function PracticalCourseList(props: Props) {
                             courseScheduleStyle.courseItem,
                         ]}>
                         <Text style={itemStyle.text}>{course.title}</Text>
-                        <Flex gap={5}>
-                            <Icon name="clock" style={itemStyle.text} />
-                            <Text style={itemStyle.text}>{course.time}</Text>
-                        </Flex>
-                        <Flex gap={5}>
-                            <Icon name="account" style={itemStyle.text} />
-                            <Text style={itemStyle.text}>{course.teacher}</Text>
-                        </Flex>
+                        {course.time && (
+                            <Flex gap={5}>
+                                <Icon name="clock" style={itemStyle.text} />
+                                <Text style={itemStyle.text}>{course.time}</Text>
+                            </Flex>
+                        )}
+                        {course.teacher && (
+                            <Flex gap={5}>
+                                <Icon name="account" style={itemStyle.text} />
+                                <Text style={itemStyle.text}>{course.teacher}</Text>
+                            </Flex>
+                        )}
                     </View>
                 );
             })}

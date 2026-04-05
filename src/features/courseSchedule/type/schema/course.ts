@@ -4,20 +4,21 @@ import {parseWeeks} from "@/js/nextCourses.ts";
 const PracticeCourseSchema = z
     .object({
         qtkcgs: z.string(),
-        qsjsz: z.string(),
-        jsxm: z.string(),
+        qsjsz: z.string().optional().default(""),
+        jsxm: z.string().optional().default(""),
     })
     .loose();
 
 const TheoryCourseSchema = z
     .object({
-        cdbh: z.string(),
+        cdbh: z.string().optional().default(""),
+        cdmc: z.string().optional().default(""),
         jcs: z.string(),
         kcmc: z.string(),
         zcd: z.string(),
         xqj: z.string().transform(Number),
-        xm: z.string(),
-        qqqh: z.string(),
+        xm: z.string().optional().default(""),
+        qqqh: z.string().optional().default(""),
     })
     .loose();
 
@@ -34,7 +35,7 @@ export const ICourse = rawCourse.transform(i => ({
         source: "jw",
     })),
     theoryList: i.kbList.map(c => ({
-        location: c.cdbh,
+        location: c.cdbh || c.cdmc,
         index: c.jcs,
         begin: Number(c.jcs.split("-")[0]),
         end: Number(c.jcs.split("-")[1]),

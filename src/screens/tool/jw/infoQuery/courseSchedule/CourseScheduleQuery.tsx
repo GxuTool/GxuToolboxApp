@@ -97,8 +97,8 @@ export function CourseScheduleQuery() {
                 <View style={{flex: 1, padding: "-1%"}}>
                     <ChooseTerm
                         onTermSelect={(Year, Term) => {
-                            setYear(Year);
-                            setTerm(Term);
+                            setYear(+Year);
+                            setTerm(+Term);
                         }}
                         includeWholeLife={false}
                         includeWholeYear={false}
