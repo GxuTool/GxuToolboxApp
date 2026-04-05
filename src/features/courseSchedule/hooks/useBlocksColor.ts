@@ -1,8 +1,10 @@
 // useEntityColor.ts
-import {useCallback} from "react";
+import {createContext, useCallback, useContext} from "react";
 import {useUserConfig} from "@/hooks/app.ts";
-import {resolveEventsColor, PaletteName} from "../utils/colorPalette.ts";
+import {PaletteName, resolveEventsColor} from "../utils/colorPalette.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+
+export const ColorMapContext = createContext<Map<string, string> | null>(null);
 
 export function useBlocksColor() {
     const {userConfig, updateUserConfig} = useUserConfig();
@@ -13,9 +15,22 @@ export function useBlocksColor() {
     const paletteName = (userConfig.theme?.course?.palette as PaletteName) || "macaron";
     const customColors = userConfig.theme?.course?.customColors || {};
 
+    const colorMap = useContext(ColorMapContext);
+
     const getColor = useCallback((entity: Partial<ScheduleTableItem> & { kind?: string }) => {
+        const key = entity.title || entity.id || "unknown";
+        if (customColors[key]) return customColors[key];
+        if (entity.kind && entity.kind !== "course" && entity.kind in {
+            exam: 1,
+            holiday: 1,
+            experiment: 1,
+            activity: 1
+        }) {
+            return resolveEventsColor(entity, customColors, paletteName);
+        }
+        if (colorMap?.has(key)) return colorMap.get(key)!;
         return resolveEventsColor(entity, customColors, paletteName);
-    }, [customColors, paletteName]);
+    }, [customColors, paletteName, colorMap]);
 
     const setCustomColor = useCallback((key: string, color: string) => {
         // 更新 userConfig
