@@ -80,6 +80,12 @@ export function ToolboxIndex() {
                     type: "navigation",
                     navigation: "ElectiveStrategy",
                 },
+                {
+                    label: "教师信息查询",
+                    icon: <Icon type="Ionicons" name="user" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "TeacherQueryInfoScreen",
+                },
                 // {
                 //     label: "自主选课",
                 //     icon: <Icon name="barschart" size={iconSize} />,

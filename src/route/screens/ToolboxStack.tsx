@@ -24,6 +24,7 @@ import {EvaluationTemplate} from "@/features/evaluation/screens/EvaluationTempla
 import {HolidayScreen} from "@/features/holidays/screen/HolidayScreen.tsx";
 import {TestPage} from "@/features/TestPage.tsx";
 import {RescheduleNotificationScreen} from "@/features/notification/screen/RescheduleNotificationScreen.tsx";
+import {TeacherQueryInfoScreen} from "@/screens/tool/other/teacherInfo/TeacherInfoScreen.tsx";
 
 const Stack = createNativeStackNavigator();
 
@@ -105,6 +106,11 @@ export function ToolboxStack() {
                 component={lazy(() => import("@/features/electiveStrategy/screen/ElectiveStrategy"))}
                 options={{title: "校选课查漏"}}
             />
+            <Stack.Screen
+                name="TeacherQueryInfoScreen"
+                component={TeacherQueryInfoScreen}
+                options={{title: "教师信息查询"}}
+            />
 
             <Stack.Screen name="phyExpScreen" component={PhyExpScreen} options={{title: "物理实验课查询"}} />
             <Stack.Screen
@@ -126,7 +132,7 @@ export function ToolboxStack() {
             <Stack.Screen name="EvaluationComment" component={EvaluationComment} options={{title: "填写评语"}} />
             <Stack.Screen name="EvaluationTemplate" component={EvaluationTemplate} options={{title: "评价模板"}} />
 
-            <Stack.Screen name="TestPage" component={TestPage} options={{title:"测试页"}} />
+            <Stack.Screen name="TestPage" component={TestPage} options={{title: "测试页"}} />
 
             <Stack.Screen name="PositionListScreen" component={BuildingListScreen} options={{title: "地图导航"}} />
             <Stack.Screen name="WidgetPreviewScreen" component={WidgetPreviewScreen} options={{title: "小部件预览"}} />
