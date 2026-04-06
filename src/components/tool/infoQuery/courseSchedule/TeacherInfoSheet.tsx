@@ -68,7 +68,7 @@ export function TeacherInfoSheet(props: Props) {
                     </View>
                 )}
                 <TabView value={tabIndex} animationType={"timing"}>
-                    <TabView.Item tabIndex={0} style={{width: "100%"}}>
+                    <TabView.Item style={{width: "100%"}}>
                         <TeacherInfoList
                             onSelect={teacher => {
                                 setSelectedTeacher(teacher);
@@ -77,7 +77,7 @@ export function TeacherInfoSheet(props: Props) {
                             list={teacherInfoList}
                         />
                     </TabView.Item>
-                    <TabView.Item tabIndex={0} style={{width: "100%"}}>
+                    <TabView.Item style={{width: "100%"}}>
                         <TeacherDetailInfo
                             onBack={() => {
                                 setTabIndex(0);
@@ -176,7 +176,8 @@ function TeacherDetailInfo(props: infoProps) {
             height: screenHeight * 0.16,
         },
         eduItem: {
-            backgroundColor: useTheme().theme.colors.primary,
+            backgroundColor: Color(theme.colors.primary).setAlpha(0.3).rgbaString,
+            paddingHorizontal: 4,
             padding: 2,
             borderRadius: 4,
         },
@@ -241,14 +242,19 @@ function TeacherDetailInfo(props: infoProps) {
                                         {teacherInfo?.baseInfo.XM}
                                     </UnText>
                                     {teacherInfo?.baseInfo.zhicheng && (
-                                        <UnText size={14} style={style.eduItem}>
+                                        <UnText
+                                            size={14}
+                                            style={style.eduItem}
+                                            color={Color.mix(theme.colors.primary, theme.colors.black, 0.3).rgbaString}>
                                             {teacherInfo?.baseInfo.zhicheng ? teacherInfo?.baseInfo.zhicheng : "无"}
                                         </UnText>
                                     )}
                                     {teacherInfo?.baseInfo.topedu && teacherInfo.baseInfo.ZHXWMC && (
-                                        <UnText size={14} style={style.eduItem}>
-                                            {teacherInfo?.baseInfo.ZHXWMC}
-                                            {teacherInfo?.baseInfo.topedu}
+                                        <UnText
+                                            size={14}
+                                            style={style.eduItem}
+                                            color={Color.mix(theme.colors.primary, theme.colors.black, 0.3).rgbaString}>
+                                            {teacherInfo?.baseInfo.ZHXWMC} | {teacherInfo?.baseInfo.topedu}
                                         </UnText>
                                     )}
                                 </View>
@@ -290,9 +296,6 @@ function TeacherDetailInfo(props: infoProps) {
                                     onClick={() => {
                                         setActivatedIndex((pre: number | null) => (pre === index ? null : index));
                                     }}>
-                                    {/*<ScrollView horizontal={true} style={{marginVertical: 4}}>*/}
-                                    {/*    <UnText>{item.value?.trim() ? item.value?.trim() : "暂无信息"}</UnText>*/}
-                                    {/*</ScrollView>*/}
                                     <UnText>{item.value?.trim() ? item.value?.trim() : "暂无信息"}</UnText>
                                 </CollapsedInfo>
                             </>

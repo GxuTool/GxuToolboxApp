@@ -18,7 +18,7 @@ export const teacherInfoApi = {
             params: {
                 xm: name,
                 pageNum: 1,
-                pageSize: 100,
+                pageSize: 1000,
             },
         });
         return res.data;
