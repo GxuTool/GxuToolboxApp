@@ -42,10 +42,10 @@ export function AttendanceSystemAccountScreen() {
 
     async function refreshCaptcha() {
         setCaptchaLoading(true);
+        setCaptchaCode("");
         try {
-            const res = await attendanceAuthApi.getCaptchaImage();
+            const res = await attendanceAuthApi.getCaptchaImage(code => setCaptchaCode(code));
             setCaptchaUri(res.uri);
-            setCaptchaCode(res.code);
         } finally {
             setCaptchaLoading(false);
         }
@@ -174,7 +174,7 @@ export function AttendanceSystemAccountScreen() {
                     value={captchaCode}
                     onChangeText={v => setCaptchaCode(v)}
                     label="验证码"
-                    placeholder="4位验证码（自动OCR识别）"
+                    placeholder="自动OCR识别"
                     autoCapitalize="none"
                     autoCorrect={false}
                     maxLength={4}
@@ -205,11 +205,9 @@ export function AttendanceSystemAccountScreen() {
                     </Button>
                     <Button
                         type="outline"
-                        onPress={() =>
-                            openInWeb("考勤系统", {uri: "https://yktuipweb.gxu.edu.cn/#/StudentHome"})
-                        }
+                        onPress={() => openInWeb("考勤系统", {uri: "https://yktuipweb.gxu.edu.cn/#/StudentHome"})}
                         disabled={busy}>
-                        在浏览器打开考勤系统
+                        在浏览器打开考勤系统（全天需要校园网）
                     </Button>
                 </View>
 

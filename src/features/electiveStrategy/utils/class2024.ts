@@ -7,6 +7,7 @@ const REQUIREMENTS = {
     artScore: 2,
     specialModules: 2,
 };
+
 function calculate2024(courses: any): ElectiveStats {
     const requiredCourses = new Set(["创业基础", "中文写作实训", "逻辑与批判性思维训练", "中华民族共同体概论"]);
 
@@ -14,7 +15,7 @@ function calculate2024(courses: any): ElectiveStats {
         (acc: ElectiveStats, course: CourseList) => {
             const score = Number(course.credit) || 0;
             acc.totalScore += score;
-            if (!course.belongTo?.includes("网络")) {
+            if (!(course.belongTo?.includes("网络") || course.teacher === "网络教师")) {
                 acc.offlineScore += score;
             }
 

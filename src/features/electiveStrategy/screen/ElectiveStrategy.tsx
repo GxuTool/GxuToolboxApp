@@ -142,7 +142,7 @@ export default function ElectiveStrategy() {
                         <View key={index} style={styles.courseRow}>
                             <View style={styles.courseInfo}>
                                 <Flex direction="row" align="center" gap={6}>
-                                    {c.belongTo.includes("网络") && <Icon name="cast-education" size={16} color={theme.colors.primary} />}
+                                    {(c.belongTo.includes("网络") || c.teacher === "网络教师") && <Icon name="cast-education" size={16} color={theme.colors.primary} />}
                                     <Text style={styles.courseName}>{c.courseName}</Text>
                                 </Flex>
                                 <Text style={styles.courseMeta}>

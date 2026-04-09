@@ -1,5 +1,5 @@
 import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export function normalizeCourse(data: ICourse): ScheduleTableItem[] {
     const items: ScheduleTableItem[] = [];
@@ -21,6 +21,7 @@ export function normalizeCourse(data: ICourse): ScheduleTableItem[] {
                 location: course.location,
                 teacher: course.teacher,
                 raw: course.raw,
+                qq: course.qq,
                 // color: undefined,
             });
         });

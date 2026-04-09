@@ -80,6 +80,12 @@ export function ToolboxIndex() {
                     type: "navigation",
                     navigation: "ElectiveStrategy",
                 },
+                {
+                    label: "教师信息查询",
+                    icon: <Icon type="Ionicons" name="user" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "TeacherQueryInfoScreen",
+                },
                 // {
                 //     label: "自主选课",
                 //     icon: <Icon name="barschart" size={iconSize} />,
@@ -146,6 +152,12 @@ export function ToolboxIndex() {
                     icon: <Icon name="map" size={iconSize} />,
                     type: "navigation",
                     navigation: "PositionListScreen",
+                },
+                {
+                    label: "测试页",
+                    icon: <Icon name="map" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "TestPage",
                 },
                 // {
                 //     label: "小部件预览",

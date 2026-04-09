@@ -4,19 +4,23 @@ import {parseWeeks} from "@/js/nextCourses.ts";
 const PracticeCourseSchema = z
     .object({
         qtkcgs: z.string(),
-        qsjsz: z.string(),
-        jsxm: z.string(),
+        qsjsz: z.string().optional().default(""),
+        jsxm: z.string().optional().default(""),
     })
     .loose();
 
-const TheoryCourseSchema = z.object({
-    cdbh: z.string(),
-    jcs: z.string(),
-    kcmc: z.string(),
-    zcd: z.string(),
-    xqj: z.string().transform(Number),
-    xm: z.string(),
-}).loose();
+const TheoryCourseSchema = z
+    .object({
+        cdbh: z.string().optional().default(""),
+        cdmc: z.string().optional().default(""),
+        jcs: z.string(),
+        kcmc: z.string(),
+        zcd: z.string(),
+        xqj: z.string().transform(Number),
+        xm: z.string().optional().default(""),
+        qqqh: z.string().optional().default(""),
+    })
+    .loose();
 
 const rawCourse = z.object({
     sjkList: z.array(PracticeCourseSchema).default([]),
@@ -31,7 +35,7 @@ export const ICourse = rawCourse.transform(i => ({
         source: "jw",
     })),
     theoryList: i.kbList.map(c => ({
-        location: c.cdbh,
+        location: c.cdbh || c.cdmc,
         index: c.jcs,
         begin: Number(c.jcs.split("-")[0]),
         end: Number(c.jcs.split("-")[1]),
@@ -39,6 +43,7 @@ export const ICourse = rawCourse.transform(i => ({
         week: parseWeeks(c.zcd),
         teacher: c.xm,
         day: c.xqj,
+        qq: c.qqqh,
         source: "jw",
         raw: c,
     })),

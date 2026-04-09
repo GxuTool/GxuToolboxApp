@@ -1,4 +1,4 @@
-import {Pressable, StyleSheet} from "react-native";
+import {Pressable, StyleSheet, View} from "react-native";
 import {useUserConfig} from "@/hooks/app.ts";
 
 import React, {memo, useMemo} from "react";
@@ -15,9 +15,10 @@ import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 interface NewCourseItemProps {
     item: ScheduleTableItem;
     onPress?: (item: ScheduleTableItem) => void;
+    conflictCount?: number;
 }
 
-export const NewCourseItem = memo(({item, onPress}: NewCourseItemProps) => {
+export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItemProps) => {
     const {userConfig} = useUserConfig();
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
@@ -56,13 +57,34 @@ export const NewCourseItem = memo(({item, onPress}: NewCourseItemProps) => {
                     color: textColor,
                     fontSize: 12,
                 },
+                badge: {
+                    position: "absolute",
+                    top: 3,
+                    right: 3,
+                    minWidth: 16,
+                    height: 16,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 1,
+                    paddingHorizontal: 3,
+                },
+                badgeText: {
+                    color: textColor,
+                    fontSize: 10,
+                    fontWeight: "bold",
+                },
             }),
         [backgroundColor, textColor, span, y, userConfig.theme.course],
     );
 
     return (
         <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={userConfig.theme.ripple}>
-            <Flex direction="column" gap={2} style={{padding: 4, height: "100%", overflow: "hidden"}} align="center">
+            {conflictCount && conflictCount > 1 && (
+                <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{conflictCount}</Text>
+                </View>
+            )}
+            <Flex direction="column" gap={2} style={{padding: 4, paddingTop: conflictCount && conflictCount > 1 ? 18 : 4, height: "100%", overflow: "hidden"}} align="center">
                 <Text style={[styles.text, {fontWeight: "bold"}]} numberOfLines={5}>
                     {item.status && (
                         <AttendanceStateIcon

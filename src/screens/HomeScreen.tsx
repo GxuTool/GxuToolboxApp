@@ -1,5 +1,5 @@
 import {GestureResponderEvent, PanResponder, PanResponderGestureState, ScrollView} from "react-native";
-import {ScheduleCard} from "@/components/app/ScheduleCard.tsx";
+import {ScheduleCard} from "@/features/courseSchedule/components/ScheduleCard.tsx";
 import React, {useRef, useState} from "react";
 import {UpdateCard} from "@/components/UpdateCard.tsx";
 import {SafeAreaView} from "react-native-safe-area-context";

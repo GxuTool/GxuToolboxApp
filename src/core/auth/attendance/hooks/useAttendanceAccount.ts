@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from "react";
-import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
+import {attendanceMachine} from "@/core/auth/attendance/attendanceMachine.ts";
 
-export function useJwAccount() {
+export function useAttendanceAccount() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [hydrating, setHydrating] = useState(true);
@@ -11,7 +11,7 @@ export function useJwAccount() {
         mountedRef.current = true;
         (async () => {
             try {
-                const account = await JwMachine.loadAccount();
+                const account = await attendanceMachine.loadAccount();
                 if (!mountedRef.current) return;
                 if (account) {
                     setUsername(account.username ?? "");
@@ -21,7 +21,6 @@ export function useJwAccount() {
                 if (mountedRef.current) setHydrating(false);
             }
         })();
-
         return () => {
             mountedRef.current = false;
         };
@@ -31,19 +30,12 @@ export function useJwAccount() {
         async (u?: string, p?: string) => {
             const nextUsername = (u ?? username).trim();
             const nextPassword = (p ?? password).trim();
-            await JwMachine.saveAccount({username: nextUsername, password: nextPassword});
+            await attendanceMachine.saveAccount({username: nextUsername, password: nextPassword});
             setUsername(nextUsername);
             setPassword(nextPassword);
         },
         [username, password],
     );
 
-    return {
-        username,
-        setUsername,
-        password,
-        setPassword,
-        hydrating,
-        saveAccount,
-    };
+    return {username, setUsername, password, setPassword, hydrating, saveAccount};
 }

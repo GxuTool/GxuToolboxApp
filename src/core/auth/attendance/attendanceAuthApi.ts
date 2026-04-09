@@ -3,32 +3,32 @@ import {userMgr} from "@/js/mgr/user.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import CryptoJS from "crypto-js";
 import {attendanceApi} from "@/features/attendance/api";
-import axios from "axios";
 
 const BASE_URL = "https://yktuipweb.gxu.edu.cn";
 
 // ─── 登录相关 ───
 
 async function getCaptchaCode(): Promise<{uri: string; code: string}> {
-    const res = await http.get(`${BASE_URL}/api/account/getVerify?num=${Date.now()}`, {
+    const res = await http.post("https://gxutool.unde.site/api/atd/mirror", {
+        id: 1,
+        method: "GET",
+        target: `https://yktuipweb.gxu.edu.cn/api/account/getVerify?num=${Date.now()}`,
+        params: {},
+        data: {},
         responseType: "arraybuffer",
     });
-    const base64 = btoa(new Uint8Array(res.data).reduce((data, byte) => data + String.fromCharCode(byte), ""));
-    const dataUri = `data:image/jpeg;base64,${base64}`;
-    const res2 = await axios.post("https://acm.gxu.edu.cn/ocr/ocr/classify_base64", {
-        image_base64: dataUri,
-    });
+
+    const dataUri = `data:image/jpeg;base64,${res.data.data}`;
 
     let code = "";
-    console.log(res2.data);
-    if (res2.data.message === "识别成功") {
-        code = res2.data.data.text;
-    }
+    await http
+        .post("https://gxutool.unde.site/api/atd/captcha", {image_base64: dataUri})
+        .then(res2 => {
+            if (res2.data.data?.code) code = res2.data.data.code;
+        })
+        .catch(() => {});
 
-    return {
-        uri: dataUri,
-        code: code,
-    };
+    return {uri: dataUri, code};
 }
 
 async function login(username: string, password: string, captchaCode: string): Promise<AST.ResRoot<AST.LoginData>> {

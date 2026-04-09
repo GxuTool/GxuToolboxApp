@@ -11,7 +11,7 @@ import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/Cour
 import {useNavigation} from "@react-navigation/native";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
-import {UnText} from "@/components/un-ui/index.ts";
+import {UnText} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
@@ -25,6 +25,8 @@ import {useHoliday} from "@/features/courseSchedule/hooks/detail/useHoliday.ts";
 import {defaultItems} from "@/features/courseSchedule/utils/defaultItems.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
 import {AuthStatusSection} from "@/features/courseSchedule/components/AuthStatusSection.tsx";
+import {useUnifiedAuth} from "@/core/auth/unified/hook/useUnifiedAuth.ts";
+import {useAttendanceAuth} from "@/core/auth/attendance/hooks/useAttendanceAuth.ts";
 
 // 菜单的类型
 type SheetState =
@@ -44,19 +46,21 @@ export function ScheduleCard() {
     const {theme} = useTheme();
     const pagerView = usePagerView({pagesAmount: 20});
     const {...rest} = pagerView;
-    const {authState} = useJwAuth();
+
+    const {authState: JWauthState} = useJwAuth();
+    const {authState: unifiedAuthState} = useUnifiedAuth();
+    const {authState: attendanceAuthState} = useAttendanceAuth();
 
     const [year, setYear] = useState(+userConfig.jw.year);
     const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
     const startDay = useStartDay(year, term);
 
-    const courseItems = useCourse(year, term) ?? [];
-    const examItems = useExam(year, term) ?? [];
+    const {items: courseItems = [], refresh: refreshCourse} = useCourse(year, term);
+    const {items: examItems = [], refresh: refreshExam} = useExam(year, term);
     const holidayItems = useHoliday(year, term) ?? [];
+    const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
 
-    const practiceItems = usePractice(year, term) ?? [];
-
-    let defaultItem: ScheduleTableItem[] = authState.status !== "no_account" ? [] : defaultItems;
+    let defaultItem: ScheduleTableItem[] = JWauthState.status !== "no_account" ? [] : defaultItems;
 
     const scheduleItems: ScheduleTableItem[] = useMemo(
         () => [...courseItems, ...examItems, ...holidayItems, ...defaultItem],
@@ -67,6 +71,17 @@ export function ScheduleCard() {
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 
     const [sheet, setSheet] = useState<SheetState>({type: "closed"});
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const handleRefresh = useCallback(async () => {
+        setRefreshing(true);
+        try {
+            await Promise.all([refreshCourse(), refreshExam()]);
+        } finally {
+            setRefreshing(false);
+        }
+    }, [refreshCourse, refreshExam]);
 
     const baseColor = theme.colors.primary;
     const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString;
@@ -118,13 +133,22 @@ export function ScheduleCard() {
             <Flex justify="space-between" style={style.cardTitle}>
                 <Flex direction="row" align="center" gap={8}>
                     <Text h4>日程表</Text>
-                    {authState.status !== "authenticated" ? (
-                        <Icon name="account-network-off-outline" size={24} color={theme.colors.error} />
-                    ) : (
-                        <Icon name="account-network-outline" size={24} color={theme.colors.success} />
+                    {[JWauthState, unifiedAuthState, attendanceAuthState].map(i =>
+                        i?.status !== "authenticated" ? (
+                            <Icon name="account-network-off-outline" size={24} color={theme.colors.error} />
+                        ) : (
+                            <Icon name="account-network-outline" size={24} color={theme.colors.success} />
+                        ),
                     )}
                 </Flex>
                 <Flex gap={15} justify="flex-end">
+                    <Pressable onPress={handleRefresh} disabled={refreshing}>
+                        <Icon
+                            name={refreshing ? "loading" : "refresh"}
+                            size={24}
+                            style={refreshing ? {opacity: 0.5} : undefined}
+                        />
+                    </Pressable>
                     {rest.activePage + 1 !== realCurrentWeek && (
                         <Pressable
                             android_ripple={userConfig.theme.ripple}
@@ -165,7 +189,12 @@ export function ScheduleCard() {
                 <View style={style.bottomSheetContainer}>
                     {sheet.type === "menu" && (
                         <>
-                            <AuthStatusSection jwAuth={authState} menuItemStyle={style.menuItem} />
+                            <AuthStatusSection
+                                jwAuth={JWauthState}
+                                unifiedAuth={unifiedAuthState}
+                                attendanceAuth={attendanceAuthState}
+                                menuItemStyle={style.menuItem}
+                            />
                             <Pressable
                                 onPress={() => {
                                     setSheet({type: "closed"});
