@@ -20,7 +20,7 @@ export function DetailInfoScreen({route}) {
             paddingVertical: screenHeight * 0.01,
         },
         tab: {
-            height: vh(52),
+            height: "auto",
             marginTop: 8,
             paddingHorizontal: 10,
         },
@@ -206,8 +206,12 @@ export function DetailInfoScreen({route}) {
                     value={tabIndex}
                     onChange={setTabIndex}
                     animationType="spring"
-                    containerStyle={{height: vh(52)}}>
-                    {detailDataList.map(item => item.render())}
+                    containerStyle={{height: vh(53)}}>
+                    {detailDataList.map((item, index) => (
+                        <TabView.Item key={index} style={{width: "100%", height:vh(53)}}>
+                            {item.render()}
+                        </TabView.Item>
+                    ))}
                 </TabView>
             </ScrollView>
         </>
@@ -232,6 +236,7 @@ export function BaseInfoItem(props: BaseItemProps) {
         baseInfoItem: {
             flexDirection: "row",
             width: "70%",
+            marginBottom: 2,
         },
         eduItem: {
             backgroundColor: Color(theme.colors.primary).setAlpha(0.3).rgbaString,
@@ -251,7 +256,7 @@ export function BaseInfoItem(props: BaseItemProps) {
 
                 <Divider orientation={"vertical"} style={{marginHorizontal: 12}} />
 
-                <View style={{gap: 4, width: "62%"}}>
+                <ScrollView contentContainerStyle={{width: "92%"}} style={{height: 180}}>
                     <View style={{flexDirection: "row", alignItems: "center", gap: 10}}>
                         <UnText size={24} style={{fontWeight: "bold", color: theme.colors.primary}}>
                             {props.item?.baseInfo.XM}
@@ -281,7 +286,7 @@ export function BaseInfoItem(props: BaseItemProps) {
                             {props.item?.baseInfo.address ? props.item.baseInfo.address : "暂无信息"}
                         </UnText>
                     </View>
-                </View>
+                </ScrollView>
             </View>
         </View>
     );
