@@ -23,6 +23,9 @@ import WebViewScreen from "@/screens/WebViewScreen.tsx";
 import {useUserConfig, useWebView} from "@/hooks/app.ts";
 import {EvaluationTemplate} from "@/features/evaluation/screens/EvaluationTemplate.tsx";
 import {HolidayScreen} from "@/features/holidays/screen/HolidayScreen.tsx";
+import {TeachBuildingListScreen} from "@/screens/tool/other/TeachingBuildingMap/TeachBuildingListScreen.tsx";
+import {FloorlistScreen} from "@/screens/tool/other/TeachingBuildingMap/FloorlistScreen.tsx";
+import {FloorMapScreen} from "@/screens/tool/other/TeachingBuildingMap/FloorMapScreen.tsx";
 
 const Stack = createNativeStackNavigator();
 
@@ -128,6 +131,10 @@ export function ToolboxStack() {
             <Stack.Screen name="PositionListScreen" component={BuildingListScreen} options={{title: "地图导航"}} />
             <Stack.Screen name="WidgetPreviewScreen" component={WidgetPreviewScreen} options={{title: "小部件预览"}} />
             <Stack.Screen name="EduRechargeScreen" component={WebViewScreen} options={{title: "校园网充值"}} />
+            <Stack.Screen name="TeachBuildingListScreen"component={TeachBuildingListScreen}options={{title:"教学楼平面图"}}/>
+            <Stack.Screen name="FloorListScreen"component={FloorlistScreen}options={{title:"楼层列表"}}/>
+
+            <Stack.Screen name="FloorMapScreen"component={FloorMapScreen}options={{title:"楼层平面图"}}/>
         </Stack.Navigator>
     );
 }

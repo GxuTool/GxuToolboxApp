@@ -163,7 +163,14 @@ export function ToolboxIndex() {
                         });
                     },
                 },
+                {
+                    label:"教学楼平面图",
+                    icon:<Icon name="city-variant" size={iconSize}/>,
+                    type:"navigation",
+                    navigation:"TeachBuildingListScreen",
+                },
             ],
+
         },
     ] as settingSection[];
     const data = {
