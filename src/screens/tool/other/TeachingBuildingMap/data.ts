@@ -10,10 +10,37 @@ export interface TeachBuilding{
     floors:TeachBuildingFloor[];
 }
 
-export const TeachBuildingList:TeachBuilding[]=[{
-    id: "liujiao",
-    name: "第六教学楼",
-    floors:[
+export const TeachBuildingList:TeachBuilding[]=[
+    {
+        id:"erjiao",
+        name:"第二教学楼",
+        floors:[
+            {
+                id:"1",
+                name:"每层楼层图",
+                image:require("./pictures/erjiao/2.jpeg"),
+            },
+        ]
+    },
+    {
+        id:"erjiao",
+        name:"第三教学楼",
+        floors:[{
+            id:"1",
+            name:"每层楼层图",
+            image:require("./pictures/sanjiao/1.jpeg"),
+        }
+        ]
+    },
+    {
+        id: "liujiao",
+        name: "第六教学楼",
+        floors:[
+        {
+            id:"all",
+            name:"总楼层图",
+            image:require("./pictures/liujiao/all.jpeg"),
+        },
         {
             id:"1",
             name:"1楼",
@@ -44,11 +71,28 @@ export const TeachBuildingList:TeachBuilding[]=[{
             name:"6楼",
             image:require("./pictures/liujiao/6.jpeg"),
         },
-        {
-            id:"all",
-            name:"总楼层图",
-            image:require("./pictures/liujiao/all.jpeg"),
-        },
+
     ],
     },
+    {
+        id:"erjiao",
+        name:"第十教学楼",
+        floors:[{
+            id:"A",
+            name:"A区1楼",
+            image:require("./pictures/shijiao/A1.jpeg"),
+        },
+            {
+                id:"A",
+                name:"A区2楼",
+                image:require("./pictures/shijiao/A2.jpeg"),
+            },
+            {
+                id:"B",
+                name:"B区每层平面图",
+                image:require("./pictures/shijiao/B.jpeg"),
+            }
+        ]
+    },
+
 ];
