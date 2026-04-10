@@ -23,7 +23,7 @@ export const TeachBuildingList:TeachBuilding[]=[
         ]
     },
     {
-        id:"erjiao",
+        id:"sanjiao",
         name:"第三教学楼",
         floors:[{
             id:"1",
@@ -75,15 +75,15 @@ export const TeachBuildingList:TeachBuilding[]=[
     ],
     },
     {
-        id:"erjiao",
+        id:"shijiao",
         name:"第十教学楼",
         floors:[{
-            id:"A",
+            id:"A1",
             name:"A区1楼",
             image:require("./pictures/shijiao/A1.jpeg"),
         },
             {
-                id:"A",
+                id:"A2",
                 name:"A区2楼",
                 image:require("./pictures/shijiao/A2.jpeg"),
             },
