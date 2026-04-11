@@ -28,6 +28,8 @@ import {FloorlistScreen} from "@/screens/tool/other/TeachingBuildingMap/Floorlis
 import {FloorMapScreen} from "@/screens/tool/other/TeachingBuildingMap/FloorMapScreen.tsx";
 import {TeacherQueryInfoScreen} from "@/screens/tool/other/teacherInfo/TeacherInfoScreen.tsx";
 import {RescheduleNotificationScreen} from "@/features/notification/screen/RescheduleNotificationScreen.tsx";
+import {TestPage} from "@/features/TestPage.tsx";
+import {FullCourseScreen} from "@/features/fullClassCourse/screens/FullCourseScreen.tsx";
 
 const Stack = createNativeStackNavigator();
 
@@ -134,6 +136,9 @@ export function ToolboxStack() {
             <Stack.Screen name="EvaluationDetail" component={EvaluationDetail} options={{title: "学生评价细节"}} />
             <Stack.Screen name="EvaluationComment" component={EvaluationComment} options={{title: "填写评语"}} />
             <Stack.Screen name="EvaluationTemplate" component={EvaluationTemplate} options={{title: "评价模板"}} />
+
+            <Stack.Screen name="TestPage" component={TestPage} options={{title: "测试页"}} />
+            <Stack.Screen name="FullCourseScreen" component={FullCourseScreen} options={{title: "全校实时课表"}} />
 
             <Stack.Screen name="PositionListScreen" component={BuildingListScreen} options={{title: "地图导航"}} />
             <Stack.Screen name="WidgetPreviewScreen" component={WidgetPreviewScreen} options={{title: "小部件预览"}} />

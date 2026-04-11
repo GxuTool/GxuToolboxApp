@@ -36,7 +36,7 @@ export function ClassCourseSchedule() {
     const pageView = usePagerView({pagesAmount: 20});
     const {year, term, setBoth} = useSchoolTerm();
     const {list, index, fetchList, theorySchedule, practicalSchedule, loading, fetchSchedule, setIndex} =
-        useClassScheduleData(year, term, school, subject, grade, classId);
+        useClassScheduleData();
 
     const startDay = useStartDay(+year, term);
 

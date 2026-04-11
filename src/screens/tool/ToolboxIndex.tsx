@@ -153,12 +153,18 @@ export function ToolboxIndex() {
                     type: "navigation",
                     navigation: "PositionListScreen",
                 },
-                // {
-                //     label: "测试页",
-                //     icon: <Icon name="map" size={iconSize} />,
-                //     type: "navigation",
-                //     navigation: "TestPage",
-                // },
+                {
+                    label: "测试页",
+                    icon: <Icon name="map" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "TestPage",
+                },
+                {
+                    label: "全校实时课表",
+                    icon: <Icon name="map" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "FullCourseScreen",
+                },
                 // {
                 //     label: "小部件预览",
                 //     icon: <Icon name="widgets" size={iconSize} />,
