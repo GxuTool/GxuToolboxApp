@@ -26,6 +26,7 @@ import {HolidayScreen} from "@/features/holidays/screen/HolidayScreen.tsx";
 import {TeachBuildingListScreen} from "@/screens/tool/other/TeachingBuildingMap/TeachBuildingListScreen.tsx";
 import {FloorlistScreen} from "@/screens/tool/other/TeachingBuildingMap/FloorlistScreen.tsx";
 import {FloorMapScreen} from "@/screens/tool/other/TeachingBuildingMap/FloorMapScreen.tsx";
+import {TeacherQueryInfoScreen} from "@/screens/tool/other/teacherInfo/TeacherInfoScreen.tsx";
 const Stack = createNativeStackNavigator();
 
 export function ToolboxStack() {
@@ -105,6 +106,11 @@ export function ToolboxStack() {
                 name="ElectiveStrategy"
                 component={lazy(() => import("@/features/electiveStrategy/screen/ElectiveStrategy"))}
                 options={{title: "校选课查漏"}}
+            />
+            <Stack.Screen
+                name="TeacherQueryInfoScreen"
+                component={TeacherQueryInfoScreen}
+                options={{title: "教师信息查询"}}
             />
 
             <Stack.Screen name="phyExpScreen" component={PhyExpScreen} options={{title: "物理实验课查询"}} />
