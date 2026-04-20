@@ -1,7 +1,7 @@
 {
     "name": "gxu_tool_app",
-    "version": "2.0.2 beta",
-    "versionCode": 20002,
+    "version": "2.0.3 beta",
+    "versionCode": 20003,
     "private": true,
     "scripts": {
         "android": "react-native run-android",
@@ -45,6 +45,7 @@
         "react-native-fs": "^2.18.0",
         "react-native-html-parser": "^0.1.0",
         "react-native-image-picker": "^8.2.1",
+        "react-native-image-viewing": "^0.2.2",
         "react-native-pager-view": "^8.0.0",
         "react-native-reanimated-table": "^0.0.2",
         "react-native-safe-area-context": "^5.6.0",

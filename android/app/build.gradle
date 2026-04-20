@@ -50,9 +50,6 @@ react {
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]
 
-    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        hermesCommand = "$rootDir/hermesc.cmd"
-    }
     /* Autolinking */
     autolinkLibrariesWithApp()
 }
@@ -85,8 +82,8 @@ android {
         applicationId "com.gxu_tool_app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20002
-        versionName "2.0.2 beta"
+        versionCode 20003
+        versionName "2.0.3 beta"
     }
     signingConfigs {
         debug {
