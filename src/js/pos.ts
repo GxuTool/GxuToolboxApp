@@ -1,12 +1,15 @@
 import {BuildingList, IPos} from "@/type/pos.ts";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import {Alert, Linking, ToastAndroid} from "react-native";
+import {Linking, ToastAndroid} from "react-native";
+import {requestMapPicker, type MapPickerOption} from "@/components/map/MapPickerHost.tsx";
 import {urlWithParams} from "@/core/http.ts";
 
 const sourceApplication = "gxujwt";
-export type MapApp = "amap" | "baidu";
+type MapApp = "amap" | "baidu";
 
-const DEFAULT_MAP_APP_KEY = "default_map_app";
+type AvailableMaps = {
+    amap: string | null;
+    baidu: string | null;
+};
 
 function getKeyword(pos: IPos | string) {
     return typeof pos === "string" ? pos : pos.fullName;
@@ -28,29 +31,23 @@ function buildBaiduProbeUrl() {
     return "baidumap://";
 }
 
-async function getDefaultMapApp(): Promise<MapApp | null> {
-    const value = await AsyncStorage.getItem(DEFAULT_MAP_APP_KEY);
-    if (value === "amap" || value === "baidu") {
-        return value;
+async function canOpenAnyUrl(urls: string[]) {
+    for (const url of urls) {
+        const canOpen = await Linking.canOpenURL(url).catch(() => false);
+        if (canOpen) {
+            return true;
+        }
     }
-    return null;
+    return false;
 }
 
-async function setDefaultMapApp(app: MapApp) {
-    await AsyncStorage.setItem(DEFAULT_MAP_APP_KEY, app);
-}
-
-async function clearDefaultMapApp() {
-    await AsyncStorage.removeItem(DEFAULT_MAP_APP_KEY);
-}
-
-async function getAvailableMaps(keyword: string) {
+async function getAvailableMaps(keyword: string): Promise<AvailableMaps> {
     const amapUrl = buildAmapUrl(keyword);
     const baiduUrl = buildBaiduUrl(keyword);
 
     const [amapAvailable, baiduAvailable] = await Promise.all([
-        Linking.canOpenURL(buildAmapProbeUrl()).catch(() => false),
-        Linking.canOpenURL(buildBaiduProbeUrl()).catch(() => false),
+        canOpenAnyUrl([amapUrl, buildAmapProbeUrl(), "androidamap://poi"]),
+        canOpenAnyUrl([baiduUrl, buildBaiduProbeUrl(), "baidumap://map/place/search"]),
     ]);
 
     return {
@@ -74,54 +71,30 @@ async function tryOpenMap(url: string, app: MapApp, showToast = true) {
     }
 }
 
-function chooseMapApp(): Promise<MapApp | null> {
-    return new Promise(resolve => {
-        Alert.alert(
-            "选择地图",
-            "请选择要使用的地图应用",
-            [
-                {text: "高德地图", onPress: () => resolve("amap")},
-                {text: "百度地图", onPress: () => resolve("baidu")},
-                {text: "取消", style: "cancel", onPress: () => resolve(null)},
-            ],
-            {
-                cancelable: true,
-                onDismiss: () => resolve(null),
-            },
-        );
-    });
-}
+function chooseInstalledMapApp(availableMaps: AvailableMaps): Promise<MapApp | null> {
+    const options: MapPickerOption[] = [];
 
-function chooseRememberMode(app: MapApp): Promise<"once" | "always" | null> {
-    const appName = app === "amap" ? "高德地图" : "百度地图";
+    if (availableMaps.amap) {
+        options.push({
+            app: "amap" as const,
+            label: "高德地图",
+        });
+    }
 
-    return new Promise(resolve => {
-        Alert.alert(
-            "地图使用方式",
-            `你这次选择了${appName}，要默认使用它，还是只用这一次？`,
-            [
-                {text: "只用一次", onPress: () => resolve("once")},
-                {text: "设为默认", onPress: () => resolve("always")},
-                {text: "取消", style: "cancel", onPress: () => resolve(null)},
-            ],
-            {
-                cancelable: true,
-                onDismiss: () => resolve(null),
-            },
-        );
-    });
+    if (availableMaps.baidu) {
+        options.push({
+            app: "baidu" as const,
+            label: "百度地图",
+        });
+    }
+
+    return requestMapPicker({
+        title: "选择要打开的方式",
+        options,
+    }) ?? Promise.resolve(null);
 }
 
 export const Pos = {
-    getDefaultMapApp: async () => {
-        return await getDefaultMapApp();
-    },
-    setDefaultMapApp: async (app: MapApp) => {
-        await setDefaultMapApp(app);
-    },
-    clearDefaultMapApp: async () => {
-        await clearDefaultMapApp();
-    },
     parseStr: (str: string): IPos | null => {
         let res: IPos | null = null;
         for (const pos of BuildingList) {
@@ -143,108 +116,17 @@ export const Pos = {
         const availableMaps = await getAvailableMaps(keyword);
         const hasAmap = !!availableMaps.amap;
         const hasBaidu = !!availableMaps.baidu;
-        const amapUrl = buildAmapUrl(keyword);
-        const baiduUrl = buildBaiduUrl(keyword);
-        const defaultApp = await getDefaultMapApp();
-        const fallbackApp: MapApp | null = defaultApp === "amap" ? "baidu" : defaultApp === "baidu" ? "amap" : null;
 
         try {
-            if (hasAmap && !hasBaidu) {
-                return await tryOpenMap(availableMaps.amap!, "amap");
-            }
-
-            if (!hasAmap && hasBaidu) {
-                return await tryOpenMap(availableMaps.baidu!, "baidu");
-            }
-
             if (!hasAmap && !hasBaidu) {
-                if (defaultApp === "amap") {
-                    const opened = await tryOpenMap(amapUrl, "amap", false);
-                    if (opened) {
-                        return true;
-                    }
-                    await clearDefaultMapApp();
-                    return await tryOpenMap(baiduUrl, "baidu");
-                }
-
-                if (defaultApp === "baidu") {
-                    const opened = await tryOpenMap(baiduUrl, "baidu", false);
-                    if (opened) {
-                        return true;
-                    }
-                    await clearDefaultMapApp();
-                    return await tryOpenMap(amapUrl, "amap");
-                }
-
-                const selectedApp = await chooseMapApp();
-
-                if (!selectedApp) {
-                    return false;
-                }
-
-                const rememberMode = await chooseRememberMode(selectedApp);
-
-                if (!rememberMode) {
-                    return false;
-                }
-
-                if (rememberMode === "always") {
-                    await setDefaultMapApp(selectedApp);
-                }
-
-                if (selectedApp === "amap") {
-                    return await tryOpenMap(amapUrl, "amap");
-                }
-
-                return await tryOpenMap(baiduUrl, "baidu");
-            }
-
-            if (defaultApp === "amap" && availableMaps.amap) {
-                const opened = await tryOpenMap(availableMaps.amap, "amap", false);
-                if (opened) {
-                    return true;
-                }
-                await clearDefaultMapApp();
-                if (availableMaps.baidu) {
-                    return await tryOpenMap(availableMaps.baidu, "baidu");
-                }
+                ToastAndroid.show("当前未检测到地图应用，请安装后再试", ToastAndroid.SHORT);
                 return false;
             }
 
-            if (defaultApp === "baidu" && availableMaps.baidu) {
-                const opened = await tryOpenMap(availableMaps.baidu, "baidu", false);
-                if (opened) {
-                    return true;
-                }
-                await clearDefaultMapApp();
-                if (availableMaps.amap) {
-                    return await tryOpenMap(availableMaps.amap, "amap");
-                }
-                return false;
-            }
-
-            if (defaultApp && fallbackApp) {
-                await clearDefaultMapApp();
-                if (fallbackApp === "amap") {
-                    return await tryOpenMap(amapUrl, "amap");
-                }
-                return await tryOpenMap(baiduUrl, "baidu");
-            }
-
-            const selectedApp = await chooseMapApp();
+            const selectedApp = await chooseInstalledMapApp(availableMaps);
 
             if (!selectedApp) {
                 return false;
-            }
-
-            const rememberMode = await chooseRememberMode(selectedApp);
-
-            if (!rememberMode) {
-                return false;
-            }
-
-            if (rememberMode === "always") {
-                await setDefaultMapApp(selectedApp);
             }
 
             if (selectedApp === "amap" && availableMaps.amap) {

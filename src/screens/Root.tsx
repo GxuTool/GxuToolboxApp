@@ -6,6 +6,7 @@ import {CourseScheduleContext, generateCourseScheduleStyle, useCourseScheduleDat
 import {useTheme} from "@rneui/themed";
 import {useUserConfig} from "@/hooks/app.ts";
 import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";
+import {MapPickerHost} from "@/components/map/MapPickerHost.tsx";
 
 export function Root(props: ViewProps) {
     const {userConfig} = useUserConfig();
@@ -63,6 +64,7 @@ export function Root(props: ViewProps) {
                         <NavigationContainer theme={navigationTheme}>
                             <RootStack />
                         </NavigationContainer>
+                        <MapPickerHost />
                     </ImageBackground>
                 </View>
             </UnToastContextProvider>

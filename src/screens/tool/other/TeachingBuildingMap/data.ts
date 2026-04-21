@@ -18,7 +18,7 @@ export const TeachBuildingList:TeachBuilding[]=[
             {
                 id:"1",
                 name:"每层楼层图",
-                image:require("./pictures/erjiao/2.jpeg"),
+                image:require("../../../../pictures/erjiao/2.jpeg"),
             },
         ]
     },
@@ -29,7 +29,7 @@ export const TeachBuildingList:TeachBuilding[]=[
             {
                 id:"1",
                 name:"每层楼层图",
-                image:require("./pictures/sanjiao/1.jpeg"),
+                image:require("../../../../pictures/sanjiao/1.jpeg"),
             }
         ]
     },
@@ -40,37 +40,37 @@ export const TeachBuildingList:TeachBuilding[]=[
             {
                 id:"all",
                 name:"总楼层图",
-                image:require("./pictures/liujiao/all.jpeg"),
+                image:require("../../../../pictures/liujiao/all.jpeg"),
             },
             {
                 id:"1",
                 name:"1楼",
-                image:require("./pictures/liujiao/1.jpeg"),
+                image:require("../../../../pictures/liujiao/1.jpeg"),
             },
             {
                 id:"2",
                 name:"2楼",
-                image:require("./pictures/liujiao/2.jpeg"),
+                image:require("../../../../pictures/liujiao/2.jpeg"),
             },
             {
                 id:"3",
                 name:"3楼",
-                image:require("./pictures/liujiao/3.jpeg"),
+                image:require("../../../../pictures/liujiao/3.jpeg"),
             },
             {
                 id:"4",
                 name:"4楼",
-                image:require("./pictures/liujiao/4.jpeg"),
+                image:require("../../../../pictures/liujiao/4.jpeg"),
             },
             {
                 id:"5",
                 name:"5楼",
-                image:require("./pictures/liujiao/5.jpeg"),
+                image:require("../../../../pictures/liujiao/5.jpeg"),
             },
             {
                 id:"6",
                 name:"6楼",
-                image:require("./pictures/liujiao/6.jpeg"),
+                image:require("../../../../pictures/liujiao/6.jpeg"),
             },
         ],
     },
@@ -81,17 +81,17 @@ export const TeachBuildingList:TeachBuilding[]=[
             {
                 id:"A1",
                 name:"A区1楼",
-                image:require("./pictures/shijiao/A1.jpeg"),
+                image:require("../../../../pictures/shijiao/A1.jpeg"),
             },
             {
                 id:"A2",
                 name:"A区2楼",
-                image:require("./pictures/shijiao/A2.jpeg"),
+                image:require("../../../../pictures/shijiao/A2.jpeg"),
             },
             {
                 id:"B",
                 name:"B区每层平面图",
-                image:require("./pictures/shijiao/B.jpeg"),
+                image:require("../../../../pictures/shijiao/B.jpeg"),
             }
         ]
     },
