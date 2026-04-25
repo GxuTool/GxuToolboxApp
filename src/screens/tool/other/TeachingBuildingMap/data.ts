@@ -17,8 +17,23 @@ export const TeachBuildingList:TeachBuilding[]=[
         floors:[
             {
                 id:"1",
-                name:"每层楼层图",
-                image:require("../../../../pictures/erjiao/2.jpeg"),
+                name:"1层楼层图",
+                image:require("../../../../pictures/erjiao/2-1.jpg"),
+            },
+            {
+                id:"2-4",
+                name:"2~4层楼层图",
+                image:require("../../../../pictures/erjiao/2-2~4.jpg"),
+            },
+            {
+                id:"5-6",
+                name:"5~6层楼层图",
+                image:require("../../../../pictures/erjiao/2-5~6.jpg"),
+            },
+            {
+                id:"7",
+                name:"7层楼层图",
+                image:require("../../../../pictures/erjiao/2-7.jpg"),
             },
         ]
     },
@@ -28,8 +43,18 @@ export const TeachBuildingList:TeachBuilding[]=[
         floors:[
             {
                 id:"1",
-                name:"每层楼层图",
-                image:require("../../../../pictures/sanjiao/1.jpeg"),
+                name:"1~2层楼层图",
+                image:require("../../../../pictures/sanjiao/3-1~2.jpg"),
+            },
+            {
+                id:"3-6",
+                name:"3~6层楼层图",
+                image:require("../../../../pictures/sanjiao/3-3~6.jpg"),
+            },
+            {
+                id:"7",
+                name:"7层楼层图",
+                image:require("../../../../pictures/sanjiao/3-7.jpg"),
             }
         ]
     },
@@ -80,19 +105,24 @@ export const TeachBuildingList:TeachBuilding[]=[
         floors:[
             {
                 id:"A1",
-                name:"A区1楼",
+                name:"A区1层",
                 image:require("../../../../pictures/shijiao/A1.jpeg"),
             },
             {
                 id:"A2",
-                name:"A区2楼",
+                name:"A区2层",
                 image:require("../../../../pictures/shijiao/A2.jpeg"),
             },
             {
-                id:"B",
-                name:"B区每层平面图",
-                image:require("../../../../pictures/shijiao/B.jpeg"),
-            }
+                id:"B23",
+                name:"B区2~3平面图",
+                image:require("../../../../pictures/shijiao/10B-2_3.png"),
+            },
+            {
+                id:"B46",
+                name:"B区4~6平面图",
+                image:require("../../../../pictures/shijiao/10B-4_6.png"),
+            },
         ]
     },
 ];

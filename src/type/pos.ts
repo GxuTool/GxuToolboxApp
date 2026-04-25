@@ -260,6 +260,13 @@ export const BuildingList: IPos[] = [
         test: /东盟/,
     },
     {
+        type:"学院",
+        name:"永雏塔菲研究中心",
+        fullName:"广西大学永雏塔菲研究中心",
+        simpleName:["关注塔菲喵,谢谢喵！！！"],
+        test:/塔菲/,
+    },
+    {
         type: "食堂",
         name: "南苑食堂",
         fullName: "广西大学西校园南苑餐厅",
