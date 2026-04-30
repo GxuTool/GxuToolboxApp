@@ -41,6 +41,9 @@ export function CourseScheduleQuery() {
         container: {
             padding: "3%",
         },
+        coursePadding:{
+            marginHorizontal:-12,
+        },
         tableText: {
             color: theme.colors.black,
             margin: 5,
@@ -104,7 +107,7 @@ export function CourseScheduleQuery() {
                         includeWholeYear={false}
                     />
                 </View>
-                {loading && <ActivityIndicator size="large" />}
+                {loading&&<ActivityIndicator size="large" />}
                 <Divider />
                 <Text h4>预览</Text>
                 <Flex style={{padding: 10}} align="flex-start" direction="column" gap={10}>
@@ -118,8 +121,9 @@ export function CourseScheduleQuery() {
                         onValueChange={v => pageView.setPage(v - 1)}
                     />
                 </Flex>
-
+                <View style={style.coursePadding}>
                 <TimeScheduleView startDay={startDay} pageView={pageView} scheduleItems={baseCourse} />
+                </View>
                 {practiceItems && (
                     <>
                         <Card.Divider />
