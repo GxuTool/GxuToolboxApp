@@ -2,9 +2,9 @@ import {Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle} from "reac
 import moment from "moment/moment";
 import {Color} from "@/shared/color.ts";
 import {BottomSheet, Text, useTheme} from "@rneui/themed";
-import {ReactNode, useContext, useEffect, useMemo, useState} from "react";
+import {ReactNode, useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {useUserConfig} from "@/hooks/app.ts";
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
@@ -51,7 +51,11 @@ function groupByConflict(items: ScheduleTableItem[]): ScheduleTableItem[][] {
 
 export function TimeSchedule(props: TimeScheduleProps) {
     const {userConfig} = useUserConfig();
-    const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
+    const {store, courseScheduleStyle} = useCourse();
+    const weekdayList = store(s => s.weekdayList);
+    const timeSpanList = store(s => s.timeSpanList);
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
     const {theme} = useTheme();
     const startDay = moment(props.startDay ?? userConfig.jw.startDay);
     const [currentTime, setCurrentTime] = useState(moment().format());
@@ -73,7 +77,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
     // 计算当前时间段
     function getCurrentTimeSpan() {
         let res = -1;
-        courseScheduleData.timeSpanList.forEach((timeSpan, index, list) => {
+        timeSpanList.forEach((timeSpan, index, list) => {
             const start = index > 0 ? list[index - 1].split("\n")[1] : "00:00";
             const end = timeSpan.split("\n")[1];
             const startTime = moment(start, "hh:mm");
@@ -89,23 +93,23 @@ export function TimeSchedule(props: TimeScheduleProps) {
     // 计算时间段的Top
     const timeSpanHighLightTop = {
         top:
-            userConfig.theme.course.weekdayHeight +
-            (currentTimeSpan ?? 1) * userConfig.theme.course.timeSpanHeight +
+            weekdayHeight +
+            (currentTimeSpan ?? 1) * timeSpanHeight +
             10,
     };
 
     // 生成短的时间段元素列表
-    const shortTimeSpanList: [number | string, string][] = Array(Math.ceil(courseScheduleData.timeSpanList.length / 2))
+    const shortTimeSpanList: [number | string, string][] = Array(Math.ceil(timeSpanList.length / 2))
         .fill(0)
         .map((_, index) =>
-            courseScheduleData.timeSpanList[index * 2 + 1] !== undefined
+            timeSpanList[index * 2 + 1] !== undefined
                 ? [
                       `${index * 2 + 1} - ${index * 2 + 2}`,
-                      courseScheduleData.timeSpanList[index * 2].split("\n")[0] +
+                      timeSpanList[index * 2].split("\n")[0] +
                           "\n" +
-                          courseScheduleData.timeSpanList[index * 2 + 1].split("\n")[1],
+                          timeSpanList[index * 2 + 1].split("\n")[1],
                   ]
-                : [index * 2 + 1, courseScheduleData.timeSpanList[index * 2]],
+                : [index * 2 + 1, timeSpanList[index * 2]],
         );
 
     // 新链路
@@ -141,8 +145,8 @@ export function TimeSchedule(props: TimeScheduleProps) {
                     )}
                 </View>
                 {/*时间段*/}
-                {userConfig.theme.course.timeSpanHeight > 40
-                    ? courseScheduleData.timeSpanList.map((time, index) => (
+                {timeSpanHeight > 40
+                    ? timeSpanList.map((time, index) => (
                           <Flex
                               inline
                               key={`timespan-${index}`}
@@ -157,7 +161,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
                               key={`timespan-${index}`}
                               style={[
                                   courseScheduleStyle.timeSpanItem,
-                                  {height: userConfig.theme.course.timeSpanHeight * 2},
+                                  {height: timeSpanHeight * 2},
                               ]}
                               justify="center">
                               <Text style={courseScheduleStyle.timeSpanText}>{`${value[0]}\n${value[1]}`}</Text>
@@ -165,7 +169,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
                       ))}
             </View>
             {/*课表*/}
-            {courseScheduleData.weekdayList.map((weekday, index) => {
+            {weekdayList.map((weekday, index) => {
                 // 判断是否为当天
                 const currentDay = startDay.clone().add({
                     week: currentWeek - 1,

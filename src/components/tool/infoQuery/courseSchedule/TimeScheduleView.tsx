@@ -3,7 +3,7 @@ import {StyleSheet, View} from "react-native";
 import {TimeSchedule, TimeScheduleProps} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {usePagerView} from "react-native-pager-view";
 import moment from "moment/moment";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {buildColorMap, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {ColorMapContext} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 
@@ -12,31 +12,32 @@ export interface TimeScheduleViewProps extends TimeScheduleProps {
 }
 
 export function TimeScheduleView(props: TimeScheduleViewProps) {
-    const {userConfig} = useUserConfig();
+    const {store} = useCourse();
     const {AnimatedPagerView, ref, ...rest} = props.pageView;
     const startDay = props.startDay ?? moment();
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 
-    const paletteName = (userConfig.theme?.course?.palette as PaletteName) || "macaron";
-    const customColors = userConfig.theme?.course?.customColors || {};
+    const paletteName = (store(s => s.theme.palette) as PaletteName) || "macaron";
+    const customColors = store(s => s.theme.customColors) || {};
     const colorMap = useMemo(
         () => buildColorMap(props.scheduleItems ?? [], paletteName, customColors),
         [props.scheduleItems, paletteName, customColors],
     );
 
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
     const style = useMemo(
         () =>
             StyleSheet.create({
                 pagerView: {
                     width: "100%",
                     height:
-                        userConfig.theme.course.timeSpanHeight *
-                            (userConfig.theme.course.timeSpanHeight <= 40 ? 14 : 13) +
-                        userConfig.theme.course.weekdayHeight +
+                        timeSpanHeight * (timeSpanHeight <= 40 ? 14 : 13) +
+                        weekdayHeight +
                         50,
                 },
             }),
-        [userConfig.theme.course.timeSpanHeight, userConfig.theme.course.weekdayHeight],
+        [timeSpanHeight, weekdayHeight],
     );
 
     return (

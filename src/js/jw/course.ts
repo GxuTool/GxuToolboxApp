@@ -2,7 +2,6 @@ import {BaseColor, Color} from "@/shared/color.ts";
 import {createContext, useCallback, useEffect, useState} from "react";
 import {StyleSheet, ToastAndroid} from "react-native";
 import {store} from "@/core/store.ts";
-import {defaultUserConfig, IUserConfig} from "@/type/IUserConfig.ts";
 import {SchoolTerms, SchoolTermValue, SchoolValue, SchoolYears, SchoolYearValue} from "@/type/global.ts";
 import {
     ClassScheduleQueryRes,
@@ -68,7 +67,17 @@ export const CourseScheduleData = {
 export type CourseScheduleDataType = typeof CourseScheduleData;
 export type CourseScheduleStyleType = ReturnType<typeof generateCourseScheduleStyle>;
 
-export function generateCourseScheduleStyle(config: IUserConfig["theme"]["course"], theme: any) {
+export interface CourseThemeConfig {
+    timeSpanHeight: number;
+    weekdayHeight: number;
+    courseItemMargin: number;
+    courseItemBorderWidth: number;
+    courseColor: Record<string, string>;
+    palette?: import("@/features/courseSchedule/utils/colorPalette.ts").PaletteName;
+    customColors?: Record<string, string>;
+}
+
+export function generateCourseScheduleStyle(config: CourseThemeConfig, theme: any) {
     return StyleSheet.create({
         timeSpanHighLight: {
             position: "absolute",
@@ -168,15 +177,8 @@ export const CourseScheduleContext = createContext<{
 } | null>(null);
 
 async function randomCourseColor(courseList: (Course | PracticalCourse)[]) {
-    const userConfig: IUserConfig = await store.load({key: "userConfig"}).catch(e => {
-        console.warn(e);
-        return defaultUserConfig;
-    });
-    if (!userConfig.theme.course.courseColor) {
-        userConfig.theme.course.courseColor = {};
-    }
-    //使得相同课程的颜色相同
-    const courseColor = userConfig.theme.course.courseColor;
+    const courseData = await store.load({key: "courseScheduleStore"}).catch(() => null);
+    const courseColor: Record<string, string> = courseData?.theme?.courseColor ?? {};
     let hasChange = false;
     courseList.forEach(course => {
         if (!courseColor[course.kcmc]) {
@@ -189,8 +191,8 @@ async function randomCourseColor(courseList: (Course | PracticalCourse)[]) {
     });
     if (hasChange) {
         await store.save({
-            key: "userConfig",
-            data: userConfig,
+            key: "courseScheduleStore",
+            data: { ...courseData, theme: { ...courseData?.theme, courseColor } },
         });
     }
 }

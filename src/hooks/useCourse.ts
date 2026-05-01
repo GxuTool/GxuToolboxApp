@@ -1,6 +1,10 @@
 import { create } from "zustand/react";
+import { useMemo } from "react";
 import { BaseColor } from "@/shared/color.ts";
 import { store as storage } from "@/core/store.ts";
+import { useTheme } from "@rneui/themed";
+import { generateCourseScheduleStyle } from "@/js/jw/course.ts";
+import { PaletteName } from "@/features/courseSchedule/utils/colorPalette.ts";
 
 const STORAGE_KEY = "courseScheduleStore";
 
@@ -10,6 +14,15 @@ export interface CourseStoreState {
     randomColor: string[];
     weekdayList: string[];
     timeSpanList: `${string}\n${string}`[];
+    theme: {
+        timeSpanHeight: number;
+        weekdayHeight: number;
+        courseItemMargin: number;
+        courseItemBorderWidth: number;
+        courseColor: Record<string, string>;
+        palette?: PaletteName;
+        customColors?: Record<string, string>;
+    };
 }
 
 export interface CourseStoreAction {
@@ -65,18 +78,36 @@ const defaultState: CourseStoreState = {
         "20:30\n21:15",
         "21:20\n22:05",
     ],
+
+    theme: {
+        timeSpanHeight: 80,
+        weekdayHeight: 60,
+        courseItemMargin: 2,
+        courseItemBorderWidth: 0,
+        courseColor: {},
+    },
 };
+
+const persistableKeys = [
+    "courseInfoVisible",
+    "startDay",
+    "randomColor",
+    "weekdayList",
+    "timeSpanList",
+    "theme",
+] as const;
 
 const useCourseStore = create<CourseStoreState & CourseStoreAction>()((set, get) => ({
     ...defaultState,
 
     update: (k, v) => {
         set({ [k]: v } as Partial<CourseStoreState>);
-        const { courseInfoVisible, startDay, randomColor, weekdayList, timeSpanList } = get();
-        storage.save({
-            key: STORAGE_KEY,
-            data: { courseInfoVisible, startDay, randomColor, weekdayList, timeSpanList },
-        });
+        const state = get();
+        const data: Record<string, unknown> = {};
+        for (const key of persistableKeys) {
+            data[key] = state[key];
+        }
+        storage.save({ key: STORAGE_KEY, data });
     },
 
     init: async () => {
@@ -92,8 +123,17 @@ const useCourseStore = create<CourseStoreState & CourseStoreAction>()((set, get)
 }));
 
 export const useCourse = () => {
+    const { theme: rneuiTheme } = useTheme();
+    const courseTheme = useCourseStore(s => s.theme);
+
+    const courseScheduleStyle = useMemo(
+        () => generateCourseScheduleStyle(courseTheme, rneuiTheme),
+        [courseTheme, rneuiTheme],
+    );
+
     return {
         store: useCourseStore,
+        courseScheduleStyle,
         /** 在应用启动时调用，从本地存储读取缓存数据还原到 store */
         init: useCourseStore.getState().init,
         /** 直接从存储加载数据（不走缓存），失败返回 null */

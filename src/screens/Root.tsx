@@ -1,8 +1,9 @@
 import {ImageBackground, StatusBar, StyleSheet, useColorScheme, View, ViewProps} from "react-native";
 import {DarkTheme, DefaultTheme, NavigationContainer} from "@react-navigation/native";
 import {RootStack} from "@/route/RootStack.tsx";
-import React, {useCallback, useMemo} from "react";
-import {CourseScheduleContext, generateCourseScheduleStyle, useCourseScheduleData} from "@/js/jw/course.ts";
+import React, {useCallback, useEffect, useMemo} from "react";
+import {CourseScheduleContext} from "@/js/jw/course.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {useTheme} from "@rneui/themed";
 import {useUserConfig} from "@/hooks/app.ts";
 import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";
@@ -12,21 +13,37 @@ export function Root(props: ViewProps) {
     const {userConfig} = useUserConfig();
     const {theme} = useTheme();
     const colorScheme = useColorScheme();
-    const {courseScheduleData, updateCourseScheduleData} = useCourseScheduleData();
-    const memoizedUpdateFunction = useCallback(updateCourseScheduleData, []);
-    const memoizedStyle = useMemo(
-        () => generateCourseScheduleStyle(userConfig.theme.course, theme),
-        [courseScheduleData, theme, userConfig],
+    const {store, courseScheduleStyle, init} = useCourse();
+
+    useEffect(() => {
+        init();
+    }, [init]);
+
+    const courseScheduleData = store(s => ({
+        courseInfoVisible: s.courseInfoVisible,
+        startDay: s.startDay,
+        randomColor: s.randomColor,
+        weekdayList: s.weekdayList,
+        timeSpanList: s.timeSpanList,
+    }));
+
+    const updateCourseScheduleData = useCallback(
+        (data: Partial<typeof courseScheduleData>) => {
+            for (const [k, v] of Object.entries(data)) {
+                store.getState().update(k as keyof typeof courseScheduleData, v);
+            }
+        },
+        [store],
     );
 
     // 使用 useMemo 包装 Context value 以避免不必要的重渲染
     const contextValue = useMemo(
         () => ({
             courseScheduleData,
-            courseScheduleStyle: memoizedStyle,
-            updateCourseScheduleData: memoizedUpdateFunction,
+            courseScheduleStyle,
+            updateCourseScheduleData,
         }),
-        [courseScheduleData, memoizedStyle, memoizedUpdateFunction],
+        [courseScheduleData, courseScheduleStyle, updateCourseScheduleData],
     );
 
     const style = StyleSheet.create({
