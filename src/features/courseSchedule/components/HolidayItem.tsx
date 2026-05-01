@@ -1,5 +1,6 @@
 import {Pressable, StyleSheet, View} from "react-native";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
 import {Text, useTheme} from "@rneui/themed";
@@ -13,6 +14,10 @@ interface HolidayItemProps {
 
 export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
     const {userConfig} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
+    const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();
 
     const span = item.end - item.begin + 1;
@@ -37,12 +42,12 @@ export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
                     borderRadius: 6,
                     backgroundColor: backgroundColor,
                     height:
-                        (item.end - item.begin + 1) * userConfig.theme.course.timeSpanHeight -
-                        userConfig.theme.course.courseItemMargin * 2,
+                        span * timeSpanHeight -
+                        courseItemMargin * 2,
                     top:
-                        userConfig.theme.course.weekdayHeight +
-                        (item.begin - 1) * userConfig.theme.course.timeSpanHeight +
-                        userConfig.theme.course.courseItemMargin,
+                        weekdayHeight +
+                        y * timeSpanHeight +
+                        courseItemMargin,
                     overflow: "hidden",
                     // Design change: Top accent border (like a sticky note) instead of left border
                     borderTopWidth: 4,
@@ -78,7 +83,7 @@ export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
                     zIndex: 1,
                 },
             }),
-        [backgroundColor, borderColor, textColor, span, y, userConfig.theme.course, isFullDay],
+        [backgroundColor, borderColor, textColor, span, y, timeSpanHeight, weekdayHeight, courseItemMargin, isFullDay],
     );
 
     return (

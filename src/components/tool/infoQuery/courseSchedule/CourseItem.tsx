@@ -8,6 +8,7 @@ import {Course} from "@/type/infoQuery/course/course.ts";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
 
 interface Props {
@@ -19,6 +20,10 @@ interface Props {
 
 export function CourseItem(props: Props) {
     const {userConfig} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
+    const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {course} = props;
@@ -27,15 +32,15 @@ export function CourseItem(props: Props) {
     const itemStyle = useMemo(() => {
         return StyleSheet.create({
             course: {
-                height: span * userConfig.theme.course.timeSpanHeight - userConfig.theme.course.courseItemMargin * 2,
+                height: span * timeSpanHeight - courseItemMargin * 2,
                 position: "absolute",
                 backgroundColor: Color(course.backgroundColor ?? theme.colors.primary).setAlpha(
                     theme.mode === "light" ? 0.3 : 0.1,
                 ).rgbaString,
                 top:
-                    userConfig.theme.course.weekdayHeight +
-                    y * userConfig.theme.course.timeSpanHeight +
-                    userConfig.theme.course.courseItemMargin,
+                    weekdayHeight +
+                    y * timeSpanHeight +
+                    courseItemMargin,
             },
             text: {
                 textAlign: "center",
@@ -44,9 +49,9 @@ export function CourseItem(props: Props) {
         });
     }, [
         course.backgroundColor,
-        userConfig.theme.course.courseItemMargin,
-        userConfig.theme.course.timeSpanHeight,
-        userConfig.theme.course.weekdayHeight,
+        courseItemMargin,
+        timeSpanHeight,
+        weekdayHeight,
         span,
         theme.colors.grey4,
         theme.mode,

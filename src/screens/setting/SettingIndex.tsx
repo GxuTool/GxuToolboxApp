@@ -8,9 +8,11 @@ import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx";
 import {ToastAndroid} from "react-native";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 
 export function SettingIndex() {
     const {userConfig, updateUserConfig} = useUserConfig();
+    const {store} = useCourse();
 
     function selectBg() {
         launchImageLibrary({
@@ -78,8 +80,7 @@ export function SettingIndex() {
                         <Flex gap={10} inline>
                             <Button
                                 onPress={() => {
-                                    userConfig.theme.course.courseColor = {};
-                                    updateUserConfig(userConfig);
+                                    store.getState().update("theme", { ...store.getState().theme, courseColor: {} });
                                     ToastAndroid.show("清空成功", ToastAndroid.SHORT);
                                 }}
                                 size="sm">

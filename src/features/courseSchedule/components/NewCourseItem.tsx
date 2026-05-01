@@ -1,5 +1,6 @@
 import {Pressable, StyleSheet, View} from "react-native";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 
 import React, {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
@@ -20,6 +21,10 @@ interface NewCourseItemProps {
 
 export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItemProps) => {
     const {userConfig} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
+    const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
 
@@ -41,12 +46,12 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     borderRadius: 5,
                     backgroundColor: backgroundColor,
                     height:
-                        (item.end - item.begin + 1) * userConfig.theme.course.timeSpanHeight -
-                        userConfig.theme.course.courseItemMargin * 2,
+                        span * timeSpanHeight -
+                        courseItemMargin * 2,
                     top:
-                        userConfig.theme.course.weekdayHeight +
-                        (item.begin - 1) * userConfig.theme.course.timeSpanHeight +
-                        userConfig.theme.course.courseItemMargin,
+                        weekdayHeight +
+                        y * timeSpanHeight +
+                        courseItemMargin,
                 },
                 text: {
                     textAlign: "center",
@@ -74,7 +79,7 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     fontWeight: "bold",
                 },
             }),
-        [backgroundColor, textColor, span, y, userConfig.theme.course],
+        [backgroundColor, textColor, span, y, timeSpanHeight, weekdayHeight, courseItemMargin],
     );
 
     return (

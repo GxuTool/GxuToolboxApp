@@ -1,19 +1,16 @@
 // useEntityColor.ts
 import {createContext, useCallback, useContext} from "react";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {PaletteName, resolveEventsColor} from "../utils/colorPalette.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export const ColorMapContext = createContext<Map<string, string> | null>(null);
 
 export function useBlocksColor() {
-    const {userConfig, updateUserConfig} = useUserConfig();
+    const {store} = useCourse();
 
-    // userConfig 里存 paletteName 和 customColors
-    // 如果没有，先用默认值, 然后扩展 userConfig 类型
-    // 先默认用马卡龙色系
-    const paletteName = (userConfig.theme?.course?.palette as PaletteName) || "macaron";
-    const customColors = userConfig.theme?.course?.customColors || {};
+    const paletteName = store(s => s.theme.palette) || "macaron";
+    const customColors = store(s => s.theme.customColors) || {};
 
     const colorMap = useContext(ColorMapContext);
 
@@ -33,19 +30,14 @@ export function useBlocksColor() {
     }, [customColors, paletteName, colorMap]);
 
     const setCustomColor = useCallback((key: string, color: string) => {
-        // 更新 userConfig
-        const newTheme = {
-            ...userConfig.theme,
-            course: {
-                ...userConfig.theme.course,
-                customColors: {
-                    ...customColors,
-                    [key]: color
-                }
+        store.getState().update("theme", {
+            ...store.getState().theme,
+            customColors: {
+                ...customColors,
+                [key]: color
             }
-        };
-        updateUserConfig({...userConfig, theme: newTheme});
-    }, [userConfig, updateUserConfig]);
+        });
+    }, [store, customColors]);
 
     return {getColor, setCustomColor, paletteName};
 }

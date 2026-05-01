@@ -1,5 +1,6 @@
 import {Pressable, StyleSheet} from "react-native";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
@@ -14,6 +15,10 @@ interface NewExamItemProps {
 }
 export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
     const {userConfig} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
+    const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
 
@@ -37,11 +42,11 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
                     borderTopColor: baseColor,
                     backgroundColor: backgroundColor,
                     height:
-                        span * userConfig.theme.course.timeSpanHeight - userConfig.theme.course.courseItemMargin * 2,
+                        span * timeSpanHeight - courseItemMargin * 2,
                     top:
-                        userConfig.theme.course.weekdayHeight +
-                        y * userConfig.theme.course.timeSpanHeight +
-                        userConfig.theme.course.courseItemMargin,
+                        weekdayHeight +
+                        y * timeSpanHeight +
+                        courseItemMargin,
                     overflow: "hidden",
                 },
                 text: {
@@ -72,7 +77,7 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
                     fontSize: 11,
                 },
             }),
-        [backgroundColor, textColor, span, y, userConfig.theme.course, baseColor],
+        [backgroundColor, textColor, span, y, timeSpanHeight, weekdayHeight, courseItemMargin, baseColor],
     );
 
     return (

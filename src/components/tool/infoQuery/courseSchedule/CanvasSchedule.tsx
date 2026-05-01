@@ -10,6 +10,7 @@ import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/core/store.ts";
 import {http} from "@/core/http.ts";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {Course} from "@/type/infoQuery/course/course.ts";
 
 type Props = {
@@ -20,6 +21,8 @@ type Props = {
 export function CanvasSchedule(props: Props) {
     const {theme} = useTheme();
     const {userConfig} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
     const [timeShift, setTimeShift] = useState<[string, string][]>([]);
@@ -35,9 +38,9 @@ export function CanvasSchedule(props: Props) {
         canvas: {
             width: screenWidth * 0.9,
             height:
-                userConfig.theme.course.timeSpanHeight > 40
-                    ? userConfig.theme.course.timeSpanHeight * 14 + 49
-                    : userConfig.theme.course.timeSpanHeight * 2 * 8 + 34,
+                timeSpanHeight > 40
+                    ? timeSpanHeight * 14 + 49
+                    : timeSpanHeight * 2 * 8 + 34,
             backgroundColor: theme.colors.background,
         },
         button: {
@@ -49,7 +52,7 @@ export function CanvasSchedule(props: Props) {
     const stringLineHeight = courseScheduleStyle.timeSpanText.fontSize; //行高
     const canvasCssWidth = styles.canvas.width;
     const spanWidth = (canvasCssWidth - 21) / 8;
-    const spanHeight = userConfig.theme.course.timeSpanHeight; //一个元素高度
+    const spanHeight = timeSpanHeight; //一个元素高度
 
     /**
      * 从内存获取当前周课表
@@ -75,7 +78,7 @@ export function CanvasSchedule(props: Props) {
     useEffect(() => {
         getCoursesData();
         getTimeShift();
-    }, [userConfig.theme.course.timeSpanHeight]);
+    }, [timeSpanHeight]);
 
     /**
      * 通用字体样式和画布字体配置
@@ -301,7 +304,7 @@ export function CanvasSchedule(props: Props) {
 
     useEffect(() => {
         drawSchedule();
-    }, [courseSchedule, userConfig.theme.course.timeSpanHeight]);
+    }, [courseSchedule, timeSpanHeight]);
     return (
         <View style={styles.container}>
             <Canvas ref={handleCanvas} style={styles.canvas} />

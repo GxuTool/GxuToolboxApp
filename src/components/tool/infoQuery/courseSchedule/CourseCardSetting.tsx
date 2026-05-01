@@ -10,6 +10,7 @@ import moment from "moment/moment";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {ColorPalettes, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {Color} from "@/shared/color.ts";
@@ -28,6 +29,8 @@ export function CourseCardSetting(props: Props) {
     const {theme} = useTheme();
 
     const {userConfig, updateUserConfig} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const {courseScheduleData, updateCourseScheduleData} = useContext(CourseScheduleContext)!;
 
     const infoVisibleOptions: Record<keyof typeof courseScheduleData.courseInfoVisible, string> = {
@@ -94,7 +97,7 @@ export function CourseCardSetting(props: Props) {
             {/* ── 课程元素高度 ── */}
             <Flex justify="space-between" style={{marginBottom: 4}}>
                 <Text style={{fontSize: 13, color: theme.colors.grey3}}>课程元素高度</Text>
-                <Text style={{fontSize: 13, color: theme.colors.grey1}}>{userConfig.theme.course.timeSpanHeight}</Text>
+                <Text style={{fontSize: 13, color: theme.colors.grey1}}>{timeSpanHeight}</Text>
             </Flex>
             <View style={{marginBottom: 16}}>
                 <UnSlider
@@ -102,10 +105,9 @@ export function CourseCardSetting(props: Props) {
                     minimumValue={5}
                     maximumValue={100}
                     allowTouchTrack
-                    value={userConfig.theme.course.timeSpanHeight}
+                    value={timeSpanHeight}
                     onValueChange={v => {
-                        userConfig.theme.course.timeSpanHeight = v;
-                        updateUserConfig(userConfig);
+                        store.getState().update("theme", { ...store.getState().theme, timeSpanHeight: v });
                     }}
                 />
             </View>
@@ -178,8 +180,7 @@ export function CourseCardSetting(props: Props) {
                         <Pressable
                             key={name}
                             onPress={() => {
-                                userConfig.theme.course.palette = name;
-                                updateUserConfig({...userConfig});
+                                store.getState().update("theme", { ...store.getState().theme, palette: name });
                             }}
                             style={{
                                 flex: 1,

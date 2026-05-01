@@ -6,6 +6,7 @@ import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 
 interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ripple"> {
     style?: ViewStyle;
@@ -15,6 +16,10 @@ interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ri
 
 export function ActivityItem(props: ActivityItemProps) {
     const {userConfig} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
+    const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {item} = props;
@@ -23,14 +28,14 @@ export function ActivityItem(props: ActivityItemProps) {
     const itemStyle = useMemo(() => {
         return StyleSheet.create({
             item: {
-                height: span * userConfig.theme.course.timeSpanHeight - userConfig.theme.course.courseItemMargin * 2,
+                height: span * timeSpanHeight - courseItemMargin * 2,
                 position: "absolute",
                 backgroundColor: Color(item.color ?? theme.colors.primary).setAlpha(theme.mode === "light" ? 0.3 : 0.1)
                     .rgbaString,
                 top:
-                    userConfig.theme.course.weekdayHeight +
-                    y * userConfig.theme.course.timeSpanHeight +
-                    userConfig.theme.course.courseItemMargin,
+                    weekdayHeight +
+                    y * timeSpanHeight +
+                    courseItemMargin,
                 borderWidth: 2,
                 borderColor: Color.mix(theme.colors.primary, theme.colors.white, 0.2).rgbaString,
             },
@@ -41,9 +46,9 @@ export function ActivityItem(props: ActivityItemProps) {
         });
     }, [
         item.color,
-        userConfig.theme.course.courseItemMargin,
-        userConfig.theme.course.timeSpanHeight,
-        userConfig.theme.course.weekdayHeight,
+        courseItemMargin,
+        timeSpanHeight,
+        weekdayHeight,
         span,
         theme.colors.grey4,
         theme.mode,

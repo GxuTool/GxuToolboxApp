@@ -5,7 +5,7 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 
 type EngTrainingExp = {
     date: string;
@@ -21,7 +21,10 @@ interface Props {
 }
 
 export function EngTrainingItem(props: Props) {
-    const {userConfig} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
+    const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {item} = props;
@@ -29,15 +32,15 @@ export function EngTrainingItem(props: Props) {
     const itemStyle = useMemo(() => {
         return StyleSheet.create({
             item: {
-                height: span * userConfig.theme.course.timeSpanHeight - userConfig.theme.course.courseItemMargin * 2,
+                height: span * timeSpanHeight - courseItemMargin * 2,
                 position: "absolute",
                 backgroundColor: Color(item.backgroundColor ?? theme.colors.primary).setAlpha(
                     theme.mode === "light" ? 0.3 : 0.1,
                 ).rgbaString,
                 top:
-                    userConfig.theme.course.weekdayHeight +
-                    y * userConfig.theme.course.timeSpanHeight +
-                    userConfig.theme.course.courseItemMargin,
+                    weekdayHeight +
+                    y * timeSpanHeight +
+                    courseItemMargin,
                 zIndex: -1,
             },
             text: {
@@ -47,9 +50,9 @@ export function EngTrainingItem(props: Props) {
         });
     }, [
         item.backgroundColor,
-        userConfig.theme.course.courseItemMargin,
-        userConfig.theme.course.timeSpanHeight,
-        userConfig.theme.course.weekdayHeight,
+        courseItemMargin,
+        timeSpanHeight,
+        weekdayHeight,
         span,
         theme.colors.grey4,
         theme.mode,
