@@ -1,3 +1,8 @@
+/** 递归地将类型的所有属性变为可选 */
+export type DeepPartial<T> = T extends object
+    ? { [P in keyof T]?: DeepPartial<T[P]> }
+    : T;
+
 export const SchoolYears = [
     ["2028", "2028-2029"],
     ["2027", "2027-2028"],
