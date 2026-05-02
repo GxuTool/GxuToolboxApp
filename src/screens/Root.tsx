@@ -4,6 +4,7 @@ import {RootStack} from "@/route/RootStack.tsx";
 import React, {useCallback, useEffect, useMemo} from "react";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
+import {useShallow} from "zustand/react/shallow";
 import {useTheme} from "@rneui/themed";
 import {useUserConfig} from "@/hooks/app.ts";
 import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";
@@ -19,13 +20,15 @@ export function Root(props: ViewProps) {
         init();
     }, [init]);
 
-    const courseScheduleData = store(s => ({
-        courseInfoVisible: s.courseInfoVisible,
-        startDay: s.startDay,
-        randomColor: s.randomColor,
-        weekdayList: s.weekdayList,
-        timeSpanList: s.timeSpanList,
-    }));
+    const courseScheduleData = store(
+        useShallow(s => ({
+            courseInfoVisible: s.courseInfoVisible,
+            startDay: s.startDay,
+            randomColor: s.randomColor,
+            weekdayList: s.weekdayList,
+            timeSpanList: s.timeSpanList,
+        })),
+    );
 
     const updateCourseScheduleData = useCallback(
         (data: Partial<typeof courseScheduleData>) => {
