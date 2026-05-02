@@ -1,10 +1,11 @@
-import { create } from "zustand/react";
-import { useMemo } from "react";
-import { BaseColor } from "@/shared/color.ts";
-import { store as storage } from "@/core/store.ts";
-import { useTheme } from "@rneui/themed";
-import { generateCourseScheduleStyle } from "@/js/jw/course.ts";
-import { PaletteName } from "@/features/courseSchedule/utils/colorPalette.ts";
+import {create} from "zustand/react";
+import {useMemo} from "react";
+import {BaseColor} from "@/shared/color.ts";
+import {store as storage} from "@/core/store.ts";
+import {useTheme} from "@rneui/themed";
+import {generateCourseScheduleStyle} from "@/js/jw/course.ts";
+import {PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
+import {deepMerge} from "@/utils/objectUtils.ts";
 
 const STORAGE_KEY = "courseScheduleStore";
 
@@ -101,20 +102,20 @@ const useCourseStore = create<CourseStoreState & CourseStoreAction>()((set, get)
     ...defaultState,
 
     update: (k, v) => {
-        set({ [k]: v } as Partial<CourseStoreState>);
+        set({[k]: v} as Partial<CourseStoreState>);
         const state = get();
         const data: Record<string, unknown> = {};
         for (const key of persistableKeys) {
             data[key] = state[key];
         }
-        storage.save({ key: STORAGE_KEY, data });
+        storage.save({key: STORAGE_KEY, data});
     },
 
     init: async () => {
         try {
-            const cached = await storage.load({ key: STORAGE_KEY });
+            const cached = await storage.load({key: STORAGE_KEY});
             if (cached) {
-                set({ ...defaultState, ...cached });
+                set(deepMerge(defaultState, cached));
             }
         } catch {
             // 首次启动无缓存，使用默认值
@@ -123,7 +124,7 @@ const useCourseStore = create<CourseStoreState & CourseStoreAction>()((set, get)
 }));
 
 export const useCourse = () => {
-    const { theme: rneuiTheme } = useTheme();
+    const {theme: rneuiTheme} = useTheme();
     const courseTheme = useCourseStore(s => s.theme);
 
     const courseScheduleStyle = useMemo(
@@ -139,14 +140,14 @@ export const useCourse = () => {
         /** 直接从存储加载数据（不走缓存），失败返回 null */
         load: async (): Promise<CourseStoreState | null> => {
             try {
-                return await storage.load({ key: STORAGE_KEY });
+                return await storage.load({key: STORAGE_KEY});
             } catch {
                 return null;
             }
         },
         /** 直接保存数据到存储 */
-        save: (data: CourseStoreState) => storage.save({ key: STORAGE_KEY, data }),
+        save: (data: CourseStoreState) => storage.save({key: STORAGE_KEY, data}),
         /** 删除存储中的数据 */
-        remove: () => storage.remove({ key: STORAGE_KEY }),
+        remove: () => storage.remove({key: STORAGE_KEY}),
     };
 };
