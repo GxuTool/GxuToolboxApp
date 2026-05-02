@@ -133,13 +133,18 @@ export function ScheduleCard() {
             <Flex justify="space-between" style={style.cardTitle}>
                 <Flex direction="row" align="center" gap={8}>
                     <Text h4>日程表</Text>
-                    {[JWauthState, unifiedAuthState, attendanceAuthState].map(i =>
+                    <Pressable
+                        android_ripple={userConfig.theme.ripple}
+                        onPress={() => setSheet({type: "menu"})}
+                        style={{flexDirection:"row",alignItems:"center",gap:8}}>
+                    {[JWauthState, unifiedAuthState, attendanceAuthState].map((i) =>
                         i?.status !== "authenticated" ? (
                             <Icon name="account-network-off-outline" size={24} color={theme.colors.error} />
                         ) : (
                             <Icon name="account-network-outline" size={24} color={theme.colors.success} />
                         ),
                     )}
+                    </Pressable>
                 </Flex>
                 <Flex gap={15} justify="flex-end">
                     <Pressable onPress={handleRefresh} disabled={refreshing}>
