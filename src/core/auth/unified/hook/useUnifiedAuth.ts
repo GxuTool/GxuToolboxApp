@@ -9,7 +9,9 @@ export function useUnifiedAuth() {
     const inFlightRef = useRef(false);
 
     useEffect(() => {
-        unifiedMachine.refreshToken().then(setAuthState).catch(() => {});
+        const unsubscibe=unifiedMachine.subscribe(setAuthState);
+        setAuthState(unifiedMachine.getState());
+        return unsubscibe;
     }, []);
 
     const refreshState = useCallback(async () => {

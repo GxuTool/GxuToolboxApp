@@ -1,4 +1,4 @@
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {Account, AuthStateMap} from "@/core/auth/auth.type.ts";
 import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 import {AuthState} from "@/core/auth/createAuthCore.ts";
@@ -19,6 +19,12 @@ export function useJwAuth() {
 
     const clearResult = useCallback(() => {
         setResult({kind: "idle", title: ""});
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe=JwMachine.subscribe(setAuthState);
+        setAuthState(JwMachine.getState());
+        return unsubscribe;
     }, []);
 
     const login = useCallback(

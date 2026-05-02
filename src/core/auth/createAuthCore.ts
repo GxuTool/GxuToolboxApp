@@ -17,35 +17,47 @@ export interface AuthMachine<A> {
     getState: () => AuthState<A>;
     loadAccount: () => Promise<A | null>;
     saveAccount: (account: A) => Promise<unknown>;
-    clearAccount: () => Promise<unknown>;
+    clearAccount: () => Promise<AuthState<A>>;
     loginWithAccount: (account: A) => Promise<AuthState<A>>;
     loginWithStoredAccount: () => Promise<AuthState<A>>;
+    subscribe:(listener:(state:AuthState<A>)=>void)=>()=>void;
 }
 
 export function createAuthCore<A>(adapter: AuthAdapter<A>): AuthMachine<A> {
     let currentState: AuthState<A> = {status: AuthStateMap.NoAccount};
+    const listeners=new Set<(state:AuthState<A>)=>void>();
+
+    function setState(nextState:AuthState<A>){
+        currentState=nextState;
+        listeners.forEach(listener=>listener(nextState));
+        return nextState;
+    }
+
+    function subscribe(listener: (state: AuthState<A>) => void) {
+        listeners.add(listener);
+        return () =>{
+            listeners.delete(listener);
+        }
+    }
 
     async function refreshToken() {
         const account = await adapter.loadAccount();
         if (!account) {
-            currentState = {status: AuthStateMap.NoAccount};
-            return currentState;
+            return setState({status:AuthStateMap.NoAccount});
         }
 
         const ok = await adapter.testToken();
         if (ok) {
-            currentState = {status: AuthStateMap.Authenticated, account};
-            return currentState;
+            return setState ({status: AuthStateMap.Authenticated, account});
         }
 
         const reLoginOk = await adapter.loginWithAccount(account);
         if (reLoginOk) {
-            currentState = {status: AuthStateMap.Authenticated, account};
-            return currentState;
+            return setState({status:AuthStateMap.Authenticated,account});
         }
 
-        currentState = {status: AuthStateMap.HasAccountNotAuthenticated, account};
-        return currentState;
+        return setState({status: AuthStateMap.HasAccountNotAuthenticated,account});
+
     }
 
     function getState() {
@@ -61,22 +73,22 @@ export function createAuthCore<A>(adapter: AuthAdapter<A>): AuthMachine<A> {
     }
 
     async function clearAccount() {
-        return adapter.clearAccount();
+        await adapter.clearAccount();
+        return setState({status:AuthStateMap.NoAccount});
     }
 
     async function loginWithAccount(account: A) {
         const ok = await adapter.loginWithAccount(account);
-        currentState = ok
+        return setState( ok
             ? {status: AuthStateMap.Authenticated, account}
-            : {status: AuthStateMap.HasAccountNotAuthenticated, account};
-        return currentState;
+            : {status: AuthStateMap.HasAccountNotAuthenticated, account});
+
     }
 
     async function loginWithStoredAccount() {
         const account = await adapter.loadAccount();
         if (!account) {
-            currentState = {status: AuthStateMap.NoAccount};
-            return currentState;
+            return setState({status:AuthStateMap.NoAccount});
         }
         return loginWithAccount(account);
     }
@@ -89,5 +101,6 @@ export function createAuthCore<A>(adapter: AuthAdapter<A>): AuthMachine<A> {
         clearAccount,
         loginWithAccount,
         loginWithStoredAccount,
+        subscribe,
     };
 }

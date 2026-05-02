@@ -10,10 +10,9 @@ export function useAttendanceAuth() {
     const inFlightRef = useRef(false);
 
     useEffect(() => {
-        attendanceMachine
-            .refreshToken()
-            .then(setAuthState)
-            .catch(() => {});
+        const unsubscribe=attendanceMachine.subscribe(setAuthState);
+        setAuthState(attendanceMachine.getState());
+        return unsubscribe;
     }, []);
 
     const refreshState = useCallback(async () => {
