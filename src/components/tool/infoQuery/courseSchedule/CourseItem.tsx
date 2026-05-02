@@ -7,7 +7,7 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {Course} from "@/type/infoQuery/course/course.ts";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
 
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function CourseItem(props: Props) {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -63,7 +63,7 @@ export function CourseItem(props: Props) {
             onPress={e => {
                 props.onCoursePress?.(course);
             }}
-            android_ripple={userConfig.theme.ripple}
+            android_ripple={ucStore(s => s.theme.ripple)}
             style={[props.style, itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
                 {courseScheduleData.courseInfoVisible.name && (

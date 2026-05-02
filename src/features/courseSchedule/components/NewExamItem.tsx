@@ -1,5 +1,5 @@
 import {Pressable, StyleSheet} from "react-native";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {memo, useMemo} from "react";
@@ -14,7 +14,7 @@ interface NewExamItemProps {
     onPress?: (item: ScheduleTableItem) => void;
 }
 export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -81,7 +81,7 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
     );
 
     return (
-        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={userConfig.theme.ripple}>
+        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={ucStore(s => s.theme.ripple)}>
             <Flex direction="column" gap={2} style={{padding: 4,paddingTop: 10, height: "100%"}} align="center">
                 <Text style={styles.badge}>
                     考试

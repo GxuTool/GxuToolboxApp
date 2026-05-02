@@ -7,7 +7,7 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import moment from "moment/moment";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export function CourseScheduleExamItem(props: Props) {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -84,7 +84,7 @@ export function CourseScheduleExamItem(props: Props) {
             onPress={e => {
                 props.onPress?.(examInfo);
             }}
-            android_ripple={userConfig.theme.ripple}
+            android_ripple={ucStore(s => s.theme.ripple)}
             style={[itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
                 <Text style={itemStyle.text}>考试</Text>

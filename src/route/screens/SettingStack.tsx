@@ -11,13 +11,15 @@ import {useNavigation} from "@react-navigation/native";
 import {AuthAccountScreen} from "@/screens/setting/account/AuthAccountScreen.tsx";
 import {AttendanceSystemAccountScreen} from "@/screens/setting/account/AttendanceSystemAccountScreen.tsx";
 import {PersonalInfo} from "@/features/personalInfo/screen/PersonalInfo.tsx";
-import {useUserConfig, useWebView} from "@/hooks/app.ts";
+import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 const Stack = createNativeStackNavigator();
 
 export function SettingStack() {
     const {theme} = useTheme();
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
+    const bgOpacity = store(s => s.theme.bgOpacity);
     const navigation = useNavigation();
     const {openInJw} = useWebView();
     const headerRightEle = () => {
@@ -39,12 +41,12 @@ export function SettingStack() {
                 headerShadowVisible: false,
                 headerStyle: {
                     backgroundColor: Color(theme.colors.background).setAlpha(
-                        ((theme.mode === "dark" ? 0.7 : 0.9) * userConfig.theme.bgOpacity) / 100,
+                        ((theme.mode === "dark" ? 0.7 : 0.9) * bgOpacity) / 100,
                     ).rgbaString,
                 },
                 contentStyle: {
                     backgroundColor: Color(theme.colors.background).setAlpha(
-                        ((theme.mode === "dark" ? 0.5 : 0.6) * userConfig.theme.bgOpacity) / 100,
+                        ((theme.mode === "dark" ? 0.5 : 0.6) * bgOpacity) / 100,
                     ).rgbaString,
                 },
                 animation: "fade",
@@ -58,7 +60,7 @@ export function SettingStack() {
                     title: "工具箱设置",
                     headerStyle: {
                         backgroundColor: Color(theme.colors.background).setAlpha(
-                            ((theme.mode === "dark" ? 0.5 : 0.4) * userConfig.theme.bgOpacity) / 100,
+                            ((theme.mode === "dark" ? 0.5 : 0.4) * bgOpacity) / 100,
                         ).rgbaString,
                     },
                     contentStyle: {
@@ -73,7 +75,7 @@ export function SettingStack() {
                     title: "偏好设置",
                     headerStyle: {
                         backgroundColor: Color(theme.colors.background).setAlpha(
-                            ((theme.mode === "dark" ? 0.5 : 0.4) * userConfig.theme.bgOpacity) / 100,
+                            ((theme.mode === "dark" ? 0.5 : 0.4) * bgOpacity) / 100,
                         ).rgbaString,
                     },
                     contentStyle: {

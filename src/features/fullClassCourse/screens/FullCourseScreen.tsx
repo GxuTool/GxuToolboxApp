@@ -1,7 +1,7 @@
 import {ActivityIndicator, SectionList, StyleSheet, View} from "react-native";
 import {useContext, useEffect, useMemo, useState} from "react";
 import {Schools, SchoolTermValue} from "@/type/global.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useClassScheduleData} from "@/features/classCourseSchedule/hooks/useClassScheduleData.ts";
 import {Button, Divider, Text} from "@rneui/themed";
 import {IClassList} from "@/features/classCourseSchedule/type/schema/classList.ts";
@@ -145,9 +145,9 @@ function SchoolContent({
 type Section = {school: SchoolType; data: [SchoolType]};
 
 export const FullCourseScreen = () => {
-    const {userConfig} = useUserConfig();
-    const [year] = useState(+userConfig.jw.year);
-    const [term] = useState<SchoolTermValue>(userConfig.jw.term);
+    const {store} = useUserConfig();
+    const [year] = useState(+store(s => s.jw.year));
+    const [term] = useState<SchoolTermValue>(store(s => s.jw.term));
     const [currentTime] = useState(moment().format());
     const startDay = useStartDay(year, term);
 

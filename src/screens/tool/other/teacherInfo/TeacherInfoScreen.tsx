@@ -5,7 +5,7 @@ import {Button, Divider, Image, Input, useTheme} from "@rneui/themed";
 import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
 import {SimpleTeacherInfo} from "@/type/api/teacherInfo/info.ts";
 import {Color} from "@/shared/color.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {DetailInfoScreen} from "@/screens/tool/other/teacherInfo/DetailInfoScreen.tsx";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {useNavigation} from "@react-navigation/native";
@@ -18,13 +18,13 @@ export function QueryInfoItem(props: ItemProps) {
     const iconUrl = "https://prof.gxu.edu.cn/images/icon-teacher.jpg";
 
     const {theme} = useTheme();
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
 
     const navigation = useNavigation();
 
     return (
         <Pressable
-            android_ripple={userConfig.theme.ripple}
+            android_ripple={store(s => s.theme.ripple)}
             style={{
                 backgroundColor: Color(theme.colors.primary).setAlpha(0.2).rgbaString,
                 width: "100%",

@@ -5,7 +5,7 @@ import {useNavigation} from "@react-navigation/native";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 export interface UnListSection {
     title: string;
@@ -22,12 +22,14 @@ interface UnListItem {
 interface Props {}
 
 export function UnSectionList(props: Props & SectionListProps<UnListItem, UnListSection>) {
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
     const navigation = useNavigation();
     const {theme} = useTheme();
+    const bgOpacity = store(s => s.theme.bgOpacity);
+    const ripple = store(s => s.theme.ripple);
 
     const bgColor = Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
-        0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
+        0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * bgOpacity) / 100,
     ).rgbaString;
     const borderRadius = 8;
     const span = 8;
@@ -97,7 +99,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                     <Pressable
                         onPress={() => navigation.navigate(item.value)}
                         style={itemStyle}
-                        android_ripple={userConfig.theme.ripple}>
+                        android_ripple={ripple}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Icon name="chevron-right" size={16} />
                     </Pressable>
@@ -114,7 +116,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                     <Pressable
                         onPress={() => openUrl(item.url)}
                         style={itemStyle}
-                        android_ripple={userConfig.theme.ripple}>
+                        android_ripple={ripple}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Text style={style.linkText}>
                             <Icon name="link" size={10} />

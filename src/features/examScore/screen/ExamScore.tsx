@@ -12,15 +12,15 @@ import {examApi} from "@/js/jw/exam.ts";
 import {useNavigation} from "@react-navigation/native";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
 import {electiveAPI} from "@/features/electiveStrategy/api";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 export function ExamScore() {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {theme} = useTheme();
     const navigation = useNavigation();
     const [apiRes, setApiRes] = useState<ExamScoreQueryRes>({} as ExamScoreQueryRes);
-    const [year, setYear] = useState(+userConfig.jw.year);
-    const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
+    const [year, setYear] = useState(+ucStore(s => s.jw.year));
+    const [term, setTerm] = useState<SchoolTermValue>(ucStore(s => s.jw.term));
     const [page, setPage] = useState(1);
     const [notScore, setNotScore] = useState<string[]>([""]);
     const style = useMemo(() => {

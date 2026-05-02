@@ -1,5 +1,5 @@
 import {SchoolTerms, SchoolTermValue, SchoolYears, SchoolYearValue} from "@/type/global.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {Pressable, ScrollView, StyleSheet, View} from "react-native";
 import {Flex, Icon, UnText, UnTooltip, vh, vw} from "@/components/un-ui/index.ts";
 import {Divider, useTheme} from "@rneui/themed";
@@ -16,7 +16,8 @@ export interface UnTermSelectorProps {
 }
 
 export function UnTermSelector(props: UnTermSelectorProps) {
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
+    const ripple = store(s => s.theme.ripple);
     const {theme} = useTheme();
 
     const [selectedYear, setSelectedYear] = useState<SchoolYearValue>(props.year);
@@ -53,7 +54,7 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                     {!props.disableSelectAll && (
                         <>
                             <Pressable
-                                android_ripple={userConfig.theme.ripple}
+                                android_ripple={ripple}
                                 onPress={() => {
                                     setSelectedAll(true);
                                     setSelectedTerm(undefined);
@@ -72,7 +73,7 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                                     onPress={() => setSelectedYear(+year[0])}
                                     key={year[1]}
                                     style={+year[0] === +selectedYear ? style.selectedOption : style.option}
-                                    android_ripple={userConfig.theme.ripple}>
+                                    android_ripple={ripple}>
                                     <UnText>{year[1]}学年</UnText>
                                 </Pressable>
                             ))}
@@ -83,7 +84,7 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                                 <Pressable
                                     onPress={() => setSelectedTerm(term[0])}
                                     key={term[1]}
-                                    android_ripple={userConfig.theme.ripple}
+                                    android_ripple={ripple}
                                     style={term[0] === selectedTerm ? style.selectedOption : style.option}>
                                     <UnText>{term[1]}</UnText>
                                 </Pressable>

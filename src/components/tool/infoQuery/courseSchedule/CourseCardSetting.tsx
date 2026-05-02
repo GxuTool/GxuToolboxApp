@@ -9,7 +9,7 @@ import {UnDateTimePicker} from "@/components/un-ui/UnDateTimePicker.tsx";
 import moment from "moment/moment";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {ColorPalettes, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
@@ -28,7 +28,7 @@ interface Props {
 export function CourseCardSetting(props: Props) {
     const {theme} = useTheme();
 
-    const {userConfig, updateUserConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const {courseScheduleData, updateCourseScheduleData} = useContext(CourseScheduleContext)!;
@@ -48,14 +48,14 @@ export function CourseCardSetting(props: Props) {
     };
 
     const onYearChange = (v: number) => {
-        userConfig.jw.year = (v + "") as SchoolYearValue;
-        updateUserConfig(userConfig);
+        const s = ucStore.getState();
+        ucStore.getState().update("jw", { ...s.jw, year: (v + "") as SchoolYearValue });
         props.onYearChange?.(v);
     };
 
     const onTermChange = (v: SchoolTermValue) => {
-        userConfig.jw.term = v;
-        updateUserConfig(userConfig);
+        const s = ucStore.getState();
+        ucStore.getState().update("jw", { ...s.jw, term: v });
         props.onTermChange?.(v);
     };
 
@@ -135,12 +135,12 @@ export function CourseCardSetting(props: Props) {
                     <Text>起始日</Text>
                     <Flex justify="flex-end">
                         <UnDateTimePicker
-                            value={moment(userConfig.jw.startDay).valueOf()}
+                            value={moment(ucStore(s => s.jw.startDay)).valueOf()}
                             onChange={v => {
                                 const startDay = moment(v).format("YYYY-MM-DD");
                                 updateCourseScheduleData({...courseScheduleData, startDay});
-                                userConfig.jw.startDay = startDay;
-                                updateUserConfig(userConfig);
+                                const s = ucStore.getState();
+                                ucStore.getState().update("jw", { ...s.jw, startDay });
                             }}
                             mode="single"
                             onlyDate

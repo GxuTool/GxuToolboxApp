@@ -6,7 +6,7 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 import {store} from "@/core/store.ts";
 import {Color} from "@/shared/color.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {getExamInfo} from "@/features/examInfo/api";
 import {ExamInfoCard} from "@/features/examInfo/components/ExamInfoCard.tsx";
 import {ExamInfoApiResponse} from "@/features/examInfo/type/exam.types.ts";
@@ -21,10 +21,10 @@ const initRes: ExamInfoApiResponse = {
 
 export function ExamInfo() {
     const {theme} = useTheme();
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const [apiRes, setApiRes] = useState<ExamInfoApiResponse>(initRes as ExamInfoApiResponse);
-    const [year, setYear] = useState(+userConfig.jw.year);
-    const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
+    const [year, setYear] = useState(+ucStore(s => s.jw.year));
+    const [term, setTerm] = useState<SchoolTermValue>(ucStore(s => s.jw.term));
     const [page, setPage] = useState(1);
 
     const style = StyleSheet.create({

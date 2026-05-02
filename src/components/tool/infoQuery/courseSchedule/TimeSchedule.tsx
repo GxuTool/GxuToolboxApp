@@ -6,7 +6,7 @@ import {ReactNode, useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
 import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
@@ -51,14 +51,14 @@ function groupByConflict(items: ScheduleTableItem[]): ScheduleTableItem[][] {
 }
 
 export function TimeSchedule(props: TimeScheduleProps) {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store, courseScheduleStyle} = useCourse();
     const weekdayList = store(s => s.weekdayList);
     const timeSpanList = store(s => s.timeSpanList);
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const {theme} = useTheme();
-    const startDay = moment(props.startDay ?? userConfig.jw.startDay);
+    const startDay = moment(props.startDay ?? ucStore(s => s.jw.startDay));
     const [currentTime, setCurrentTime] = useState(moment().format());
     const currentWeek = props.currentWeek ?? Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
     const currentTimeSpan = getCurrentTimeSpan();

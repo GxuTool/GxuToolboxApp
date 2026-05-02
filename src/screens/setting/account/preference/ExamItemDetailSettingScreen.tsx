@@ -8,16 +8,18 @@ import {Picker} from "@react-native-picker/picker";
 import {Row, Rows, Table} from "react-native-reanimated-table";
 import {Color} from "@/shared/color.ts";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 type ExamKeysType = keyof Omit<ExamInfo, "queryModel" | "userModel">;
 
 export function ExamItemDetailSettingScreen() {
-    const {userConfig, updateUserConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {theme} = useTheme();
     const [examList, setExamList] = useState<ExamInfo[]>([]);
     const [activeExamIndex, setActiveExamIndex] = useState(0);
     const activeExam = examList[activeExamIndex];
+
+    const examDetail = ucStore(s => s.preference.examDetail);
 
     const style = StyleSheet.create({
         input: {
@@ -36,22 +38,36 @@ export function ExamItemDetailSettingScreen() {
     });
 
     function editLabel(prop: ExamKeysType, label: string) {
-        userConfig.preference.examDetail[prop].label = label;
+        const s = ucStore.getState();
+        ucStore.getState().update("preference", {
+            ...s.preference,
+            examDetail: {
+                ...s.preference.examDetail,
+                [prop]: { ...s.preference.examDetail[prop], label },
+            },
+        });
     }
 
     function toggleShow(prop: ExamKeysType) {
-        userConfig.preference.examDetail[prop].show = !userConfig.preference.examDetail[prop].show;
-        save();
+        const s = ucStore.getState();
+        const newShow = !s.preference.examDetail[prop].show;
+        ucStore.getState().update("preference", {
+            ...s.preference,
+            examDetail: {
+                ...s.preference.examDetail,
+                [prop]: { ...s.preference.examDetail[prop], show: newShow },
+            },
+        });
     }
 
     function save() {
-        updateUserConfig(userConfig);
+        // save is now a no-op since updates are done via store.update
     }
 
     const table = {
         header: ["属性", "标签", "预览", "操作"],
         flex: [1, 1, 1, 1],
-        showingProps: Object.entries(userConfig.preference.examDetail)
+        showingProps: Object.entries(examDetail)
             .filter(prop => prop[1].show)
             .map(prop => [
                 prop[0],
@@ -67,7 +83,7 @@ export function ExamItemDetailSettingScreen() {
                     隐藏
                 </Button>,
             ]),
-        availableProps: Object.entries(userConfig.preference.examDetail)
+        availableProps: Object.entries(examDetail)
             .filter(prop => !prop[1].show)
             .map(prop => [
                 prop[0],

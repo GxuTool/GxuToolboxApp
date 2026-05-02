@@ -5,7 +5,7 @@ import {Linking, PermissionsAndroid, StyleSheet} from "react-native";
 import Flex from "./un-ui/Flex";
 import {Color} from "@/shared/color.ts";
 import PackageJSON from "@/../package.json";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {UnCard} from "@/components/un-ui";
 
 enum ChannelList {
@@ -27,7 +27,7 @@ interface Version {
 
 export function UpdateCard() {
     const {theme} = useTheme();
-    const {userConfig, updateUserConfig} = useUserConfig();
+    const {store} = useUserConfig();
     const [channel, setChannel] = useState<ChannelList>(
         PackageJSON.version.indexOf("beta") > -1 ? ChannelList.beta : ChannelList.release,
     );
@@ -40,7 +40,7 @@ export function UpdateCard() {
     const style = StyleSheet.create({
         card: {
             backgroundColor: Color(theme.colors.background).setAlpha(
-                0.05 + ((theme.mode === "dark" ? 0.6 : 0.7) * userConfig.theme.bgOpacity) / 100,
+                0.05 + ((theme.mode === "dark" ? 0.6 : 0.7) * store(s => s.theme.bgOpacity)) / 100,
             ).rgbaString,
             borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.7).rgbaString,
             borderRadius: 5,

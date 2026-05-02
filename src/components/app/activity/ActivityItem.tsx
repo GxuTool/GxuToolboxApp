@@ -5,7 +5,7 @@ import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 
 interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ripple"> {
@@ -15,7 +15,7 @@ interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ri
 }
 
 export function ActivityItem(props: ActivityItemProps) {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -60,7 +60,7 @@ export function ActivityItem(props: ActivityItemProps) {
             onPress={e => {
                 props.onPress?.(item);
             }}
-            android_ripple={userConfig.theme.ripple}
+            android_ripple={ucStore(s => s.theme.ripple)}
             style={[props.style, courseScheduleStyle.courseItem, itemStyle.item]}>
             <Flex direction="column" gap={5}>
                 <Text style={[itemStyle.text, {fontWeight: "bold"}]}>{item.name}</Text>

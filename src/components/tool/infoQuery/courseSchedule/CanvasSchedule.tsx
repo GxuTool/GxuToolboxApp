@@ -9,7 +9,7 @@ import {CourseScheduleClass} from "@/class/jw/course.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/core/store.ts";
 import {http} from "@/core/http.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {Course} from "@/type/infoQuery/course/course.ts";
 
@@ -20,7 +20,7 @@ type Props = {
 
 export function CanvasSchedule(props: Props) {
     const {theme} = useTheme();
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
@@ -28,7 +28,7 @@ export function CanvasSchedule(props: Props) {
     const [timeShift, setTimeShift] = useState<[string, string][]>([]);
 
     const {width: screenWidth} = Dimensions.get("window");
-    const startDay = moment(userConfig.jw.startDay);
+    const startDay = moment(ucStore(s => s.jw.startDay));
     const currentWeek = props.week;
     const styles = StyleSheet.create({
         container: {

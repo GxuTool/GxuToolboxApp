@@ -5,7 +5,8 @@ import {useNavigation} from "@react-navigation/native";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import React from "react";
 import {Flex, UnCard} from "@/components/un-ui";
-import {useUserConfig, useWebView} from "@/hooks/app.ts";
+import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 interface settingSection {
     title: string;
@@ -32,7 +33,9 @@ export function ToolboxIndex() {
     const navigation = useNavigation();
     const {theme} = useTheme();
     const {openInWeb} = useWebView();
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
+    const bgOpacity = store(s => s.theme.bgOpacity);
+    const ripple = store(s => s.theme.ripple);
 
     const toolList = [
         {
@@ -209,7 +212,7 @@ export function ToolboxIndex() {
             paddingBottom: "5%",
             borderRadius: 16,
             backgroundColor: Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
-                0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
+                0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * bgOpacity) / 100,
             ).rgbaString,
             marginBottom: 10,
         },
@@ -256,7 +259,7 @@ export function ToolboxIndex() {
                             <Pressable
                                 key={`tool-${section.title}-${tool.label}`}
                                 style={style.settingItem}
-                                android_ripple={userConfig.theme.ripple}
+                                android_ripple={ripple}
                                 onPress={() => itemClick(tool)}>
                                 <Flex direction="column" inline>
                                     <View style={style.toolIcon}>{tool.icon}</View>
