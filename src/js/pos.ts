@@ -1,6 +1,6 @@
 import {BuildingList, IPos} from "@/type/pos.ts";
 import {Linking, ToastAndroid} from "react-native";
-import {requestMapPicker, type MapPickerOption} from "@/components/map/MapPickerHost.tsx";
+import {requestMapPicker, type MapPickerOption} from "@/features/map/components/MapPickerHost.tsx";
 import {urlWithParams} from "@/core/http.ts";
 
 const sourceApplication = "gxujwt";

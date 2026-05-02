@@ -8,7 +8,7 @@ import {useShallow} from "zustand/react/shallow";
 import {useTheme} from "@rneui/themed";
 import {useUserConfig} from "@/hooks/app.ts";
 import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";
-import {MapPickerHost} from "@/components/map/MapPickerHost.tsx";
+import {MapPickerHost} from "@/features/map/components/MapPickerHost.tsx";
 
 export function Root(props: ViewProps) {
     const {userConfig} = useUserConfig();
