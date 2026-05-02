@@ -1,72 +1,82 @@
-// useShift.ts
-import {useCallback, useEffect, useState} from "react";
-import {http} from "@/core/http.ts";
+import { create } from "zustand/react";
+import { http } from "@/core/http.ts";
 import moment from "moment";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
-import {SchoolTermValue} from "@/type/global.ts";
-import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
+import { ScheduleTableItem } from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 
-type ShiftRule = [string, string]; // [调课日, 调休日] ["2026-04-27", "2026-05-01"]
+type ShiftRule = [string, string];
 
-export function useShift(year: number, term: SchoolTermValue) {
-    const [shiftRules, setShiftRules] = useState<ShiftRule[]>([]);
-    const startDay = useStartDay(year, term);
+interface ShiftStoreState {
+    shiftRules: ShiftRule[];
+}
 
-    useEffect(() => {
-        http.get("https://file.unde.site/GxuToolApp/data.json").then(({data}) => {
-            if (data?.timeShift) setShiftRules([...data.timeShift]);
-        });
-    }, []);
+interface ShiftStoreAction {
+    init: () => Promise<void>;
+}
 
-    // 应用调课规则
-    const applyShift = useCallback(
-        (items: ScheduleTableItem[]): ScheduleTableItem[] => {
-            if (shiftRules.length === 0) return items;
+const useShiftStore = create<ShiftStoreState & ShiftStoreAction>()(set => ({
+    shiftRules: [],
 
-            // 预计算：调休日 → 对应的 week+day
-            const restDays = new Set(
-                shiftRules.map(([_, restDate]) => {
-                    const d = moment(restDate);
-                    const week = d.diff(startDay, "weeks") + 1;
-                    const day = d.isoWeekday();
-                    return `${week}-${day}`;
-                }),
-            );
-
-            // 过滤掉调休日的课（那天放假）
-            const filtered = items.filter(item => !restDays.has(`${item.week}-${item.day}`));
-
-            // 把调课日应该上的课"复制"过去
-            const additions: ScheduleTableItem[] = [];
-            for (const [workDate, restDate] of shiftRules) {
-                const workMoment = moment(workDate);
-                const restMoment = moment(restDate);
-
-                const targetWeek = workMoment.diff(startDay, "weeks") + 1;
-                const targetDay = workMoment.isoWeekday();
-
-                // 找到调休日原本的课
-                const sourceWeek = restMoment.diff(startDay, "weeks") + 1;
-                const sourceDay = restMoment.isoWeekday();
-
-                const sourceCourses = items.filter(item => item.week === sourceWeek && item.day === sourceDay);
-
-                // 复制到调课日，修改 week + day
-                for (const course of sourceCourses) {
-                    additions.push({
-                        ...course,
-                        id: `shift-${course.id}`,
-                        week: targetWeek,
-                        day: targetDay as 1 | 2 | 3 | 4 | 5 | 6 | 7,
-                        isShift: true,
-                    });
-                }
+    init: async () => {
+        try {
+            const { data } = await http.get("https://file.unde.site/GxuToolApp/data.json");
+            if (data?.timeShift) {
+                set({ shiftRules: [...data.timeShift] });
             }
+        } catch {
+            // 加载失败，保持默认空数组
+        }
+    },
+}));
 
-            return [...filtered, ...additions];
-        },
-        [shiftRules, startDay],
+/** 对课表项应用调课规则，返回处理后的新数组 */
+export function applyShift(
+    items: ScheduleTableItem[],
+    shiftRules: ShiftRule[],
+    startDay: moment.Moment,
+): ScheduleTableItem[] {
+    if (shiftRules.length === 0) return items;
+
+    const restDays = new Set(
+        shiftRules.map(([_, restDate]) => {
+            const d = moment(restDate);
+            const week = d.diff(startDay, "weeks") + 1;
+            const day = d.isoWeekday();
+            return `${week}-${day}`;
+        }),
     );
 
-    return {applyShift};
+    const filtered = items.filter(item => !restDays.has(`${item.week}-${item.day}`));
+
+    const additions: ScheduleTableItem[] = [];
+    for (const [workDate, restDate] of shiftRules) {
+        const workMoment = moment(workDate);
+        const restMoment = moment(restDate);
+
+        const targetWeek = workMoment.diff(startDay, "weeks") + 1;
+        const targetDay = workMoment.isoWeekday();
+
+        const sourceWeek = restMoment.diff(startDay, "weeks") + 1;
+        const sourceDay = restMoment.isoWeekday();
+
+        const sourceCourses = items.filter(item => item.week === sourceWeek && item.day === sourceDay);
+
+        for (const course of sourceCourses) {
+            additions.push({
+                ...course,
+                id: `shift-${course.id}`,
+                week: targetWeek,
+                day: targetDay as 1 | 2 | 3 | 4 | 5 | 6 | 7,
+                isShift: true,
+            });
+        }
+    }
+
+    return [...filtered, ...additions];
 }
+
+export const useShift = () => {
+    return {
+        store: useShiftStore,
+        init: useShiftStore.getState().init,
+    };
+};

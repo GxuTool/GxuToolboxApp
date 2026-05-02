@@ -5,6 +5,7 @@ import {BottomSheet, Text, useTheme} from "@rneui/themed";
 import {ReactNode, useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {useCourse} from "@/hooks/useCourse.ts";
+import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 import {useUserConfig} from "@/hooks/app.ts";
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
