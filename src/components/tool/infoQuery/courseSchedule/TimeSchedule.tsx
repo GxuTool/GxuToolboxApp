@@ -162,7 +162,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
                         </View>
                         {(props.scheduleItems ?? []).map((td, tdIndex) =>
                             td.data
-                                .filter(item => (td.isItemShow ? td.isItemShow(item, currentDay, currentWeek) : true))
+                                .filter(item => td.isItemShow(item, currentDay, currentWeek))
                                 .map((item, itemIndex) => (
                                     <View key={`${tdIndex}-${itemIndex}`}>
                                         {td.itemRender?.(item, i => props.onItemPress?.(i))}

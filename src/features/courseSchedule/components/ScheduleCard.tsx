@@ -73,12 +73,19 @@ export function ScheduleCard() {
     const nextCourse = useNextCourse(rawItems, startDay);
 
     const scheduleItems: TimeScheduleItemData[] = useMemo(
-        () => [
-            {data: courseItems, itemRender: (item, onPress) => <NewCourseItem item={item} onPress={onPress} />},
-            {data: examItems, itemRender: (item, onPress) => <NewExamItem item={item} onPress={onPress} />},
-            {data: holidayItems, itemRender: (item) => <HolidayItem item={item} />},
-            {data: defaultItem, itemRender: (item, onPress) => <NewCourseItem item={item} onPress={onPress} />},
-        ].filter(td => td.data.length > 0),
+        () =>
+            [
+                {data: courseItems, itemRender: (item, onPress) => <NewCourseItem item={item} onPress={onPress} />},
+                {data: examItems, itemRender: (item, onPress) => <NewExamItem item={item} onPress={onPress} />},
+                {data: holidayItems, itemRender: (item) => <HolidayItem item={item} />},
+                {data: defaultItem, itemRender: (item, onPress) => <NewCourseItem item={item} onPress={onPress} />},
+            ]
+                .filter(td => td.data.length > 0)
+                .map(td => ({
+                    ...td,
+                    isItemShow: (item: any, day: moment.Moment, week: number) =>
+                        item.week === week && item.day === day.isoWeekday(),
+                })),
         [courseItems, examItems, holidayItems, defaultItem],
     );
 

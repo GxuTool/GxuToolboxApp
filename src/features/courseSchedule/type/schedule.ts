@@ -7,7 +7,7 @@ export interface TimeScheduleItemData<T = any> {
     /** 元素渲染 */
     itemRender?: (item: T, onPressHook?: (item: T) => void) => ReactNode;
     /** 判断元素是否在当天渲染 */
-    isItemShow?: (item: T, day: moment.Moment, week: number) => boolean;
+    isItemShow: (item: T, day: moment.Moment, week: number) => boolean;
 }
 
 export interface ScheduleTableItem {
