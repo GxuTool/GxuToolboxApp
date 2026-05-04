@@ -9,6 +9,25 @@ import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 
+function groupByTimeOverlap<T>(
+    items: T[],
+    isStack: ((a: T, b: T, ori: T[], day: moment.Moment, week: number) => boolean) | undefined,
+    day: moment.Moment,
+    week: number,
+): T[][] {
+    if (!isStack) return items.map(item => [item]);
+    const groups: T[][] = [];
+    for (const item of items) {
+        const target = groups.find(g => g.some(x => isStack(item, x, [...g], day, week)));
+        if (target) {
+            target.push(item);
+        } else {
+            groups.push([item]);
+        }
+    }
+    return groups;
+}
+
 export interface TimeScheduleProps {
     /** 学期的第一天 */
     startDay?: moment.MomentInput;
@@ -178,15 +197,30 @@ export function TimeSchedule(props: TimeScheduleProps) {
                                 })()}
                             </Text>
                         </View>
-                        {(props.scheduleItems ?? []).map((td, tdIndex) =>
-                            td.data
-                                .filter(item => td.isItemShow(item, effectiveDay, currentWeek))
-                                .map((item, itemIndex) => (
-                                    <View key={`${tdIndex}-${itemIndex}`}>
-                                        {td.itemRender?.(item, i => props.onItemPress?.(i))}
+                        {(props.scheduleItems ?? []).map((td, tdIndex) => {
+                            const visibleItems = td.data.filter(item =>
+                                td.isItemShow(item, effectiveDay, currentWeek),
+                            );
+                            // 按时段重叠分组
+                            const groups = groupByTimeOverlap(visibleItems, td.isItemStack, effectiveDay, currentWeek);
+                            return groups.map((group, gi) => {
+                                const timeRange: [number, number] = [
+                                    Math.min(...group.map(g => (g as any).begin ?? 1)),
+                                    Math.max(...group.map(g => (g as any).end ?? 1)),
+                                ];
+                                return (
+                                    <View key={`${tdIndex}-${gi}`}>
+                                        {group.length > 1 && td.stackRender
+                                            ? td.stackRender(group, effectiveDay, currentWeek, timeRange)
+                                            : group.map((item, ii) => (
+                                                  <View key={ii}>
+                                                      {td.itemRender?.(item, effectiveDay, currentWeek, i => props.onItemPress?.(i))}
+                                                  </View>
+                                              ))}
                                     </View>
-                                )),
-                        )}
+                                );
+                            });
+                        })}
                     </View>
                 );
             })}
