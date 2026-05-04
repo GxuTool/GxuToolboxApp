@@ -7,6 +7,7 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
+import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 
 export interface TimeScheduleProps {
     /** 学期的第一天 */
@@ -33,6 +34,21 @@ export function TimeSchedule(props: TimeScheduleProps) {
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const {theme} = useTheme();
+    const shiftStore = useShift().store;
+    const shiftRules = shiftStore(s => s.shiftRules);
+    const {shiftMap, workDates, restDates} = useMemo(() => {
+        const map = new Map<string, string>();
+        const work = new Set<string>();
+        const rest = new Set<string>();
+        for (const [workDate, restDate] of shiftRules) {
+            map.set(workDate, restDate);
+            map.set(restDate, workDate);
+            work.add(workDate);
+            rest.add(restDate);
+        }
+        return {shiftMap: map, workDates: work, restDates: rest};
+    }, [shiftRules]);
+
     const startDay = moment(props.startDay ?? ucStore(s => s.jw.startDay));
     const [currentTime, setCurrentTime] = useState(moment().format());
     const currentWeek = props.currentWeek ?? Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
@@ -136,6 +152,9 @@ export function TimeSchedule(props: TimeScheduleProps) {
                     week: currentWeek - 1,
                     day: index,
                 });
+                const dateKey = currentDay.format("YYYY-MM-DD");
+                const shiftedDate = shiftMap.get(dateKey);
+                const effectiveDay = shiftedDate ? moment(shiftedDate) : currentDay;
                 const itemStyle = StyleSheet.create({
                     activeContainer: {
                         backgroundColor: Color(theme.colors.primary).setAlpha(0.2).rgbaString,
@@ -155,14 +174,17 @@ export function TimeSchedule(props: TimeScheduleProps) {
                         {/* 日期部分 */}
                         <View style={courseScheduleStyle.weekdayItem}>
                             <Text style={weekdayTextStyle}>
-                                {props.showDate
-                                    ? `${weekday}\n${currentDay.month() + 1}-${currentDay.date()}`
-                                    : `${weekday}`}
+                                {(() => {
+                                    const shiftLabel = workDates.has(dateKey) ? "(补)" : restDates.has(dateKey) ? "(休)" : "";
+                                    return props.showDate
+                                        ? `${weekday}${shiftLabel}\n${currentDay.month() + 1}-${currentDay.date()}`
+                                        : `${weekday}${shiftLabel}`;
+                                })()}
                             </Text>
                         </View>
                         {(props.scheduleItems ?? []).map((td, tdIndex) =>
                             td.data
-                                .filter(item => td.isItemShow(item, currentDay, currentWeek))
+                                .filter(item => td.isItemShow(item, effectiveDay, currentWeek))
                                 .map((item, itemIndex) => (
                                     <View key={`${tdIndex}-${itemIndex}`}>
                                         {td.itemRender?.(item, i => props.onItemPress?.(i))}
