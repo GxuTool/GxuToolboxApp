@@ -6,6 +6,7 @@ import {Color} from "@/shared/color.ts";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+import {useShallow} from "zustand/react/shallow";
 
 interface HolidayItemProps {
     item: ScheduleTableItem;
@@ -16,7 +17,6 @@ export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
     const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
-    const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();
 
@@ -41,13 +41,8 @@ export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
                     marginHorizontal: "2%",
                     borderRadius: 6,
                     backgroundColor: backgroundColor,
-                    height:
-                        span * timeSpanHeight -
-                        courseItemMargin * 2,
-                    top:
-                        weekdayHeight +
-                        y * timeSpanHeight +
-                        courseItemMargin,
+                    height: span * timeSpanHeight - courseItemMargin * 2,
+                    top: y * timeSpanHeight + courseItemMargin,
                     overflow: "hidden",
                     // Design change: Top accent border (like a sticky note) instead of left border
                     borderTopWidth: 4,
@@ -83,11 +78,14 @@ export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
                     zIndex: 1,
                 },
             }),
-        [backgroundColor, borderColor, textColor, span, y, timeSpanHeight, weekdayHeight, courseItemMargin, isFullDay],
+        [span, y, store(useShallow(s => s.theme)), baseColor, isFullDay],
     );
 
     return (
-        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={ucStore(s => s.theme.ripple)}>
+        <Pressable
+            style={styles.container}
+            onPress={() => onPress?.(item)}
+            android_ripple={ucStore(s => s.theme.ripple)}>
             {/* Watermark Icon - Scaled up for impact */}
             <View style={styles.watermark}>
                 <Icon

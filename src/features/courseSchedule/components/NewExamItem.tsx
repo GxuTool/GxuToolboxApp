@@ -8,6 +8,7 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
+import {useShallow} from "zustand/react/shallow";
 
 interface NewExamItemProps {
     item: ScheduleTableItem;
@@ -17,7 +18,6 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
     const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
-    const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
@@ -41,12 +41,8 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
                     borderTopWidth: 3,
                     borderTopColor: baseColor,
                     backgroundColor: backgroundColor,
-                    height:
-                        span * timeSpanHeight - courseItemMargin * 2,
-                    top:
-                        weekdayHeight +
-                        y * timeSpanHeight +
-                        courseItemMargin,
+                    height: span * timeSpanHeight - courseItemMargin * 2,
+                    top: y * timeSpanHeight + courseItemMargin,
                     overflow: "hidden",
                 },
                 text: {
@@ -77,18 +73,17 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
                     fontSize: 11,
                 },
             }),
-        [backgroundColor, textColor, span, y, timeSpanHeight, weekdayHeight, courseItemMargin, baseColor],
+        [span, y, store(useShallow(s => s.theme)), baseColor],
     );
 
     return (
-        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={ucStore(s => s.theme.ripple)}>
-            <Flex direction="column" gap={2} style={{padding: 4,paddingTop: 10, height: "100%"}} align="center">
-                <Text style={styles.badge}>
-                    考试
-                </Text>
-                <Text style={styles.title}>
-                    {item.title}
-                </Text>
+        <Pressable
+            style={styles.container}
+            onPress={() => onPress?.(item)}
+            android_ripple={ucStore(s => s.theme.ripple)}>
+            <Flex direction="column" gap={2} style={{padding: 4, paddingTop: 10, height: "100%"}} align="center">
+                <Text style={styles.badge}>考试</Text>
+                <Text style={styles.title}>{item.title}</Text>
                 {!!item.location && (
                     <Text style={styles.meta}>
                         <Icon name="map-marker" style={styles.icon} />

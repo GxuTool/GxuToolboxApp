@@ -11,7 +11,7 @@ import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts"
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
-
+import {useShallow} from "zustand/react/shallow";
 
 interface NewCourseItemProps {
     item: ScheduleTableItem;
@@ -23,7 +23,6 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
     const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
-    const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
@@ -45,13 +44,8 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     marginHorizontal: "2%",
                     borderRadius: 5,
                     backgroundColor: backgroundColor,
-                    height:
-                        span * timeSpanHeight -
-                        courseItemMargin * 2,
-                    top:
-                        weekdayHeight +
-                        y * timeSpanHeight +
-                        courseItemMargin,
+                    height: span * timeSpanHeight - courseItemMargin * 2,
+                    top: y * timeSpanHeight + courseItemMargin,
                 },
                 text: {
                     textAlign: "center",
@@ -79,17 +73,29 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     fontWeight: "bold",
                 },
             }),
-        [backgroundColor, textColor, span, y, timeSpanHeight, weekdayHeight, courseItemMargin],
+        [span, y, store(useShallow(s => s.theme)), baseColor],
     );
 
     return (
-        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={ucStore(s => s.theme.ripple)}>
+        <Pressable
+            style={styles.container}
+            onPress={() => onPress?.(item)}
+            android_ripple={ucStore(s => s.theme.ripple)}>
             {conflictCount && conflictCount > 1 && (
                 <View style={styles.badge}>
                     <Text style={styles.badgeText}>{conflictCount}</Text>
                 </View>
             )}
-            <Flex direction="column" gap={2} style={{padding: 4, paddingTop: conflictCount && conflictCount > 1 ? 18 : 4, height: "100%", overflow: "hidden"}} align="center">
+            <Flex
+                direction="column"
+                gap={2}
+                style={{
+                    padding: 4,
+                    paddingTop: conflictCount && conflictCount > 1 ? 18 : 4,
+                    height: "100%",
+                    overflow: "hidden",
+                }}
+                align="center">
                 <Text style={[styles.text, {fontWeight: "bold"}]} numberOfLines={5}>
                     {item.status && (
                         <AttendanceStateIcon
