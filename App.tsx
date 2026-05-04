@@ -4,7 +4,6 @@ import {theme} from "@/shared/theme.ts";
 import {Root} from "./src/screens/Root.tsx";
 import {useColorScheme} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";
-import {AppProvider} from "@/components/AppProvider.tsx";
 import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 
 function App(): React.JSX.Element {
@@ -32,11 +31,9 @@ function App(): React.JSX.Element {
 
     return (
         <ThemeProvider theme={currentTheme}>
-            <AppProvider>
-                <SafeAreaProvider>
-                    <Root />
-                </SafeAreaProvider>
-            </AppProvider>
+            <SafeAreaProvider>
+                <Root />
+            </SafeAreaProvider>
         </ThemeProvider>
     );
 }

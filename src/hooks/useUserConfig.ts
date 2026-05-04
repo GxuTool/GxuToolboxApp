@@ -1,7 +1,7 @@
-import { create } from "zustand/react";
-import { defaultUserConfig, IUserConfig } from "@/type/IUserConfig.ts";
-import { store as storage } from "@/core/store.ts";
-import { deepMerge } from "@/utils/objectUtils.ts";
+import {create} from "zustand/react";
+import {defaultUserConfig, IUserConfig} from "@/type/IUserConfig.ts";
+import {store as storage} from "@/core/store.ts";
+import {deepMerge} from "@/utils/objectUtils.ts";
 
 const STORAGE_KEY = "userConfig";
 
@@ -14,13 +14,13 @@ const useUserConfigStore = create<
     ...defaultUserConfig,
 
     update: (k, v) => {
-        set({ [k]: v } as Partial<IUserConfig>);
-        storage.save({ key: STORAGE_KEY, data: get() });
+        set({[k]: v} as Partial<IUserConfig>);
+        storage.save({key: STORAGE_KEY, data: get()});
     },
 
     init: async () => {
         try {
-            const cached = await storage.load({ key: STORAGE_KEY });
+            const cached = await storage.load({key: STORAGE_KEY});
             if (cached) {
                 set(deepMerge(defaultUserConfig, cached));
             }
@@ -38,14 +38,14 @@ export const useUserConfig = () => {
         /** 直接从存储加载数据（不走缓存），失败返回 null */
         load: async (): Promise<IUserConfig | null> => {
             try {
-                return await storage.load({ key: STORAGE_KEY });
+                return await storage.load({key: STORAGE_KEY});
             } catch {
                 return null;
             }
         },
         /** 直接保存数据到存储 */
-        save: (data: IUserConfig) => storage.save({ key: STORAGE_KEY, data }),
+        save: (data: IUserConfig) => storage.save({key: STORAGE_KEY, data}),
         /** 删除存储中的数据 */
-        remove: () => storage.remove({ key: STORAGE_KEY }),
+        remove: () => storage.remove({key: STORAGE_KEY}),
     };
 };

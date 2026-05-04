@@ -1,53 +1,35 @@
 import {ImageBackground, StatusBar, StyleSheet, useColorScheme, View, ViewProps} from "react-native";
 import {DarkTheme, DefaultTheme, NavigationContainer} from "@react-navigation/native";
 import {RootStack} from "@/route/RootStack.tsx";
-import React, {useCallback, useEffect, useMemo} from "react";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
+import React, {useEffect} from "react";
 import {useCourse} from "@/hooks/useCourse.ts";
-import {useShallow} from "zustand/react/shallow";
-import {useTheme} from "@rneui/themed";
+import {createTheme, useTheme} from "@rneui/themed";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";
 import {MapPickerHost} from "@/features/map/components/MapPickerHost.tsx";
+import {cowsay} from "@/js/cowsay.ts";
+import {generateUiTheme} from "@/shared/theme.ts";
 
 export function Root(props: ViewProps) {
-    const {store: ucStore} = useUserConfig();
-    const {theme} = useTheme();
+    const {store: ucStore, init: ucInit} = useUserConfig();
+    const {theme, updateTheme} = useTheme();
+    const {init: courseInit} = useCourse();
+    const userConfig = ucStore();
     const colorScheme = useColorScheme();
-    const {store, courseScheduleStyle, init} = useCourse();
 
     useEffect(() => {
-        init();
-    }, [init]);
+        courseInit();
+        ucInit();
+        cowsay({
+            text: "恭喜你，成功启动了开发服",
+            f: "dragon",
+        });
+    }, []);
 
-    const courseScheduleData = store(
-        useShallow(s => ({
-            courseInfoVisible: s.courseInfoVisible,
-            startDay: s.startDay,
-            randomColor: s.randomColor,
-            weekdayList: s.weekdayList,
-            timeSpanList: s.timeSpanList,
-        })),
-    );
-
-    const updateCourseScheduleData = useCallback(
-        (data: Partial<typeof courseScheduleData>) => {
-            for (const [k, v] of Object.entries(data)) {
-                store.getState().update(k as keyof typeof courseScheduleData, v);
-            }
-        },
-        [store],
-    );
-
-    // 使用 useMemo 包装 Context value 以避免不必要的重渲染
-    const contextValue = useMemo(
-        () => ({
-            courseScheduleData,
-            courseScheduleStyle,
-            updateCourseScheduleData,
-        }),
-        [courseScheduleData, courseScheduleStyle, updateCourseScheduleData],
-    );
+    useEffect(() => {
+        const newUiTheme = createTheme(generateUiTheme(userConfig, colorScheme));
+        updateTheme(newUiTheme);
+    }, [ucStore(s => s.theme), colorScheme]);
 
     const style = StyleSheet.create({
         backgroundStyle: {
@@ -72,22 +54,20 @@ export function Root(props: ViewProps) {
         },
     };
     return (
-        <CourseScheduleContext.Provider value={contextValue}>
-            <UnToastContextProvider>
-                <View {...props} style={[style.backgroundStyle, props.style]}>
-                    <ImageBackground
-                        style={style.bg}
-                        source={{uri: ucStore(s => s.theme.bgUrl)}}
-                        loadingIndicatorSource={{uri: ucStore(s => s.theme.bgUrl)}}
-                        resizeMode="cover">
-                        <StatusBar barStyle={colorScheme === "light" ? "dark-content" : "light-content"} />
-                        <NavigationContainer theme={navigationTheme}>
-                            <RootStack />
-                        </NavigationContainer>
-                        <MapPickerHost />
-                    </ImageBackground>
-                </View>
-            </UnToastContextProvider>
-        </CourseScheduleContext.Provider>
+        <UnToastContextProvider>
+            <View {...props} style={[style.backgroundStyle, props.style]}>
+                <ImageBackground
+                    style={style.bg}
+                    source={{uri: ucStore(s => s.theme.bgUrl)}}
+                    loadingIndicatorSource={{uri: ucStore(s => s.theme.bgUrl)}}
+                    resizeMode="cover">
+                    <StatusBar barStyle={colorScheme === "light" ? "dark-content" : "light-content"} />
+                    <NavigationContainer theme={navigationTheme}>
+                        <RootStack />
+                    </NavigationContainer>
+                    <MapPickerHost />
+                </ImageBackground>
+            </View>
+        </UnToastContextProvider>
     );
 }

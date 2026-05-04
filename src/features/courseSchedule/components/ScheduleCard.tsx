@@ -135,16 +135,16 @@ export function ScheduleCard() {
                 <Flex direction="row" align="center" gap={8}>
                     <Text h4>日程表</Text>
                     <Pressable
-                        android_ripple={userConfig.theme.ripple}
+                        android_ripple={ucStore(s => s.theme.ripple)}
                         onPress={() => setSheet({type: "menu"})}
-                        style={{flexDirection:"row",alignItems:"center",gap:8}}>
-                    {[JWauthState, unifiedAuthState, attendanceAuthState].map((i) =>
-                        i?.status !== "authenticated" ? (
-                            <Icon name="account-network-off-outline" size={24} color={theme.colors.error} />
-                        ) : (
-                            <Icon name="account-network-outline" size={24} color={theme.colors.success} />
-                        ),
-                    )}
+                        style={{flexDirection: "row", alignItems: "center", gap: 8}}>
+                        {[JWauthState, unifiedAuthState, attendanceAuthState].map(i =>
+                            i?.status !== "authenticated" ? (
+                                <Icon name="account-network-off-outline" size={24} color={theme.colors.error} />
+                            ) : (
+                                <Icon name="account-network-outline" size={24} color={theme.colors.success} />
+                            ),
+                        )}
                     </Pressable>
                 </Flex>
                 <Flex gap={15} justify="flex-end">
@@ -156,9 +156,7 @@ export function ScheduleCard() {
                         />
                     </Pressable>
                     {rest.activePage + 1 !== realCurrentWeek && (
-                        <Pressable
-                            android_ripple={ripple}
-                            onPress={() => rest.setPage(realCurrentWeek - 1)}>
+                        <Pressable android_ripple={ripple} onPress={() => rest.setPage(realCurrentWeek - 1)}>
                             <Icon name="history" size={24} />
                         </Pressable>
                     )}

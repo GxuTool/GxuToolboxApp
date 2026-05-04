@@ -3,9 +3,9 @@ import {BaseColor, Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {Text, useTheme} from "@rneui/themed";
-import {useContext, useEffect, useState} from "react";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
+import {useEffect, useState} from "react";
 import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 
 type PracticeItem = ICourse["practiceList"][number];
 
@@ -45,12 +45,11 @@ const staticData = {
 export function PracticalCourseList(props: Props) {
     const {theme} = useTheme();
     const [courseList, setCourseList] = useState<ICourse["practiceList"]>([]);
+    const {courseScheduleStyle} = useCourse();
     useEffect(() => {
         randomCourseColor(props.courseList as ICourse["practiceList"]);
         setCourseList(props.courseList as ICourse["practiceList"]);
     }, [props.courseList]);
-
-    const {courseScheduleStyle} = useContext(CourseScheduleContext)!;
 
     function randomCourseColor(courseList: ICourse["practiceList"]) {
         //使得相同课程的颜色相同

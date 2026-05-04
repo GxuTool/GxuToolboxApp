@@ -3,17 +3,17 @@ import {useBaseCourse} from "@/features/courseSchedule/hooks/detail/useBaseCours
 import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {useCallback, useMemo} from "react";
 import {useAttendance} from "@/features/courseSchedule/hooks/detail/useAttendance.ts";
-import {AuthState} from "@/core/auth/auth.type.ts";
-import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
-export function useCourse(year: number, term: SchoolTermValue): {
+export function useCourse(
+    year: number,
+    term: SchoolTermValue,
+): {
     items: ScheduleTableItem[];
     refresh: () => Promise<void>;
 } {
     const {item: baseCourse, refresh: refreshBaseCourse} = useBaseCourse(year, term);
     const phyExpList = usePhyExp(year, term) || [];
-    const {applyShift} = useShift(year, term);
     const {status, attendanceList, refresh: refreshAttendance} = useAttendance(year, term);
 
     const safeBase = baseCourse || [];
@@ -47,8 +47,8 @@ export function useCourse(year: number, term: SchoolTermValue): {
             return enrichedCourse;
         });
 
-        return applyShift(enriched);
-    }, [safeBase, phyExpList, attendanceList, applyShift]);
+        return enriched;
+    }, [safeBase, phyExpList, attendanceList]);
 
     const refresh = useCallback(async () => {
         await Promise.all([refreshBaseCourse(), refreshAttendance()]);
