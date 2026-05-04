@@ -81,10 +81,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
 
     // 计算时间段的Top
     const timeSpanHighLightTop = {
-        top:
-            weekdayHeight +
-            (currentTimeSpan ?? 1) * timeSpanHeight +
-            10,
+        top: weekdayHeight + (currentTimeSpan ?? 1) * timeSpanHeight + 10,
     };
 
     // 生成短的时间段元素列表
@@ -94,9 +91,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
             timeSpanList[index * 2 + 1] !== undefined
                 ? [
                       `${index * 2 + 1} - ${index * 2 + 2}`,
-                      timeSpanList[index * 2].split("\n")[0] +
-                          "\n" +
-                          timeSpanList[index * 2 + 1].split("\n")[1],
+                      timeSpanList[index * 2].split("\n")[0] + "\n" + timeSpanList[index * 2 + 1].split("\n")[1],
                   ]
                 : [index * 2 + 1, timeSpanList[index * 2]],
         );
@@ -136,10 +131,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
                           <Flex
                               inline
                               key={`timespan-${index}`}
-                              style={[
-                                  courseScheduleStyle.timeSpanItem,
-                                  {height: timeSpanHeight * 2},
-                              ]}
+                              style={[courseScheduleStyle.timeSpanItem, {height: timeSpanHeight * 2}]}
                               justify="center">
                               <Text style={courseScheduleStyle.timeSpanText}>{`${value[0]}\n${value[1]}`}</Text>
                           </Flex>
@@ -175,7 +167,11 @@ export function TimeSchedule(props: TimeScheduleProps) {
                         <View style={courseScheduleStyle.weekdayItem}>
                             <Text style={weekdayTextStyle}>
                                 {(() => {
-                                    const shiftLabel = workDates.has(dateKey) ? "(补)" : restDates.has(dateKey) ? "(休)" : "";
+                                    const shiftLabel = workDates.has(dateKey)
+                                        ? "(补)"
+                                        : restDates.has(dateKey)
+                                          ? "(休)"
+                                          : "";
                                     return props.showDate
                                         ? `${weekday}${shiftLabel}\n${currentDay.month() + 1}-${currentDay.date()}`
                                         : `${weekday}${shiftLabel}`;

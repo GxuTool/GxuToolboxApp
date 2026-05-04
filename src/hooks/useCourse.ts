@@ -6,6 +6,7 @@ import {useTheme} from "@rneui/themed";
 import {generateCourseScheduleStyle} from "@/js/jw/course.ts";
 import {PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {deepMerge} from "@/utils/objectUtils.ts";
+import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 
 const STORAGE_KEY = "courseScheduleStore";
 
@@ -28,7 +29,6 @@ export interface CourseStoreState {
 
 export interface CourseStoreAction {
     update: <T extends keyof CourseStoreState>(k: T, v: CourseStoreState[T]) => void;
-    init: () => Promise<void>;
 }
 
 const defaultState: CourseStoreState = {
@@ -110,22 +110,24 @@ const useCourseStore = create<CourseStoreState & CourseStoreAction>()((set, get)
         }
         storage.save({key: STORAGE_KEY, data});
     },
-
-    init: async () => {
-        try {
-            const cached = await storage.load({key: STORAGE_KEY});
-            if (cached) {
-                set(deepMerge(defaultState, cached));
-            }
-        } catch {
-            // 首次启动无缓存，使用默认值
-        }
-    },
 }));
 
 export const useCourse = () => {
     const {theme: rneuiTheme} = useTheme();
+    const shiftInit = useShift().init;
     const courseTheme = useCourseStore(s => s.theme);
+
+    async function init() {
+        try {
+            await shiftInit();
+            const cached = await storage.load({key: STORAGE_KEY});
+            if (cached) {
+                useCourseStore.setState(deepMerge(defaultState, cached));
+            }
+        } catch {
+            // 首次启动无缓存，使用默认值
+        }
+    }
 
     const courseScheduleStyle = useMemo(
         () => generateCourseScheduleStyle(courseTheme, rneuiTheme),
@@ -136,7 +138,7 @@ export const useCourse = () => {
         store: useCourseStore,
         courseScheduleStyle,
         /** 在应用启动时调用，从本地存储读取缓存数据还原到 store */
-        init: useCourseStore.getState().init,
+        init,
         /** 直接从存储加载数据（不走缓存），失败返回 null */
         load: async (): Promise<CourseStoreState | null> => {
             try {
