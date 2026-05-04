@@ -7,7 +7,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import React, {useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {Pos} from "@/js/pos.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/TeacherInfoSheet.tsx";
 
 interface Props extends ViewProps {
@@ -26,7 +26,8 @@ function copy(value: string, tip: string) {
 }
 
 function PropItem({item, ...props}: {item: Info} & Props) {
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
+    const ripple = store(s => s.theme.ripple);
     const {theme} = useTheme();
     const label = item.label;
     const value = props.course[item.key] ?? "";
@@ -46,7 +47,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
         label: <Text style={style.infoLabel}>{label}</Text>,
         value: (
             <Pressable
-                android_ripple={userConfig.theme.ripple}
+                android_ripple={ripple}
                 onPress={() => copy(value + "", `复制${item.label}成功`)}>
                 <Text style={style.infoData}>{value}</Text>
             </Pressable>
@@ -55,7 +56,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
     switch (item.key) {
         case "cdmc":
             info.label = (
-                <Pressable android_ripple={userConfig.theme.ripple} onPress={() => Pos.parseAndSearchInMap(value + "")}>
+                <Pressable android_ripple={ripple} onPress={() => Pos.parseAndSearchInMap(value + "")}>
                     <Flex gap={5} align="center">
                         <Text style={style.infoLabel}>{label}</Text>
                         <Icon
@@ -71,7 +72,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
             break;
         case "xm":
             info.label = (
-                <Pressable android_ripple={userConfig.theme.ripple} onPress={() => props.onClick()}>
+                <Pressable android_ripple={ripple} onPress={() => props.onClick()}>
                     <Flex gap={5} align="center">
                         <Text style={style.infoLabel}>{label}</Text>
                     </Flex>
@@ -91,8 +92,8 @@ function PropItem({item, ...props}: {item: Info} & Props) {
 export function CourseDetail(props: Props) {
     const [visible, setVisible] = useState(false);
 
-    const {userConfig} = useUserConfig();
-    const infoList = Object.entries(userConfig.preference.courseDetail)
+    const {store} = useUserConfig();
+    const infoList = Object.entries(store(s => s.preference.courseDetail))
         .filter(prop => prop[1].show)
         .map(
             ([key, {label}]) =>

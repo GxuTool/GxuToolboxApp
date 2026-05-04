@@ -1,8 +1,8 @@
 import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 export function UserPreferenceSettingIndex() {
-    const {userConfig, updateUserConfig} = useUserConfig();
+    const {store} = useUserConfig();
 
     const settingList: UnListSection[] = [
         {

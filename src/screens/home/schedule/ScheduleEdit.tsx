@@ -13,19 +13,19 @@ import {Color} from "@/shared/color.ts";
 import {NumberInput} from "@/components/un-ui/NumberInput.tsx";
 import {Picker} from "@react-native-picker/picker";
 import {ColorPicker} from "@/components/un-ui/ColorPicker.tsx";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ActivityItem} from "@/components/app/activity/ActivityItem.tsx";
 import {ActivityDetail} from "@/components/app/activity/ActivityDetail.tsx";
 import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 
 export function ScheduleEdit() {
-    const {userConfig, updateUserConfig} = useUserConfig();
+    const {store} = useUserConfig();
     const {theme} = useTheme();
     const pageView = usePagerView({pagesAmount: 20});
 
-    const [year, setYear] = useState(userConfig.jw.year);
-    const [term, setTerm] = useState(userConfig.jw.term);
+    const [year, setYear] = useState(store(s => s.jw.year));
+    const [term, setTerm] = useState(store(s => s.jw.term));
 
     const [courseRes, setCourseRes] = useState<CourseScheduleClass>();
     // 用户数据中的Index
@@ -73,23 +73,25 @@ export function ScheduleEdit() {
     }
 
     function save() {
+        const s = store.getState();
+        const newData = [...s.activity.data];
         if (activityList.length === 0 && activityListIndex > -1) {
             // 日程为空就删除
-            userConfig.activity.data.splice(activityListIndex, 1);
+            newData.splice(activityListIndex, 1);
             setActivityListIndex(-1);
         } else if (activityListIndex > -1) {
             // 替换
-            userConfig.activity.data[activityListIndex].list = activityList;
+            newData[activityListIndex] = { ...newData[activityListIndex], list: activityList };
         } else {
             // 不存在就新建
-            userConfig.activity.data.push({
+            newData.push({
                 year,
                 term,
                 list: activityList,
             });
-            setActivityListIndex(userConfig.activity.data.length - 1);
+            setActivityListIndex(newData.length - 1);
         }
-        updateUserConfig(userConfig);
+        store.getState().update("activity", { ...s.activity, data: newData });
         ToastAndroid.show("保存日程成功", ToastAndroid.SHORT);
     }
 
@@ -98,9 +100,10 @@ export function ScheduleEdit() {
     }
 
     async function init() {
-        const activityDataIndex = userConfig.activity.data.findIndex(item => item.year === year && item.term === term);
+        const activityData = store.getState().activity.data;
+        const activityDataIndex = activityData.findIndex(item => item.year === year && item.term === term);
         if (activityDataIndex > -1) {
-            setActivityList(userConfig.activity.data[activityDataIndex].list);
+            setActivityList(activityData[activityDataIndex].list);
             setActivityListIndex(activityDataIndex);
         } else {
             setActivityList([]);
@@ -189,10 +192,10 @@ export function ScheduleEdit() {
                 <Flex justify="space-between">
                     <Text h4>日程列表</Text>
                     <Flex gap={5} justify="flex-end">
-                        <Pressable onPress={addActivity} android_ripple={userConfig.theme.ripple} style={{padding: 5}}>
+                        <Pressable onPress={addActivity} android_ripple={store(s => s.theme.ripple)} style={{padding: 5}}>
                             <Icon name="plus" size={24} />
                         </Pressable>
-                        <Pressable onPress={save} android_ripple={userConfig.theme.ripple} style={{padding: 5}}>
+                        <Pressable onPress={save} android_ripple={store(s => s.theme.ripple)} style={{padding: 5}}>
                             <Icon name="content-save" size={24} color={theme.colors.primary} />
                         </Pressable>
                     </Flex>
@@ -241,13 +244,13 @@ export function ScheduleEdit() {
                                 <Flex gap={5} justify="flex-end">
                                     <Pressable
                                         onPress={() => editActivity(activity, index)}
-                                        android_ripple={userConfig.theme.ripple}
+                                        android_ripple={store(s => s.theme.ripple)}
                                         style={{padding: 5}}>
                                         <Icon name="edit" size={22} />
                                     </Pressable>
                                     <Pressable
                                         onPress={() => deleteActivity(index)}
-                                        android_ripple={userConfig.theme.ripple}
+                                        android_ripple={store(s => s.theme.ripple)}
                                         style={{padding: 5}}>
                                         <Icon name="delete" color={theme.colors.error} size={22} />
                                     </Pressable>

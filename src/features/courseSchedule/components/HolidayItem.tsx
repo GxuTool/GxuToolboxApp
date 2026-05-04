@@ -1,5 +1,5 @@
 import {Pressable, StyleSheet, View} from "react-native";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
@@ -13,7 +13,7 @@ interface HolidayItemProps {
 }
 
 export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -87,7 +87,7 @@ export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
     );
 
     return (
-        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={userConfig.theme.ripple}>
+        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={ucStore(s => s.theme.ripple)}>
             {/* Watermark Icon - Scaled up for impact */}
             <View style={styles.watermark}>
                 <Icon

@@ -7,11 +7,11 @@ import {launchImageLibrary} from "react-native-image-picker";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx";
 import {ToastAndroid} from "react-native";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 
 export function SettingIndex() {
-    const {userConfig, updateUserConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
 
     function selectBg() {
@@ -19,8 +19,8 @@ export function SettingIndex() {
             mediaType: "photo",
         }).then(res => {
             if (!res.didCancel && res.assets && res.assets.length > 0) {
-                userConfig.theme.bgUrl = res.assets[0].uri ?? "";
-                updateUserConfig(userConfig);
+                const s = ucStore.getState();
+                ucStore.getState().update("theme", { ...s.theme, bgUrl: res.assets[0].uri ?? "" });
                 ToastAndroid.show("设置成功", ToastAndroid.SHORT);
             }
         });
@@ -65,10 +65,10 @@ export function SettingIndex() {
                     type: "any",
                     value: (
                         <ColorPicker
-                            color={userConfig.theme.primaryColor}
+                            color={ucStore(s => s.theme.primaryColor)}
                             onColorChange={v => {
-                                userConfig.theme.primaryColor = v;
-                                updateUserConfig(userConfig);
+                                const s = ucStore.getState();
+                                ucStore.getState().update("theme", { ...s.theme, primaryColor: v });
                             }}
                         />
                     ),
@@ -96,8 +96,8 @@ export function SettingIndex() {
                         <Flex gap={10} inline>
                             <Button
                                 onPress={() => {
-                                    userConfig.theme.bgUrl = "";
-                                    updateUserConfig(userConfig);
+                                    const s = ucStore.getState();
+                                    ucStore.getState().update("theme", { ...s.theme, bgUrl: "" });
                                     ToastAndroid.show("清空成功", ToastAndroid.SHORT);
                                 }}
                                 size="sm">
@@ -117,10 +117,10 @@ export function SettingIndex() {
                             step={1}
                             minimumValue={0}
                             maximumValue={130}
-                            value={userConfig.theme.bgOpacity}
+                            value={ucStore(s => s.theme.bgOpacity)}
                             onValueChange={v => {
-                                userConfig.theme.bgOpacity = v;
-                                updateUserConfig(userConfig);
+                                const s = ucStore.getState();
+                                ucStore.getState().update("theme", { ...s.theme, bgOpacity: v });
                             }}
                         />
                     ),

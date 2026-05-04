@@ -2,7 +2,7 @@ import {Pressable, StyleSheet, View} from "react-native";
 import {useTheme} from "@rneui/themed";
 import {UnText} from "@/components/un-ui";
 import React from "react";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 type Data = {
     label: string;
@@ -17,7 +17,7 @@ interface Props {
 
 export function CollapsedInfo(props: React.PropsWithChildren<Props>) {
     const {theme} = useTheme();
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
     const style = StyleSheet.create({
         infoContainer: {
             height: "auto",
@@ -47,7 +47,7 @@ export function CollapsedInfo(props: React.PropsWithChildren<Props>) {
         <View style={style.infoContainer}>
             {!props.isCollapsed && props.children}
             <Pressable
-                android_ripple={userConfig.theme.ripple}
+                android_ripple={store(s => s.theme.ripple)}
                 style={{marginHorizontal: 8}}
                 onPress={() => {
                     props.onClick();

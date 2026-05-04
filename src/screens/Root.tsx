@@ -6,12 +6,12 @@ import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {useShallow} from "zustand/react/shallow";
 import {useTheme} from "@rneui/themed";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";
 import {MapPickerHost} from "@/features/map/components/MapPickerHost.tsx";
 
 export function Root(props: ViewProps) {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {theme} = useTheme();
     const colorScheme = useColorScheme();
     const {store, courseScheduleStyle, init} = useCourse();
@@ -77,8 +77,8 @@ export function Root(props: ViewProps) {
                 <View {...props} style={[style.backgroundStyle, props.style]}>
                     <ImageBackground
                         style={style.bg}
-                        source={{uri: userConfig.theme.bgUrl}}
-                        loadingIndicatorSource={{uri: userConfig.theme.bgUrl}}
+                        source={{uri: ucStore(s => s.theme.bgUrl)}}
+                        loadingIndicatorSource={{uri: ucStore(s => s.theme.bgUrl)}}
                         resizeMode="cover">
                         <StatusBar barStyle={colorScheme === "light" ? "dark-content" : "light-content"} />
                         <NavigationContainer theme={navigationTheme}>

@@ -7,7 +7,7 @@ import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {usePagerView} from "react-native-pager-view";
 import Clipboard from "@react-native-clipboard/clipboard";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {UnTable, UnTableCols} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {CourseClass} from "@/class/jw/course.ts";
@@ -21,10 +21,10 @@ import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
 
-    const [year, setYear] = useState(+userConfig.jw.year);
-    const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
+    const [year, setYear] = useState(+store(s => s.jw.year));
+    const [term, setTerm] = useState<SchoolTermValue>(store(s => s.jw.term));
     const pageView = usePagerView({pagesAmount: 20});
 
     const {item: baseCourse, refresh: refreshBaseCourse, loading} = useBaseCourse(year, term);
@@ -82,7 +82,7 @@ export function CourseScheduleQuery() {
             dataIndex: "qq",
             render: qq =>
                 qq?.trim() ? (
-                    <Pressable android_ripple={userConfig.theme.ripple} onPress={() => qqLink(qq)}>
+                    <Pressable android_ripple={store(s => s.theme.ripple)} onPress={() => qqLink(qq)}>
                         <Text style={style.tableText}>{qq}</Text>
                     </Pressable>
                 ) : (

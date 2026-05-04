@@ -9,7 +9,7 @@ import RNFS from "react-native-fs";
 import {CameraRoll} from "@react-native-camera-roll/camera-roll";
 import Share, {ShareOptions} from "react-native-share";
 import Canvas from "react-native-canvas";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 type Props = {
     week: number;
@@ -18,7 +18,8 @@ type Props = {
 
 export function ScheduleShareSheet(props: Props) {
     const {theme} = useTheme();
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
+    const ripple = store(s => s.theme.ripple);
 
     const {width: screenWidth, height: screenHeight} = Dimensions.get("window");
     const styles = StyleSheet.create({
@@ -115,7 +116,7 @@ export function ScheduleShareSheet(props: Props) {
                 <Flex style={styles.flexContainer}>
                     <Flex justify={"center"} direction={"column"}>
                         <Pressable
-                            android_ripple={userConfig.theme.ripple}
+                            android_ripple={ripple}
                             onPress={async () => {
                                 await saveToLocal();
                             }}>
@@ -127,7 +128,7 @@ export function ScheduleShareSheet(props: Props) {
                     </Flex>
                     <Flex justify={"center"} direction={"column"}>
                         <Pressable
-                            android_ripple={userConfig.theme.ripple}
+                            android_ripple={ripple}
                             onPress={async () => {
                                 await shareSchedule();
                             }}>

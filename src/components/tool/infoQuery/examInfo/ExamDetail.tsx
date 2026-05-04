@@ -7,7 +7,7 @@ import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import React from "react";
 import {Pos} from "@/js/pos.ts";
 import {Color} from "@/shared/color.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 interface Props extends ViewProps {
     examInfo: ExamInfo;
@@ -24,7 +24,8 @@ function copy(value: string, tip: string) {
 }
 
 function PropItem({item, ...props}: {item: Info} & Props) {
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
+    const ripple = store(s => s.theme.ripple);
     const {theme} = useTheme();
     const label = item.label;
     const value = props.examInfo[item.key] ?? "";
@@ -44,7 +45,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
         label: <Text style={style.infoLabel}>{label}</Text>,
         value: (
             <Pressable
-                android_ripple={userConfig.theme.ripple}
+                android_ripple={ripple}
                 onPress={() => copy(value + "", `复制${item.label}成功`)}>
                 <Text style={style.infoData}>{value}</Text>
             </Pressable>
@@ -53,7 +54,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
     switch (item.key) {
         case "cdmc":
             info.label = (
-                <Pressable android_ripple={userConfig.theme.ripple} onPress={() => Pos.parseAndSearchInMap(value + "")}>
+                <Pressable android_ripple={ripple} onPress={() => Pos.parseAndSearchInMap(value + "")}>
                     <Flex gap={5} align="center">
                         <Text style={style.infoLabel}>{label}</Text>
                         <Icon
@@ -79,8 +80,8 @@ function PropItem({item, ...props}: {item: Info} & Props) {
 }
 
 export function ExamDetail(props: Props) {
-    const {userConfig} = useUserConfig();
-    const infoList = Object.entries(userConfig.preference.examDetail)
+    const {store} = useUserConfig();
+    const infoList = Object.entries(store(s => s.preference.examDetail))
         .filter(prop => prop[1].show)
         .map(
             ([key, {label}]) =>
@@ -123,7 +124,7 @@ export function ExamDetail(props: Props) {
                     </Flex>
                     <Flex justify="flex-end">
                         <Pressable
-                            android_ripple={userConfig.theme.ripple}
+                            android_ripple={store(s => s.theme.ripple)}
                             onPress={() =>
                                 copy(JSON.stringify(props.examInfo, null, 4) + "" ?? "", "复制考试信息JSON成功")
                             }>

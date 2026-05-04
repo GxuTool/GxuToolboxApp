@@ -10,7 +10,7 @@ import {usePagerView} from "react-native-pager-view";
 import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/CourseCardSetting.tsx";
 import {useNavigation} from "@react-navigation/native";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {UnText} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
@@ -41,7 +41,7 @@ type SheetState =
  * @constructor
  */
 export function ScheduleCard() {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const navigation = useNavigation();
     const {theme} = useTheme();
     const pagerView = usePagerView({pagesAmount: 20});
@@ -51,8 +51,9 @@ export function ScheduleCard() {
     const {authState: unifiedAuthState} = useUnifiedAuth();
     const {authState: attendanceAuthState} = useAttendanceAuth();
 
-    const [year, setYear] = useState(+userConfig.jw.year);
-    const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
+    const [year, setYear] = useState(+ucStore(s => s.jw.year));
+    const [term, setTerm] = useState<SchoolTermValue>(ucStore(s => s.jw.term));
+    const ripple = ucStore(s => s.theme.ripple);
     const startDay = useStartDay(year, term);
 
     const {items: courseItems = [], refresh: refreshCourse} = useCourse(year, term);
@@ -156,12 +157,12 @@ export function ScheduleCard() {
                     </Pressable>
                     {rest.activePage + 1 !== realCurrentWeek && (
                         <Pressable
-                            android_ripple={userConfig.theme.ripple}
+                            android_ripple={ripple}
                             onPress={() => rest.setPage(realCurrentWeek - 1)}>
                             <Icon name="history" size={24} />
                         </Pressable>
                     )}
-                    <Pressable android_ripple={userConfig.theme.ripple} onPress={() => setSheet({type: "menu"})}>
+                    <Pressable android_ripple={ripple} onPress={() => setSheet({type: "menu"})}>
                         <Icon name="menu" size={24} />
                     </Pressable>
                 </Flex>

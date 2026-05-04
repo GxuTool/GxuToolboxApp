@@ -1,5 +1,5 @@
 import {SchoolTermValue} from "@/type/global.ts";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import moment from "moment";
 import {useCallback, useEffect, useMemo} from "react";
 import {store} from "@/core/store.ts";
@@ -8,8 +8,8 @@ import {courseApi} from "@/js/jw/course.ts";
 import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 
 export function useStartDay(year: number, term: SchoolTermValue) {
-    const {userConfig, updateUserConfig} = useUserConfig();
-    const startDay = useMemo(() => moment(userConfig.jw.startDay), [userConfig.jw.startDay]);
+    const {store: ucStore} = useUserConfig();
+    const startDay = useMemo(() => moment(ucStore(s => s.jw.startDay)), [ucStore(s => s.jw.startDay)]);
 
     const getStartDay = useCallback(async () => {
         const userInfo = await store
@@ -24,9 +24,9 @@ export function useStartDay(year: number, term: SchoolTermValue) {
 
         if (!Array.isArray(data?.weekNum) || (data?.weekNum.length ?? 0) < 1) return;
         const firstDay = data?.weekNum[0].rq.split("/")[0];
-        if (userConfig.jw.startDay !== firstDay && typeof firstDay === "string") {
-            userConfig.jw.startDay = firstDay;
-            updateUserConfig(userConfig);
+        const s = ucStore.getState();
+        if (s.jw.startDay !== firstDay && typeof firstDay === "string") {
+            ucStore.getState().update("jw", { ...s.jw, startDay: firstDay });
         }
     }, [year, term]);
 

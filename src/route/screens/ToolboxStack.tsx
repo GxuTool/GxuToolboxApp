@@ -20,7 +20,8 @@ import {GPAcalculator} from "@/screens/tool/jw/GPAcalculator/GPAcalculator.tsx";
 import {TimeShiftScreen} from "@/screens/tool/jw/notification/TimeShiftScreen.tsx";
 import AttendanceInfoQueryScreen from "@/screens/tool/auth/attendanceSystem/AttendanceInfoQueryScreen.tsx";
 import WebViewScreen from "@/screens/WebViewScreen.tsx";
-import {useUserConfig, useWebView} from "@/hooks/app.ts";
+import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {EvaluationTemplate} from "@/features/evaluation/screens/EvaluationTemplate.tsx";
 import {HolidayScreen} from "@/features/holidays/screen/HolidayScreen.tsx";
 import {TeachBuildingListScreen} from "@/screens/tool/other/TeachingBuildingMap/TeachBuildingListScreen.tsx";
@@ -35,7 +36,8 @@ const Stack = createNativeStackNavigator();
 
 export function ToolboxStack() {
     const {theme} = useTheme();
-    const {userConfig} = useUserConfig();
+    const {store} = useUserConfig();
+    const bgOpacity = store(s => s.theme.bgOpacity);
     const {openInJw} = useWebView();
     const headerRightEle = () => {
         return (
@@ -56,12 +58,12 @@ export function ToolboxStack() {
                 headerShadowVisible: false,
                 headerStyle: {
                     backgroundColor: Color(theme.colors.background).setAlpha(
-                        ((theme.mode === "dark" ? 0.7 : 0.9) * userConfig.theme.bgOpacity) / 100,
+                        ((theme.mode === "dark" ? 0.7 : 0.9) * bgOpacity) / 100,
                     ).rgbaString,
                 },
                 contentStyle: {
                     backgroundColor: Color(theme.colors.background).setAlpha(
-                        ((theme.mode === "dark" ? 0.5 : 0.6) * userConfig.theme.bgOpacity) / 100,
+                        ((theme.mode === "dark" ? 0.5 : 0.6) * bgOpacity) / 100,
                     ).rgbaString,
                 },
                 animation: "fade",
@@ -75,7 +77,7 @@ export function ToolboxStack() {
                     title: "工具箱",
                     headerStyle: {
                         backgroundColor: Color(theme.colors.background).setAlpha(
-                            ((theme.mode === "dark" ? 0.5 : 0.4) * userConfig.theme.bgOpacity) / 100,
+                            ((theme.mode === "dark" ? 0.5 : 0.4) * bgOpacity) / 100,
                         ).rgbaString,
                     },
                     contentStyle: {

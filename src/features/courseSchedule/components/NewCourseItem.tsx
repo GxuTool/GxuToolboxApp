@@ -1,5 +1,5 @@
 import {Pressable, StyleSheet, View} from "react-native";
-import {useUserConfig} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
 
 import React, {memo, useMemo} from "react";
@@ -20,7 +20,7 @@ interface NewCourseItemProps {
 }
 
 export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItemProps) => {
-    const {userConfig} = useUserConfig();
+    const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -83,7 +83,7 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
     );
 
     return (
-        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={userConfig.theme.ripple}>
+        <Pressable style={styles.container} onPress={() => onPress?.(item)} android_ripple={ucStore(s => s.theme.ripple)}>
             {conflictCount && conflictCount > 1 && (
                 <View style={styles.badge}>
                     <Text style={styles.badgeText}>{conflictCount}</Text>
