@@ -171,7 +171,7 @@ export function ScheduleEdit() {
                 </Flex>
                 <TimeScheduleView
                     pageView={pageView}
-                    itemList={[
+                    scheduleItems={[
                         {
                             data: activityList,
                             isItemShow: (item, day, week) =>

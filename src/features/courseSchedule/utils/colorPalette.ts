@@ -1,5 +1,14 @@
 import {BaseColor} from "@/shared/color.ts";
-import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+
+interface ColorMapItem {
+    id?: string;
+    title?: string;
+    day?: number;
+    begin?: number;
+    end?: number;
+    kind?: string;
+    color?: string;
+}
 
 export type PaletteName = "default" | "macaron" | "morandi" | "vivid";
 
@@ -114,7 +123,7 @@ function hashStr(key: string): number {
  * 保证：同一门课颜色唯一；在同一天时段相邻的课颜色尽量差异最大。
  */
 export function buildColorMap(
-    items: ScheduleTableItem[],
+    items: ColorMapItem[],
     paletteName: PaletteName,
     customColors: Record<string, string> = {},
 ): Map<string, string> {
@@ -188,7 +197,7 @@ export function buildColorMap(
 }
 
 export function resolveEventsColor(
-    entity: Partial<ScheduleTableItem> & {kind?: string},
+    entity: ColorMapItem,
     customColors: Record<string, string> = {},
     paletteName: PaletteName = "default",
 ): string {

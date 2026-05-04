@@ -19,9 +19,13 @@ export function TimeScheduleView(props: TimeScheduleViewProps) {
 
     const paletteName = (store(s => s.theme.palette) as PaletteName) || "macaron";
     const customColors = store(s => s.theme.customColors) || {};
+    const flatItems = useMemo(
+        () => (props.scheduleItems ?? []).flatMap(td => td.data),
+        [props.scheduleItems],
+    );
     const colorMap = useMemo(
-        () => buildColorMap(props.scheduleItems ?? [], paletteName, customColors),
-        [props.scheduleItems, paletteName, customColors],
+        () => buildColorMap(flatItems, paletteName, customColors),
+        [flatItems, paletteName, customColors],
     );
 
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);

@@ -13,7 +13,7 @@ import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/Sch
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {UnText} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
-import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {useExam} from "@/features/courseSchedule/hooks/detail/useExam.ts";
@@ -27,6 +27,9 @@ import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
 import {AuthStatusSection} from "@/features/courseSchedule/components/AuthStatusSection.tsx";
 import {useUnifiedAuth} from "@/core/auth/unified/hook/useUnifiedAuth.ts";
 import {useAttendanceAuth} from "@/core/auth/attendance/hooks/useAttendanceAuth.ts";
+import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
+import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
+import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
 
 // 菜单的类型
 type SheetState =
@@ -63,11 +66,21 @@ export function ScheduleCard() {
 
     let defaultItem: ScheduleTableItem[] = JWauthState.status !== "no_account" ? [] : defaultItems;
 
-    const scheduleItems: ScheduleTableItem[] = useMemo(
+    const rawItems: ScheduleTableItem[] = useMemo(
         () => [...courseItems, ...examItems, ...holidayItems, ...defaultItem],
         [courseItems, examItems, holidayItems, defaultItem],
     );
-    const nextCourse = useNextCourse(scheduleItems, startDay);
+    const nextCourse = useNextCourse(rawItems, startDay);
+
+    const scheduleItems: TimeScheduleItemData[] = useMemo(
+        () => [
+            {data: courseItems, itemRender: (item, onPress) => <NewCourseItem item={item} onPress={onPress} />},
+            {data: examItems, itemRender: (item, onPress) => <NewExamItem item={item} onPress={onPress} />},
+            {data: holidayItems, itemRender: (item) => <HolidayItem item={item} />},
+            {data: defaultItem, itemRender: (item, onPress) => <NewCourseItem item={item} onPress={onPress} />},
+        ].filter(td => td.data.length > 0),
+        [courseItems, examItems, holidayItems, defaultItem],
+    );
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 

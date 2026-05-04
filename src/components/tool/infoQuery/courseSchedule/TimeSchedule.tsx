@@ -1,16 +1,12 @@
-import {Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle} from "react-native";
+import {StyleProp, StyleSheet, TextStyle, View, ViewStyle} from "react-native";
 import moment from "moment/moment";
 import {Color} from "@/shared/color.ts";
-import {BottomSheet, Text, useTheme} from "@rneui/themed";
-import {ReactNode, useEffect, useMemo, useState} from "react";
+import {Text, useTheme} from "@rneui/themed";
+import {useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {useCourse} from "@/hooks/useCourse.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
-import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
-import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
-import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
-import {useCoursePriority} from "@/features/courseSchedule/hooks/useCoursePriority.ts";
+import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 
 export interface TimeScheduleProps {
     /** 学期的第一天 */
@@ -24,29 +20,9 @@ export interface TimeScheduleProps {
     /** 时候高亮今日，通过第一天和周数计算后和系统时间进行比对 */
     showDayHighlight?: boolean;
 
-    scheduleItems?: ScheduleTableItem[];
+    scheduleItems?: TimeScheduleItemData[];
 
-    scheduleItemRender?: (item: ScheduleTableItem) => ReactNode;
-
-    onItemPress?: (item: ScheduleTableItem) => void;
-}
-
-// 解决冲突和课表重叠
-function groupByConflict(items: ScheduleTableItem[]): ScheduleTableItem[][] {
-    const holidays = items.filter(i => i.kind === "holiday");
-    const others = items.filter(i => i.kind !== "holiday");
-    const groups: ScheduleTableItem[][] = holidays.map(h => [h]);
-    for (const item of others) {
-        const target = groups.find(g =>
-            g.some(x => x.kind !== "holiday" && x.begin <= item.end && item.begin <= x.end),
-        );
-        if (target) {
-            target.push(item);
-        } else {
-            groups.push([item]);
-        }
-    }
-    return groups;
+    onItemPress?: (item: any) => void;
 }
 
 export function TimeSchedule(props: TimeScheduleProps) {
@@ -61,9 +37,6 @@ export function TimeSchedule(props: TimeScheduleProps) {
     const [currentTime, setCurrentTime] = useState(moment().format());
     const currentWeek = props.currentWeek ?? Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
     const currentTimeSpan = getCurrentTimeSpan();
-    const [conflictState, setConflictState] = useState<{group: ScheduleTableItem[]; key: string} | null>(null);
-    const {getPriority, setPriority} = useCoursePriority();
-
     useEffect(() => {
         // 时间段刷新定时器
         if (props.showTimeSpanHighlight) {
@@ -111,18 +84,6 @@ export function TimeSchedule(props: TimeScheduleProps) {
                   ]
                 : [index * 2 + 1, timeSpanList[index * 2]],
         );
-
-    // 新链路
-    const scheduleItemMap = useMemo(() => {
-        const map = new Map<string, ScheduleTableItem[]>();
-        (props.scheduleItems ?? []).forEach(item => {
-            const key = `${item.week}-${item.day}`;
-            const list = map.get(key) ?? [];
-            list.push(item);
-            map.set(key, list);
-        });
-        return map;
-    }, [props.scheduleItems]);
 
     return (
         <View style={courseScheduleStyle.courseSchedule}>
@@ -188,8 +149,6 @@ export function TimeSchedule(props: TimeScheduleProps) {
                     weekdayContainerStyle.push(itemStyle.activeContainer);
                     weekdayTextStyle.push(itemStyle.activeText);
                 }
-                const currentDayScheduleItems = scheduleItemMap.get(`${currentWeek}-${currentDay.isoWeekday()}`) ?? [];
-
                 return (
                     // 当日课程渲染
                     <View style={weekdayContainerStyle} key={`day-${currentWeek}-${weekday}-${index}`}>
@@ -197,88 +156,22 @@ export function TimeSchedule(props: TimeScheduleProps) {
                         <View style={courseScheduleStyle.weekdayItem}>
                             <Text style={weekdayTextStyle}>
                                 {props.showDate
-                                    ? `${weekday}${currentDayScheduleItems.some(i => i.isShift) ? "(调)" : ""}\n` +
-                                      `${currentDay.month() + 1}-${currentDay.date()}`
+                                    ? `${weekday}\n${currentDay.month() + 1}-${currentDay.date()}`
                                     : `${weekday}`}
                             </Text>
                         </View>
-                        {groupByConflict(currentDayScheduleItems).map(group => {
-                            const groupKey = group.map(i => i.id).sort().join("|");
-                            const sortedGroup = [...group].sort((a, b) => getPriority(b.id) - getPriority(a.id));
-                            const displayItem = sortedGroup[0];
-                            switch (displayItem.kind) {
-                                case "exam":
-                                    return (
-                                        <NewExamItem
-                                            key={groupKey}
-                                            item={{...displayItem, color: displayItem.color ?? "#ff4d4f"}}
-                                            onPress={item => console.log("Exam pressed", item)}
-                                        />
-                                    );
-                                case "holiday":
-                                    return <HolidayItem key={groupKey} item={displayItem} />;
-                                default:
-                                    return (
-                                        <NewCourseItem
-                                            key={groupKey}
-                                            item={displayItem}
-                                            conflictCount={group.length}
-                                            onPress={
-                                                group.length > 1
-                                                    ? () => setConflictState({group: sortedGroup, key: groupKey})
-                                                    : props.onItemPress
-                                            }
-                                        />
-                                    );
-                            }
-                        })}
+                        {(props.scheduleItems ?? []).map((td, tdIndex) =>
+                            td.data
+                                .filter(item => (td.isItemShow ? td.isItemShow(item, currentDay, currentWeek) : true))
+                                .map((item, itemIndex) => (
+                                    <View key={`${tdIndex}-${itemIndex}`}>
+                                        {td.itemRender?.(item, i => props.onItemPress?.(i))}
+                                    </View>
+                                )),
+                        )}
                     </View>
                 );
             })}
-
-            <BottomSheet isVisible={conflictState !== null} onBackdropPress={() => setConflictState(null)}>
-                <View style={{backgroundColor: theme.colors.background, padding: 16, borderTopLeftRadius: 8, borderTopRightRadius: 8}}>
-                    <Text style={{fontSize: 16, fontWeight: "bold", marginBottom: 4}}>选择显示的课程</Text>
-                    <Text style={{fontSize: 12, color: theme.colors.grey3, marginBottom: 12}}>点击置顶将永久优先显示该课程</Text>
-                    {conflictState?.group.map(conflictItem => {
-                        const maxPriority = Math.max(...conflictState.group.map(i => getPriority(i.id)));
-                        const isTop = conflictItem.id === conflictState.group[0].id;
-                        return (
-                            <Pressable
-                                key={conflictItem.id}
-                                onPress={() => {
-                                    if (isTop) {
-                                        setConflictState(null);
-                                        props.onItemPress?.(conflictItem);
-                                    } else {
-                                        setPriority(conflictItem.id, maxPriority + 1);
-                                        setConflictState(null);
-                                    }
-                                }}
-                                style={{
-                                    paddingVertical: 12,
-                                    borderBottomWidth: StyleSheet.hairlineWidth,
-                                    borderBottomColor: theme.colors.greyOutline,
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                }}>
-                                <View style={{flex: 1}}>
-                                    <Text style={{fontSize: 15, fontWeight: "500"}}>{conflictItem.title}</Text>
-                                    {!!conflictItem.teacher && (
-                                        <Text style={{fontSize: 13, color: theme.colors.grey3}}>{conflictItem.teacher}</Text>
-                                    )}
-                                    {!!conflictItem.location && (
-                                        <Text style={{fontSize: 13, color: theme.colors.grey3}}>{conflictItem.location}</Text>
-                                    )}
-                                </View>
-                                <Text style={{fontSize: 13, color: isTop ? theme.colors.primary : theme.colors.grey3}}>
-                                    {isTop ? "当前显示" : "置顶"}
-                                </Text>
-                            </Pressable>
-                        );
-                    })}
-                </View>
-            </BottomSheet>
         </View>
     );
 }
