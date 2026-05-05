@@ -66,7 +66,7 @@ export function ScheduleCard() {
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
 
     useEffect(() => {
-        initExam(year, term);
+        initExam(year, term, startDay);
     }, [year, term]);
 
     let defaultItem: ScheduleTableItem[] = JWauthState.status !== "no_account" ? [] : defaultItems;
@@ -103,11 +103,11 @@ export function ScheduleCard() {
     const handleRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
-            await Promise.all([refreshCourse(), initExam(year, term)]);
+            await Promise.all([refreshCourse(), initExam(year, term, startDay)]);
         } finally {
             setRefreshing(false);
         }
-    }, [refreshCourse, refreshExam]);
+    }, [refreshCourse, initExam, year, term, startDay]);
 
     const baseColor = theme.colors.primary;
     const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString;

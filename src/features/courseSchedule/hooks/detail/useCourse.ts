@@ -3,6 +3,7 @@ import {useBaseCourse} from "@/features/courseSchedule/hooks/detail/useBaseCours
 import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {useCallback, useEffect, useMemo} from "react";
 import {useAttendance} from "@/features/courseSchedule/hooks/detail/useAttendance.ts";
+import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export function useCourse(
@@ -16,13 +17,14 @@ export function useCourse(
     const {item: baseCourse, refresh: refreshBaseCourse, loading: baseCourseLoading} = useBaseCourse(year, term);
     const {store: phyExpStore, init: initPhyExp} = usePhyExp();
     const {store: attStore, init: initAttendance} = useAttendance();
+    const startDay = useStartDay(year, term);
     const phyExpList = phyExpStore(s => s.phyExpList) || [];
     const attendanceList = attStore(s => s.normalizedList);
     const attStatus = attStore(s => s.status);
 
     useEffect(() => {
         initPhyExp(year, term);
-        initAttendance(year, term);
+        initAttendance(year, term, startDay);
     }, [year, term]);
 
     const safeBase = baseCourse || [];
@@ -65,8 +67,8 @@ export function useCourse(
     }, [safeBase, phyExpList, attendanceList]);
 
     const refresh = useCallback(async () => {
-        await Promise.all([refreshBaseCourse(), initAttendance(year, term)]);
-    }, [refreshBaseCourse, initAttendance, year, term]);
+        await Promise.all([refreshBaseCourse(), initAttendance(year, term, startDay)]);
+    }, [refreshBaseCourse, initAttendance, year, term, startDay]);
 
     return {items, refresh, loading: baseCourseLoading};
 }

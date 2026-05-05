@@ -2,11 +2,11 @@ import {store} from "@/core/store.ts";
 import {SchoolTermValue} from "@/type/global.ts";
 import {IExam} from "@/features/courseSchedule/type/schema/exam.ts";
 import {normalizeExam} from "@/features/courseSchedule/utils/normalizeExam.ts";
-import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {examApi} from "@/js/jw/exam.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import {ExamInfoQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
+import moment from "moment";
 import {create} from "zustand/react";
 
 interface ExamStoreState {
@@ -20,9 +20,7 @@ const useExamStore = create<ExamStoreState>()(() => ({
 }));
 
 export const useExam = () => {
-    async function init(year: number, term: SchoolTermValue) {
-        const startDay = useStartDay(year, term);
-
+    async function init(year: number, term: SchoolTermValue, startDay: moment.Moment) {
         const setData = (raw: ExamInfoQueryRes, shouldCache: boolean) => {
             if (!raw) return;
 

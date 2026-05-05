@@ -5,7 +5,6 @@ import {SchoolTermValue} from "@/type/global.ts";
 import {attendanceApi} from "@/features/attendance/api";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
-import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import moment from "moment";
 import {store} from "@/core/store.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
@@ -40,9 +39,7 @@ function normalizeAttendance(
 }
 
 export const useAttendance = () => {
-    async function init(year: number, term: SchoolTermValue) {
-        const startDay = useStartDay(year, term);
-
+    async function init(year: number, term: SchoolTermValue, startDay: moment.Moment) {
         const setData = (raw: AST.AttendanceData[], shouldCache: boolean): void => {
             if (shouldCache) {
                 store.save({key: "originalAttendanceList", data: raw});
