@@ -1,15 +1,16 @@
 import {store} from "@/core/store.ts";
 import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
 import {courseApi} from "@/js/jw/course.ts";
-import {CourseScheduleClass, CourseClass} from "@/class/jw/course.ts";
 import {SchoolTermValue} from "@/type/global.ts";
 import {normalizeCourse} from "@/features/courseSchedule/utils/normalizeCourse.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+import {Course} from "@/type/infoQuery/course/course.ts";
+import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {create} from "zustand/react";
 
 interface BaseCourseStoreState {
-    rawCourseList: CourseClass[];
-    courseList: ScheduleTableItem<CourseClass>[];
+    rawCourseList: Course[];
+    courseList: ScheduleTableItem<Course>[];
     loading: boolean;
 }
 
@@ -23,7 +24,7 @@ export const useBaseCourse = () => {
     async function init(year: number, term: SchoolTermValue) {
         useBaseCourseStore.setState({loading: true});
 
-        const setData = (raw: CourseScheduleClass, shouldCache: boolean) => {
+        const setData = (raw: CourseScheduleQueryRes, shouldCache: boolean) => {
             if (!raw) return;
 
             const parsed = ICourse.safeParse(raw);
@@ -47,16 +48,16 @@ export const useBaseCourse = () => {
         };
 
         try {
-            const cachedRaw = await store.load({key: "originalCourseList"}).catch(() => null);
+            const cachedRaw = await store.load<CourseScheduleQueryRes>({key: "originalCourseList"}).catch(() => null);
             if (cachedRaw) {
                 setData(cachedRaw, false);
             }
         } catch {}
 
         try {
-            const fetchedRaw = await courseApi.getCourseSchedule(year, term);
-            if (fetchedRaw) {
-                setData(fetchedRaw, true);
+            const classInstance = await courseApi.getCourseSchedule(year, term);
+            if (classInstance) {
+                setData(classInstance._ori, true);
             }
         } catch (e) {
             console.warn("网络请求失败", e);

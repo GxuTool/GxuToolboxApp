@@ -35,7 +35,7 @@ export function usePractice(year: number, term: SchoolTermValue): {
 
         // 从内存中加载课程缓存
         try {
-            const cachedRaw = await store.load({key: "originalCourseList"}).catch(() => null);
+            const cachedRaw = await store.load<CourseScheduleClass>({key: "originalCourseList"}).catch(() => null);
             if (cachedRaw) {
                 processAndSet(cachedRaw, false);
             }

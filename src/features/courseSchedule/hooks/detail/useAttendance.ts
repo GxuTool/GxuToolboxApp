@@ -57,7 +57,7 @@ export const useAttendance = () => {
 
         // 从内存中加载缓存
         try {
-            const cachedRaw = await store.load({key: "originalAttendanceList"}).catch(() => null);
+            const cachedRaw = await store.load<AST.AttendanceData[]>({key: "originalAttendanceList"}).catch(() => null);
             if (cachedRaw) {
                 setData(cachedRaw, false);
             }

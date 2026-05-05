@@ -46,7 +46,7 @@ export const useExam = () => {
         };
 
         try {
-            const cachedRaw = await store.load({key: "originalExamList"}).catch(() => null);
+            const cachedRaw = await store.load<ExamInfoQueryRes>({key: "originalExamList"}).catch(() => null);
             if (cachedRaw) {
                 setData(cachedRaw, false);
             }
