@@ -4,7 +4,7 @@ import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {Course} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
@@ -13,9 +13,9 @@ import {AttendanceStateIcon} from "@/features/courseSchedule/components/Attendan
 
 interface Props {
     style?: ViewStyle;
-    course: Course;
+    course: CourseClass;
     attendanceState?: AST.AttendanceState;
-    onCoursePress?: (course: Course) => void;
+    onCoursePress?: (course: CourseClass) => void;
 }
 
 export function CourseItem(props: Props) {
@@ -27,14 +27,14 @@ export function CourseItem(props: Props) {
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {course} = props;
-    const span = parseInt(course.jcs.split("-")[1], 10) - parseInt(course.jcs.split("-")[0], 10) + 1;
-    const y = +course.jcs.split("-")[0] - 1;
+    const span = parseInt(course._ori.jcs.split("-")[1], 10) - parseInt(course._ori.jcs.split("-")[0], 10) + 1;
+    const y = +course._ori.jcs.split("-")[0] - 1;
     const itemStyle = useMemo(() => {
         return StyleSheet.create({
             course: {
                 height: span * timeSpanHeight - courseItemMargin * 2,
                 position: "absolute",
-                backgroundColor: Color(course.backgroundColor ?? theme.colors.primary).setAlpha(
+                backgroundColor: Color(course._ori.backgroundColor ?? theme.colors.primary).setAlpha(
                     theme.mode === "light" ? 0.3 : 0.1,
                 ).rgbaString,
                 top:
@@ -44,11 +44,11 @@ export function CourseItem(props: Props) {
             },
             text: {
                 textAlign: "center",
-                color: Color.mix(course.backgroundColor ?? theme.colors.primary, theme.colors.black, 0.5).rgbaString,
+                color: Color.mix(course._ori.backgroundColor ?? theme.colors.primary, theme.colors.black, 0.5).rgbaString,
             },
         });
     }, [
-        course.backgroundColor,
+        course._ori.backgroundColor,
         courseItemMargin,
         timeSpanHeight,
         weekdayHeight,
@@ -74,24 +74,24 @@ export function CourseItem(props: Props) {
                                 state={props.attendanceState ?? AST.AttendanceState.NotStarted}
                             />
                         )}
-                        {courseScheduleData.courseInfoVisible.name && course.jxbsftkbj === "1" && (
+                        {courseScheduleData.courseInfoVisible.name && course._ori.jxbsftkbj === "1" && (
                             <Text style={itemStyle.text}>
                                 <Icon name="clock-star-four-points" color={itemStyle.text.color} />调
                             </Text>
                         )}
-                        {course.kcmc}
+                        {course._ori.kcmc}
                     </Text>
                 )}
                 {courseScheduleData.courseInfoVisible.position && (
                     <Text style={itemStyle.text}>
                         <Icon name="map-marker" style={itemStyle.text} />
-                        {"\n" + course.cdmc.replace("-", "\n")}
+                        {"\n" + course._ori.cdmc.replace("-", "\n")}
                     </Text>
                 )}
                 {courseScheduleData.courseInfoVisible.teacher && (
                     <Text style={itemStyle.text} ellipsizeMode="tail" numberOfLines={5}>
                         <Icon name="account" style={itemStyle.text} />
-                        {"\n" + course.xm}
+                        {"\n" + course._ori.xm}
                     </Text>
                 )}
             </Flex>

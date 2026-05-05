@@ -34,11 +34,11 @@ export function AttendanceCourseItem(props: Props) {
         [AST.AttendanceState.NoNeed]: theme.colors.primary,
     };
     const {course} = props;
-    const span = course.periodArry!.reduceRight((pv, cv) => pv - cv) + 1;
-    const y = course.periodArry![0];
+    const span = course._ori.periodArry!.reduceRight((pv, cv) => pv - cv) + 1;
+    const y = course._ori.periodArry![0];
     const attendanceState = props.attendanceData?.getAttendanceStateByDate(
-        props.course.weekDay!,
-        props.course.periodArry![0],
+        props.course._ori.weekDay!,
+        props.course._ori.periodArry![0],
     );
     const color = ColorMap[attendanceState!];
     const itemStyle = useMemo(() => {
@@ -82,19 +82,19 @@ export function AttendanceCourseItem(props: Props) {
                             defaultColor={itemStyle.text.color}
                             state={attendanceState ?? AST.AttendanceState.NotStarted}
                         />
-                        {course.subjectName}
+                        {course._ori.subjectName}
                     </Text>
                 )}
                 {courseScheduleData.courseInfoVisible.position && (
                     <Text style={itemStyle.text}>
                         <Icon name="map-marker" style={itemStyle.text} />
-                        {"\n" + course.roomName!.replace("-", "\n")}
+                        {"\n" + course._ori.roomName!.replace("-", "\n")}
                     </Text>
                 )}
                 {courseScheduleData.courseInfoVisible.teacher && (
                     <Text style={itemStyle.text} ellipsizeMode="tail" numberOfLines={5}>
                         <Icon name="account" style={itemStyle.text} />
-                        {"\n" + course.teacherName}
+                        {"\n" + course._ori.teacherName}
                     </Text>
                 )}
             </Flex>

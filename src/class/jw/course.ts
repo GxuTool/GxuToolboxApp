@@ -147,7 +147,7 @@ export class CourseClass extends BaseClass<Course> implements Course {
      */
     getAttendanceTimeSpan(day: moment.Moment = moment()): [moment.Moment, moment.Moment] {
         // 获取节次数组
-        const courseSpan = this.jcs.split("-").map(num => +num - 1);
+        const courseSpan = this._ori.jcs.split("-").map(num => +num - 1);
         // 获取并切割开始时间，"08:00\n08:45" -> "08:00" -> ["08", "00"] -> [8, 0]
         const startTimeSpan = CourseScheduleData.timeSpanList[courseSpan[0]]
             .split("\n")[0]
@@ -166,7 +166,7 @@ export class CourseClass extends BaseClass<Course> implements Course {
 
     get getWeeksList(): number[] {
         const res = new Set<number>();
-        this.zcd.split(",").forEach(weekSpanStr => {
+        this._ori.zcd.split(",").forEach(weekSpanStr => {
             const weekSpan = weekSpanStr
                 .replace(/[^0-9-]/g, "")
                 .split("-")
@@ -186,7 +186,7 @@ export class CourseClass extends BaseClass<Course> implements Course {
         return Array.from(res);
     }
     get weekday() {
-        return parseInt(this.xqj, 10);
+        return parseInt(this._ori.xqj, 10);
     }
 
     atDay(day: moment.MomentInput, startDay: moment.MomentInput) {

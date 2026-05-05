@@ -5,13 +5,12 @@ import {Color} from "@/shared/color.ts";
 import {useTheme} from "@rneui/themed";
 import {CourseScheduleContext, CourseScheduleData} from "@/js/jw/course.ts";
 import moment from "moment/moment";
-import {CourseScheduleClass} from "@/class/jw/course.ts";
+import {CourseScheduleClass, CourseClass} from "@/class/jw/course.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/core/store.ts";
 import {http} from "@/core/http.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
-import {Course} from "@/type/infoQuery/course/course.ts";
 
 type Props = {
     week: number;
@@ -182,7 +181,7 @@ export function CanvasSchedule(props: Props) {
         const topCourseSpanY = spanHeight > 40 ? spanHeight + 3 : spanHeight * 2 + 4;
         courseList?.forEach((dailyCourseList, index) => {
             dailyCourseList.forEach(item => {
-                const classPeriod = item.jcs.split("-").map(span => +span);
+                const classPeriod = item._ori.jcs.split("-").map(span => +span);
                 const radius = 5;
                 const courseSpanX = spanWidth * (index + 1) + 3 * (index + 1); //矩形左上角x
                 const courseSpanY =
@@ -229,7 +228,7 @@ export function CanvasSchedule(props: Props) {
                 ctx.arcTo(courseSpanX, courseSpanY, courseSpanX + radius, courseSpanY, radius);
 
                 ctx.closePath();
-                ctx.fillStyle = Color(item.backgroundColor ?? theme.colors.primary).rgbaString;
+                ctx.fillStyle = Color(item._ori.backgroundColor ?? theme.colors.primary).rgbaString;
                 ctx.globalAlpha = theme.mode === "light" ? 0.3 : 0.1;
                 ctx.fill();
 
@@ -248,13 +247,13 @@ export function CanvasSchedule(props: Props) {
                     return list;
                 }
 
-                function handleInfo(course: Course): string[] {
-                    const locationList = crateSpan(course.cdmc);
-                    const nameList = crateSpan(course.xm);
+                function handleInfo(course: CourseClass): string[] {
+                    const locationList = crateSpan(course._ori.cdmc);
+                    const nameList = crateSpan(course._ori.xm);
                     return locationList.concat(nameList);
                 }
 
-                const spanList: string[] = crateSpan(item.kcmc);
+                const spanList: string[] = crateSpan(item._ori.kcmc);
                 const infoSpanList: string[] = handleInfo(item);
                 const courseSpanList = spanList.concat(infoSpanList);
                 const minRows = Math.floor(
@@ -265,7 +264,7 @@ export function CanvasSchedule(props: Props) {
                 ctx.globalAlpha = 1;
                 ctx.fillStyle =
                     theme.mode === "dark"
-                        ? Color(item.backgroundColor ?? theme.colors.primary).rgbaString
+                        ? Color(item._ori.backgroundColor ?? theme.colors.primary).rgbaString
                         : courseScheduleStyle.timeSpanText.color;
                 courseSpanList.forEach((span, spanIndex) => {
                     ctx.fillText(

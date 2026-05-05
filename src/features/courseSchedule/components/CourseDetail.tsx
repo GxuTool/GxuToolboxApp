@@ -30,7 +30,8 @@ function PropItem({item, ...props}: {item: Info} & Props) {
     const ripple = store(s => s.theme.ripple);
     const {theme} = useTheme();
     const label = item.label;
-    const value = props.course[item.key] ?? "";
+    const course = (props.course as any)._ori ?? props.course;
+    const value = course[item.key] ?? "";
     const style = StyleSheet.create({
         infoIcon: {
             width: 20,
@@ -143,7 +144,7 @@ export function CourseDetail(props: Props) {
                 {/*    </Flex>*/}
                 {/*</Flex>*/}
             </ListItem>
-            <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
+            <TeacherInfoSheet isVisible={visible} name={(props.course as any)._ori.xm} onClose={() => setVisible(false)} />
         </View>
     );
 }

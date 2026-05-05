@@ -167,7 +167,7 @@ function TableScreen(props: ScreenType) {
                 itemList={[
                     {
                         data: courseList,
-                        isItemShow: (item, day) => moment(item.weekDay).isSame(day, "d"),
+                        isItemShow: (item, day) => moment(item._ori.weekDay).isSame(day, "d"),
                         itemRender: item => <AttendanceCourseItem attendanceData={attendanceData} course={item} />,
                     } as TimeScheduleItemData<AttendanceCourseClass>,
                 ]}
