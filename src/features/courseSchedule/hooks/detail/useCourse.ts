@@ -1,7 +1,7 @@
 import {SchoolTermValue} from "@/type/global.ts";
 import {useBaseCourse} from "@/features/courseSchedule/hooks/detail/useBaseCourse.ts";
 import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
-import {useCallback, useMemo} from "react";
+import {useCallback, useEffect, useMemo} from "react";
 import {useAttendance} from "@/features/courseSchedule/hooks/detail/useAttendance.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
@@ -11,11 +11,19 @@ export function useCourse(
 ): {
     items: ScheduleTableItem[];
     refresh: () => Promise<void>;
-    loading:boolean;
+    loading: boolean;
 } {
-    const {item: baseCourse, refresh: refreshBaseCourse,loading:baseCourseloading} = useBaseCourse(year, term);
-    const phyExpList = usePhyExp(year, term) || [];
-    const {status, attendanceList, refresh: refreshAttendance} = useAttendance(year, term);
+    const {item: baseCourse, refresh: refreshBaseCourse, loading: baseCourseLoading} = useBaseCourse(year, term);
+    const {store: phyExpStore, init: initPhyExp} = usePhyExp();
+    const {store: attStore, init: initAttendance} = useAttendance();
+    const phyExpList = phyExpStore(s => s.phyExpList) || [];
+    const attendanceList = attStore(s => s.normalizedList);
+    const attStatus = attStore(s => s.status);
+
+    useEffect(() => {
+        initPhyExp(year, term);
+        initAttendance(year, term);
+    }, [year, term]);
 
     const safeBase = baseCourse || [];
 
@@ -27,24 +35,24 @@ export function useCourse(
             attendanceList.map(item => [`${item.week}-${item.day}-${item.begin}-${item.end}`, item]),
         );
 
-        let phyIdx=0;
+        let phyIdx = 0;
         const enriched = safeBase.map(course => {
             let enrichedCourse = {...course};
             const searchKey = `${course.week}-${course.day}-${course.begin}-${course.end}`;
             if (enrichedCourse.title && enrichedCourse.title.includes("物理实验")) {
-                    const ext=safePhyList[phyIdx];
-                    phyIdx++;
-                    if(ext) {
-                        enrichedCourse.teacher = ext.teacher;
-                        enrichedCourse.location = ext.classroom;
-                        enrichedCourse.raw = {
-                            ...enrichedCourse.raw,
-                            xm: ext.teacher,
-                            cdmc: ext.classroom,
-                        };
-                    }
+                const ext = safePhyList[phyIdx];
+                phyIdx++;
+                if (ext) {
+                    enrichedCourse.teacher = ext.teacher;
+                    enrichedCourse.location = ext.classroom;
+                    enrichedCourse.raw = {
+                        ...enrichedCourse.raw,
+                        xm: ext.teacher,
+                        cdmc: ext.classroom,
+                    };
+                }
             }
-            if (status.status === "authenticated") {
+            if (attStatus.status === "authenticated") {
                 if (attendanceDict.has(searchKey)) {
                     const ext = attendanceDict.get(searchKey);
                     enrichedCourse.status = ext.status;
@@ -57,8 +65,8 @@ export function useCourse(
     }, [safeBase, phyExpList, attendanceList]);
 
     const refresh = useCallback(async () => {
-        await Promise.all([refreshBaseCourse(), refreshAttendance()]);
-    }, [refreshBaseCourse, refreshAttendance]);
+        await Promise.all([refreshBaseCourse(), initAttendance(year, term)]);
+    }, [refreshBaseCourse, initAttendance, year, term]);
 
-    return {items, refresh,loading:baseCourseloading};
+    return {items, refresh, loading: baseCourseLoading};
 }
