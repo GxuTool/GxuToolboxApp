@@ -47,7 +47,7 @@ export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTab
         const [begin, end] = exam.time.match(/(?<=\().*?(?=\))/g)?.[0].split("-") as [string, string];
         const date = moment(exam.time.slice(0, 10));
         items.push({
-            day: date.day() as 1 | 2 | 3 | 4 | 5 | 6 | 7,
+            day: date.day() as ScheduleTableItem['day'],
             title: exam.course,
             id: exam.courseId,
             week: date.diff(startDay, "week") + 1,

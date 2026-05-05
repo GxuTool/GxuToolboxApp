@@ -14,7 +14,7 @@ export interface TimeScheduleItemData<T = any> {
     stackRender?: (items: T[], day: moment.Moment, week: number, timeRange: [number, number]) => ReactNode;
 }
 
-export interface ScheduleTableItem {
+export interface ScheduleTableItem<T = any> {
     id: string;
     week: number;
     day: 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -30,5 +30,5 @@ export interface ScheduleTableItem {
     status?: number;
     isShift?: boolean;
     qq?: string;
-    raw?: any; // 原始 API 数据，暂时用于详情展示
+    raw?: T;
 }

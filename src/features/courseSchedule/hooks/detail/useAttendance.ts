@@ -30,11 +30,9 @@ function normalizeAttendance(
     return raw.map(item => ({
         id: `${item.day}-${item.periodSplit}`,
         week: moment(item.day).diff(startDay, "week") + 1,
-        day: moment(item.day).day() as 1 | 2 | 3 | 4 | 5 | 6 | 7,
-        begin: Number(item.periodSplit.split(",")[0]) as
-            | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
-        end: Number(item.periodSplit.split(",")[1]) as
-            | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
+        day: moment(item.day).day() as ScheduleTableItem['day'],
+        begin: Number(item.periodSplit.split(",")[0]) as ScheduleTableItem['begin'],
+        end: Number(item.periodSplit.split(",")[1]) as ScheduleTableItem['end'],
         title: item.courseName,
         kind: "attendance",
         status: item.atdStateId,

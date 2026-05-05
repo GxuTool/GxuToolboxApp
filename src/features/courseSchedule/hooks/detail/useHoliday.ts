@@ -33,7 +33,7 @@ export const useHoliday = (year: number, term: SchoolTermValue): ScheduleTableIt
             days.push({
                 id: `${h.title}-${d.format("YYYY-MM-DD")}`,
                 week: weekDiff,
-                day: dayOfWeek as 1 | 2 | 3 | 4 | 5 | 6 | 7,
+                day: dayOfWeek as ScheduleTableItem['day'],
                 begin: 1,   // 占满全天
                 end: 13,
                 title: d.isSame(start) ? h.title : "",

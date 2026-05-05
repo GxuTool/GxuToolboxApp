@@ -52,7 +52,7 @@ export function applyShift(
                 ...course,
                 id: `shift-${course.id}`,
                 week: targetWeek,
-                day: targetDay as 1 | 2 | 3 | 4 | 5 | 6 | 7,
+                day: targetDay as ScheduleTableItem['day'],
                 isShift: true,
             });
         }

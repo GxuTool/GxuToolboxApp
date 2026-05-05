@@ -14,9 +14,9 @@ export function normalizeCourse(data: ICourse): ScheduleTableItem[] {
             items.push({
                 id: `${course.title}-${week}-${course.day}-${course.index}`,
                 week: week,
-                day: course.day as 1 | 2 | 3 | 4 | 5 | 6 | 7,
-                begin: course.begin as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
-                end: course.end as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13,
+                day: course.day as ScheduleTableItem['day'],
+                begin: course.begin as ScheduleTableItem['begin'],
+                end: course.end as ScheduleTableItem['begin'],
                 title: course.title,
                 location: course.location,
                 teacher: course.teacher,
