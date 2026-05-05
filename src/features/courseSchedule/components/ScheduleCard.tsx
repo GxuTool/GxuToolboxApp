@@ -1,6 +1,6 @@
 import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
 import {Pressable, StyleSheet, View} from "react-native";
-import React, {useCallback, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import moment from "moment";
@@ -60,9 +60,14 @@ export function ScheduleCard() {
     const startDay = useStartDay(year, term);
 
     const {items: courseItems = [], refresh: refreshCourse} = useCourse(year, term);
-    const {items: examItems = [], refresh: refreshExam} = useExam(year, term);
+    const {store: examStore, init: initExam} = useExam();
+    const examItems = examStore(s => s.examList) || [];
     const holidayItems = useHoliday(year, term) ?? [];
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
+
+    useEffect(() => {
+        initExam(year, term);
+    }, [year, term]);
 
     let defaultItem: ScheduleTableItem[] = JWauthState.status !== "no_account" ? [] : defaultItems;
 
@@ -98,7 +103,7 @@ export function ScheduleCard() {
     const handleRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
-            await Promise.all([refreshCourse(), refreshExam()]);
+            await Promise.all([refreshCourse(), initExam(year, term)]);
         } finally {
             setRefreshing(false);
         }
