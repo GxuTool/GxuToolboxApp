@@ -14,7 +14,7 @@ import {CourseClass} from "@/class/jw/course.ts";
 import {Color} from "@/shared/color.ts";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
-import {useBaseCourse} from "@/features/courseSchedule/hooks/detail/useBaseCourse.ts";
+import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
@@ -27,15 +27,15 @@ export function CourseScheduleQuery() {
     const [term, setTerm] = useState<SchoolTermValue>(store(s => s.jw.term));
     const pageView = usePagerView({pagesAmount: 20});
 
-    const {item: baseCourse, refresh: refreshBaseCourse, loading} = useBaseCourse(year, term);
+    const {items:courseItems=[],loading}=useCourse(year,term);
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
 
     // 不绑定全局的startDay，根据year和term动态计算，以免造成混乱
     const startDay = useStartDay(year, term);
 
-    const tableData = useMemo(
-        () => (baseCourse ?? []).filter((item, idx, arr) => arr.findIndex(i => i.title === item.title) === idx),
-        [baseCourse],
+    const tableData=useMemo(
+        ()=>courseItems.filter((item,idx,arr)=>arr.findIndex(i=>i.title===item.title)===idx),
+        [courseItems],
     );
     const style = StyleSheet.create({
         container: {
@@ -122,7 +122,7 @@ export function CourseScheduleQuery() {
                     />
                 </Flex>
                 <View style={style.coursePadding}>
-                <TimeScheduleView startDay={startDay} pageView={pageView} scheduleItems={baseCourse} />
+                    <TimeScheduleView startDay={startDay} pageView={pageView} scheduleItems={courseItems} />
                 </View>
                 {practiceItems && (
                     <>

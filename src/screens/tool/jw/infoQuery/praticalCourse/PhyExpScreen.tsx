@@ -34,6 +34,11 @@ export function PhyExpScreen() {
             width: 190,
         },
         {
+            title:"上课教师",
+            dataIndex:"zjjsxm",
+            width:120,
+        },
+        {
             title: "实验名称",
             dataIndex: "xmmc",
             width: 300,

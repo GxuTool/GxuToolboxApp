@@ -11,8 +11,9 @@ export function useCourse(
 ): {
     items: ScheduleTableItem[];
     refresh: () => Promise<void>;
+    loading:boolean;
 } {
-    const {item: baseCourse, refresh: refreshBaseCourse} = useBaseCourse(year, term);
+    const {item: baseCourse, refresh: refreshBaseCourse,loading:baseCourseloading} = useBaseCourse(year, term);
     const phyExpList = usePhyExp(year, term) || [];
     const {status, attendanceList, refresh: refreshAttendance} = useAttendance(year, term);
 
@@ -22,21 +23,26 @@ export function useCourse(
         if (safeBase.length === 0) return [];
 
         const safePhyList = Array.isArray(phyExpList) ? phyExpList : [];
-        const phyDict = new Map(safePhyList.map(item => [`${item.week}-${item.day}-${item.begin}-${item.end}`, item]));
         const attendanceDict = new Map(
             attendanceList.map(item => [`${item.week}-${item.day}-${item.begin}-${item.end}`, item]),
         );
 
+        let phyIdx=0;
         const enriched = safeBase.map(course => {
             let enrichedCourse = {...course};
             const searchKey = `${course.week}-${course.day}-${course.begin}-${course.end}`;
             if (enrichedCourse.title && enrichedCourse.title.includes("物理实验")) {
-                if (phyDict.has(searchKey)) {
-                    const ext = phyDict.get(searchKey);
-                    enrichedCourse.subtitle = ext.course;
-                    enrichedCourse.teacher = ext.teacher;
-                    enrichedCourse.location = ext.classroom;
-                }
+                    const ext=safePhyList[phyIdx];
+                    phyIdx++;
+                    if(ext) {
+                        enrichedCourse.teacher = ext.teacher;
+                        enrichedCourse.location = ext.classroom;
+                        enrichedCourse.raw = {
+                            ...enrichedCourse.raw,
+                            xm: ext.teacher,
+                            cdmc: ext.classroom,
+                        };
+                    }
             }
             if (status.status === "authenticated") {
                 if (attendanceDict.has(searchKey)) {
@@ -54,5 +60,5 @@ export function useCourse(
         await Promise.all([refreshBaseCourse(), refreshAttendance()]);
     }, [refreshBaseCourse, refreshAttendance]);
 
-    return {items, refresh};
+    return {items, refresh,loading:baseCourseloading};
 }
