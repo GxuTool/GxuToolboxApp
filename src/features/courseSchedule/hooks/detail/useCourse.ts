@@ -14,10 +14,11 @@ export function useCourse(
     refresh: () => Promise<void>;
     loading: boolean;
 } {
-    const {item: baseCourse, refresh: refreshBaseCourse, loading: baseCourseLoading} = useBaseCourse(year, term);
+    const startDay = useStartDay(year, term);
+    const {store: baseCourseStore, init: refreshBaseCourse} = useBaseCourse();
+    const baseCourse = baseCourseStore(s => s.courseList);
     const {store: phyExpStore, init: initPhyExp} = usePhyExp();
     const {store: attStore, init: initAttendance} = useAttendance();
-    const startDay = useStartDay(year, term);
     const phyExpList = phyExpStore(s => s.phyExpList) || [];
     const attendanceList = attStore(s => s.normalizedList);
     const attStatus = attStore(s => s.status);
@@ -25,6 +26,7 @@ export function useCourse(
     useEffect(() => {
         initPhyExp(year, term);
         initAttendance(year, term, startDay);
+        refreshBaseCourse(year, term);
     }, [year, term]);
 
     const safeBase = baseCourse || [];
@@ -67,8 +69,8 @@ export function useCourse(
     }, [safeBase, phyExpList, attendanceList]);
 
     const refresh = useCallback(async () => {
-        await Promise.all([refreshBaseCourse(), initAttendance(year, term, startDay)]);
+        await Promise.all([refreshBaseCourse(year, term), initAttendance(year, term, startDay)]);
     }, [refreshBaseCourse, initAttendance, year, term, startDay]);
 
-    return {items, refresh, loading: baseCourseLoading};
+    return {items, refresh, loading: baseCourseStore(s => s.loading)};
 }

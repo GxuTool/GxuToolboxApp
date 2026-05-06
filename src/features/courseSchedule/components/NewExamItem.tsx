@@ -9,10 +9,11 @@ import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {useShallow} from "zustand/react/shallow";
+import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 
 interface NewExamItemProps {
-    item: ScheduleTableItem;
-    onPress?: (item: ScheduleTableItem) => void;
+    item: ScheduleTableItem<ExamInfo>;
+    onPress?: (item: ScheduleTableItem<ExamInfo>) => void;
 }
 export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
     const {store: ucStore} = useUserConfig();

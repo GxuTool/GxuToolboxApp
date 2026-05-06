@@ -1,6 +1,7 @@
 import {IExam} from "@/features/courseSchedule/type/schema/exam.ts";
-import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import moment from "moment";
+import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 const timeSpanList = [
     "08:00\n08:45",
@@ -18,10 +19,10 @@ const timeSpanList = [
     "21:20\n22:05",
 ];
 
-export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTableItem[] {
-    const items: ScheduleTableItem[] = [];
+export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTableItem<ExamInfo>[] {
+    const items: ScheduleTableItem<ExamInfo>[] = [];
 
-    function timeToTimeSpan(time: string, endTime: boolean = false): number {
+    function timeToTimeSpan(time: string, endTime: boolean = false) {
         let res = -1;
         if (endTime) {
             for (let i = timeSpanList.length - 1; i >= 0; i--) {
@@ -40,14 +41,14 @@ export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTab
                 }
             }
         }
-        return res + 1;
+        return (res + 1) as ScheduleTableItem["begin"];
     }
 
     data.forEach(exam => {
         const [begin, end] = exam.time.match(/(?<=\().*?(?=\))/g)?.[0].split("-") as [string, string];
         const date = moment(exam.time.slice(0, 10));
         items.push({
-            day: date.day() as ScheduleTableItem['day'],
+            day: date.isoWeekday() as ScheduleTableItem["day"],
             title: exam.course,
             id: exam.courseId,
             week: date.diff(startDay, "week") + 1,
@@ -55,7 +56,7 @@ export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTab
             end: timeToTimeSpan(end, true),
             location: exam.classroom,
             seat: exam.seat || "未知",
-            kind: "exam"
+            kind: "exam",
         });
     });
 

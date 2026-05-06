@@ -80,16 +80,26 @@ export function ScheduleCard() {
     const scheduleItems: TimeScheduleItemData[] = useMemo(
         () =>
             [
-                {data: courseItems, itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />},
-                {data: examItems, itemRender: (item, _day, _week, onPress) => <NewExamItem item={item} onPress={onPress} />},
-                {data: holidayItems, itemRender: (item) => <HolidayItem item={item} />},
-                {data: defaultItem, itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />},
+                {
+                    data: courseItems,
+                    itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />,
+                },
+                {
+                    data: examItems,
+                    itemRender: (item, _day, _week, onPress) => <NewExamItem item={item} onPress={onPress} />,
+                },
+                {data: holidayItems, itemRender: item => <HolidayItem item={item} />},
+                {
+                    data: defaultItem,
+                    itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />,
+                },
             ]
                 .filter(td => td.data.length > 0)
                 .map(td => ({
                     ...td,
-                    isItemShow: (item: any, day: moment.Moment, week: number) =>
-                        item.week === week && item.day === day.isoWeekday(),
+                    isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) => {
+                        return item.week === week && item.day === day.isoWeekday();
+                    },
                 })),
         [courseItems, examItems, holidayItems, defaultItem],
     );
