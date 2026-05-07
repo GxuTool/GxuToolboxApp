@@ -7,7 +7,7 @@ export interface TimeScheduleItemData<T = any> {
     /** 元素渲染 */
     itemRender?: (item: T, day: moment.Moment, week: number) => ReactNode;
     /** 判断元素是否在当天渲染 */
-    isItemShow: (item: T, day: moment.Moment, week: number) => boolean;
+    isItemShow?: (item: T, day: moment.Moment, week: number) => boolean;
     /** 判断两项是否应合并到同一个冲突栈 */
     isItemStack?: (a: T, b: T, ori: T[], day: moment.Moment, week: number) => boolean;
     /** 冲突栈渲染：同一时段重叠的多项数据合并渲染 */

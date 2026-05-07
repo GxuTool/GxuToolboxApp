@@ -34,6 +34,7 @@ import {Course} from "@/type/infoQuery/course/course.ts";
 import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseItem.tsx";
 import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
 import {ConflictCourseList} from "@/features/courseSchedule/components/ConflictCourseList.tsx";
+import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 
 // 菜单的类型
 type SheetState =
@@ -90,10 +91,7 @@ export function ScheduleCard() {
 
     const [sheet, setSheet] = useState<SheetState>({type: "closed"});
 
-    const onItemPress = useCallback(
-        (item: ScheduleTableItem, _day: moment.Moment, _week: number) => setSheet({type: "itemDetail", item}),
-        [],
-    );
+    const onItemPress = useCallback((item: ScheduleTableItem) => setSheet({type: "itemDetail", item}), []);
 
     const scheduleItems: TimeScheduleItemData[] = useMemo(
         () =>
@@ -108,19 +106,13 @@ export function ScheduleCard() {
                         const kchs = courses.map(c => c.kch).sort();
                         const storedActive = useConflictCourseStore.getState().getActive(kchs);
                         const activeCourse = storedActive ?? courses[0]?.kch;
-                        return (
-                            <StackCourseItem
-                                course={courses}
-                                activeCourse={activeCourse}
-                                timeRange={timeRange}
-                            />
-                        );
+                        return <StackCourseItem course={courses} activeCourse={activeCourse} timeRange={timeRange} />;
                     },
-                },
+                } as TimeScheduleItemData<ScheduleTableItem<Course>>,
                 {
                     data: examItems,
                     itemRender: (item, _day, _week) => <NewExamItem item={item} onPress={onItemPress} />,
-                },
+                } as TimeScheduleItemData<ScheduleTableItem<ExamInfo>>,
                 {
                     data: holidayItems,
                     needShift: false,
@@ -307,39 +299,41 @@ export function ScheduleCard() {
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
                     )}
-                    {conflictSheet && (() => {
-                        const kchs = conflictSheet.courses.map(x => x.kch).sort();
-                        const storedActive = conflictStore.getState().getActive(kchs);
-                        const activeKch = storedActive ?? conflictSheet.courses[0]?.kch;
-                        return (
-                            <ConflictCourseList
-                                courses={conflictSheet.courses}
-                                activeKch={activeKch}
-                                onSelect={course => {
-                                    conflictStore.getState().setActive(kchs, course.kch);
-                                    conflictStore.getState().closeSheet();
-                                    setSheet({type: "closed"});
-                                }}
-                                onPressActive={course => {
-                                    conflictStore.getState().closeSheet();
-                                    setSheet({
-                                        type: "itemDetail",
-                                        item: {
-                                            id: course.kch,
-                                            week: 0,
-                                            day: 1 as ScheduleTableItem["day"],
-                                            begin: 1 as ScheduleTableItem["begin"],
-                                            end: 1 as ScheduleTableItem["begin"],
-                                            title: course.kcmc,
-                                            location: course.cdmc,
-                                            teacher: course.xm,
-                                            raw: course,
-                                        },
-                                    });
-                                }}
-                            />
-                        );
-                    })()}
+                    {conflictSheet &&
+                        (() => {
+                            const kchs = conflictSheet.courses.map(x => x.kch).sort();
+                            const conflictStoreState = conflictStore.getState();
+                            const storedActive = conflictStoreState.getActive(kchs);
+                            const activeKch = storedActive ?? conflictSheet.courses[0]?.kch;
+                            return (
+                                <ConflictCourseList
+                                    courses={conflictSheet.courses}
+                                    activeKch={activeKch}
+                                    onSelect={course => {
+                                        conflictStoreState.setActive(kchs, course.kch);
+                                        conflictStoreState.closeSheet();
+                                        setSheet({type: "closed"});
+                                    }}
+                                    onPressActive={course => {
+                                        conflictStoreState.closeSheet();
+                                        setSheet({
+                                            type: "itemDetail",
+                                            item: {
+                                                id: course.kch,
+                                                week: 0,
+                                                day: 1 as ScheduleTableItem["day"],
+                                                begin: 1 as ScheduleTableItem["begin"],
+                                                end: 1 as ScheduleTableItem["begin"],
+                                                title: course.kcmc,
+                                                location: course.cdmc,
+                                                teacher: course.xm,
+                                                raw: course,
+                                            },
+                                        });
+                                    }}
+                                />
+                            );
+                        })()}
                 </View>
             </BottomSheet>
         </View>

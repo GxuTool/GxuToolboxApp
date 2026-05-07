@@ -5,11 +5,11 @@ import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts
 
 interface HolidayRange {
     title: string;
-    from: string;  // YYYY-MM-DD
+    from: string; // YYYY-MM-DD
     to: string;
 }
 
-export const useHoliday = (year: number, term: SchoolTermValue): ScheduleTableItem[] => {
+export const useHoliday = (year: number, term: SchoolTermValue) => {
     const startDay = useStartDay(year, term);
 
     const holidays: HolidayRange[] = [
@@ -21,10 +21,10 @@ export const useHoliday = (year: number, term: SchoolTermValue): ScheduleTableIt
 
     if (!startDay) return [];
 
-    return holidays.flatMap((h): ScheduleTableItem[] => {
+    return holidays.flatMap(h => {
         const start = moment(h.from);
         const end = moment(h.to);
-        const days: ScheduleTableItem[] = [];
+        const days: ScheduleTableItem<HolidayRange>[] = [];
 
         for (let d = start.clone(); d.isSameOrBefore(end); d.add(1, "day")) {
             const weekDiff = d.diff(moment(startDay), "weeks") + 1;
@@ -33,8 +33,8 @@ export const useHoliday = (year: number, term: SchoolTermValue): ScheduleTableIt
             days.push({
                 id: `${h.title}-${d.format("YYYY-MM-DD")}`,
                 week: weekDiff,
-                day: dayOfWeek as ScheduleTableItem['day'],
-                begin: 1,   // 占满全天
+                day: dayOfWeek as ScheduleTableItem["day"],
+                begin: 1, // 占满全天
                 end: 13,
                 title: d.isSame(start) ? h.title : "",
                 subtitle: d.isSame(start) ? "放假" : "",

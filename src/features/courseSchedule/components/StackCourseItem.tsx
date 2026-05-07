@@ -61,10 +61,15 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange}: StackCou
                     color: textColor,
                     fontSize: 12,
                 },
+                badge: {
+                    backgroundColor: Color.mix(theme.colors.primary, theme.colors.background, 0.35).setAlpha(0.95)
+                        .rgbaString,
+                    height: 14,
+                },
                 badgeContainer: {
                     position: "absolute",
-                    top: 3,
-                    right: 3,
+                    top: -6,
+                    right: -8,
                     zIndex: 1,
                 },
             }),
@@ -72,19 +77,21 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange}: StackCou
     );
 
     return (
-        <Pressable
-            style={styles.container}
-            onPress={handlePress}
-            android_ripple={ucStore(s => s.theme.ripple)}>
+        <Pressable style={styles.container} onPress={handlePress} android_ripple={ucStore(s => s.theme.ripple)}>
             {course.length > 1 && (
-                <Badge value={course.length} status="primary" containerStyle={styles.badgeContainer} />
+                <Badge
+                    value={course.length}
+                    status="primary"
+                    textStyle={{fontSize: 10}}
+                    containerStyle={styles.badgeContainer}
+                    badgeStyle={styles.badge}
+                />
             )}
             <Flex
                 direction="column"
                 gap={2}
                 style={{
                     padding: 4,
-                    paddingTop: course.length > 1 ? 18 : 4,
                     height: "100%",
                     overflow: "hidden",
                 }}
