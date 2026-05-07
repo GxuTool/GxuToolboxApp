@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React from "react";
 import {Pressable, StyleProp, View, ViewStyle} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
@@ -7,7 +7,6 @@ import {SchoolTermValue, SchoolYearValue} from "@/type/global.ts";
 import {usePagerView} from "react-native-pager-view";
 import {UnDateTimePicker} from "@/components/un-ui/UnDateTimePicker.tsx";
 import moment from "moment/moment";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
@@ -31,20 +30,17 @@ export function CourseCardSetting(props: Props) {
     const {store: ucStore} = useUserConfig();
     const {store} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
-    const {courseScheduleData, updateCourseScheduleData} = useContext(CourseScheduleContext)!;
+    const courseInfoVisible = store(s => s.courseInfoVisible);
 
-    const infoVisibleOptions: Record<keyof typeof courseScheduleData.courseInfoVisible, string> = {
+    const infoVisibleOptions: Record<string, string> = {
         name: "课程名称",
         position: "上课地点",
         teacher: "教师名称",
     };
-    const changeCourseInfoVisible = (key: keyof typeof courseScheduleData.courseInfoVisible, v: boolean) => {
-        const newCourseInfoVisible = {...courseScheduleData.courseInfoVisible};
+    const changeCourseInfoVisible = (key: string, v: boolean) => {
+        const newCourseInfoVisible = {...courseInfoVisible};
         newCourseInfoVisible[key] = v;
-        updateCourseScheduleData({
-            ...courseScheduleData,
-            courseInfoVisible: newCourseInfoVisible,
-        });
+        store.getState().update("courseInfoVisible", newCourseInfoVisible);
     };
 
     const onYearChange = (v: number) => {
@@ -67,7 +63,7 @@ export function CourseCardSetting(props: Props) {
             <Text style={{fontSize: 13, color: theme.colors.grey3, marginBottom: 4}}>显示内容</Text>
             <View style={{flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 16}}>
                 {(Object.keys(infoVisibleOptions) as (keyof typeof infoVisibleOptions)[]).map(key => {
-                    const active = courseScheduleData.courseInfoVisible[key];
+                    const active = courseInfoVisible[key];
                     return (
                         <Pressable
                             key={key}
@@ -138,7 +134,7 @@ export function CourseCardSetting(props: Props) {
                             value={moment(ucStore(s => s.jw.startDay)).valueOf()}
                             onChange={v => {
                                 const startDay = moment(v).format("YYYY-MM-DD");
-                                updateCourseScheduleData({...courseScheduleData, startDay});
+                                store.getState().update("startDay", startDay);
                                 const s = ucStore.getState();
                                 ucStore.getState().update("jw", { ...s.jw, startDay });
                             }}

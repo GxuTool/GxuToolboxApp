@@ -1,10 +1,9 @@
-import React, {useContext, useMemo} from "react";
+import React, {useMemo} from "react";
 import {Pressable, StyleSheet} from "react-native";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import moment from "moment/moment";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
@@ -17,27 +16,28 @@ interface Props {
 
 export function CourseScheduleExamItem(props: Props) {
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store, courseScheduleStyle} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
-    const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
+    const timeSpanList = store(s => s.timeSpanList);
+    const randomColor = store(s => s.randomColor);
     const {theme} = useTheme();
     const {examInfo} = props;
 
     function timeToTimeSpan(time: string, endTime: boolean = false): number {
         let res = -1;
         if (endTime) {
-            for (let i = courseScheduleData.timeSpanList.length - 1; i >= 0; i--) {
-                const timeSpanStartTime = courseScheduleData.timeSpanList[i].split("\n")[0];
+            for (let i = timeSpanList.length - 1; i >= 0; i--) {
+                const timeSpanStartTime = timeSpanList[i].split("\n")[0];
                 if (moment(timeSpanStartTime, "hh:mm").isBefore(moment(time, "hh:mm"))) {
                     res = i;
                     break;
                 }
             }
         } else {
-            for (let i = 0; i < courseScheduleData.timeSpanList.length; i++) {
-                const timeSpanEndTime = courseScheduleData.timeSpanList[i].split("\n")[1];
+            for (let i = 0; i < timeSpanList.length; i++) {
+                const timeSpanEndTime = timeSpanList[i].split("\n")[1];
                 if (moment(timeSpanEndTime, "hh:mm").isAfter(moment(time, "hh:mm"))) {
                     res = i;
                     break;
@@ -50,7 +50,7 @@ export function CourseScheduleExamItem(props: Props) {
     const examTime = examInfo.kssj.match(/(?<=\().*?(?=\))/g)?.[0].split("-") as [string, string];
     const y = timeToTimeSpan(examTime[0]);
     const span = timeToTimeSpan(examTime[1], true) - y + 1;
-    const color = courseScheduleData.randomColor[Math.floor(Math.random() * courseScheduleData.randomColor.length)];
+    const color = randomColor[Math.floor(Math.random() * randomColor.length)];
     const itemStyle = useMemo(() => {
         return StyleSheet.create({
             course: {

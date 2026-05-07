@@ -1,11 +1,10 @@
-import React, {useContext, useMemo} from "react";
+import React, {useMemo} from "react";
 import {Pressable, StyleSheet, ViewStyle} from "react-native";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {CourseClass} from "@/class/jw/course.ts";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourse} from "@/hooks/useCourse.ts";
@@ -20,11 +19,11 @@ interface Props {
 
 export function CourseItem(props: Props) {
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store, courseScheduleStyle} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
-    const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
+    const courseInfoVisible = store(s => s.courseInfoVisible);
     const {theme} = useTheme();
     const {course} = props;
     const span = parseInt(course._ori.jcs.split("-")[1], 10) - parseInt(course._ori.jcs.split("-")[0], 10) + 1;
@@ -66,7 +65,7 @@ export function CourseItem(props: Props) {
             android_ripple={ucStore(s => s.theme.ripple)}
             style={[props.style, itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
-                {courseScheduleData.courseInfoVisible.name && (
+                {courseInfoVisible.name && (
                     <Text style={[itemStyle.text, {fontWeight: 700}]}>
                         {props.attendanceState && (
                             <AttendanceStateIcon
@@ -74,7 +73,7 @@ export function CourseItem(props: Props) {
                                 state={props.attendanceState ?? AST.AttendanceState.NotStarted}
                             />
                         )}
-                        {courseScheduleData.courseInfoVisible.name && course._ori.jxbsftkbj === "1" && (
+                        {courseInfoVisible.name && course._ori.jxbsftkbj === "1" && (
                             <Text style={itemStyle.text}>
                                 <Icon name="clock-star-four-points" color={itemStyle.text.color} />调
                             </Text>
@@ -82,13 +81,13 @@ export function CourseItem(props: Props) {
                         {course._ori.kcmc}
                     </Text>
                 )}
-                {courseScheduleData.courseInfoVisible.position && (
+                {courseInfoVisible.position && (
                     <Text style={itemStyle.text}>
                         <Icon name="map-marker" style={itemStyle.text} />
                         {"\n" + course._ori.cdmc.replace("-", "\n")}
                     </Text>
                 )}
-                {courseScheduleData.courseInfoVisible.teacher && (
+                {courseInfoVisible.teacher && (
                     <Text style={itemStyle.text} ellipsizeMode="tail" numberOfLines={5}>
                         <Icon name="account" style={itemStyle.text} />
                         {"\n" + course._ori.xm}

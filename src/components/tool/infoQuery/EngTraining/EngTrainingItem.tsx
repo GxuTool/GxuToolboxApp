@@ -1,9 +1,8 @@
-import React, {useContext, useMemo} from "react";
+import React, {useMemo} from "react";
 import {StyleSheet, ViewStyle} from "react-native";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useCourse} from "@/hooks/useCourse.ts";
 
@@ -21,11 +20,11 @@ interface Props {
 }
 
 export function EngTrainingItem(props: Props) {
-    const {store} = useCourse();
+    const {store, courseScheduleStyle} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
-    const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
+    const courseInfoVisible = store(s => s.courseInfoVisible);
     const {theme} = useTheme();
     const {item} = props;
     const {span, y} = item;
@@ -63,7 +62,7 @@ export function EngTrainingItem(props: Props) {
         <Flex direction="column" gap={5} style={[itemStyle.item, courseScheduleStyle.courseItem]}>
             <Icon name="tools" style={itemStyle.text} />
             <Text style={[itemStyle.text, {fontWeight: 700}]}>金工实训</Text>
-            {courseScheduleData.courseInfoVisible.name && (
+            {courseInfoVisible.name && (
                 <Text style={[itemStyle.text, {fontWeight: 700}]}>{item.name}</Text>
             )}
         </Flex>

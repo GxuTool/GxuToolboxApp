@@ -1,10 +1,9 @@
-import React, {useContext, useMemo} from "react";
+import React, {useMemo} from "react";
 import {Pressable, StyleSheet, ViewStyle} from "react-native";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {AttendanceCourseClass, AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
@@ -20,11 +19,11 @@ interface Props {
 
 export function AttendanceCourseItem(props: Props) {
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store, courseScheduleStyle} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
-    const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
+    const courseInfoVisible = store(s => s.courseInfoVisible);
     const {theme} = useTheme();
     const ColorMap = {
         [AST.AttendanceState.Normal]: theme.colors.success,
@@ -76,7 +75,7 @@ export function AttendanceCourseItem(props: Props) {
             android_ripple={ucStore(s => s.theme.ripple)}
             style={[props.style, itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
-                {courseScheduleData.courseInfoVisible.name && (
+                {courseInfoVisible.name && (
                     <Text style={[itemStyle.text, {fontWeight: 700}]}>
                         <AttendanceStateIcon
                             defaultColor={itemStyle.text.color}
@@ -85,13 +84,13 @@ export function AttendanceCourseItem(props: Props) {
                         {course._ori.subjectName}
                     </Text>
                 )}
-                {courseScheduleData.courseInfoVisible.position && (
+                {courseInfoVisible.position && (
                     <Text style={itemStyle.text}>
                         <Icon name="map-marker" style={itemStyle.text} />
                         {"\n" + course._ori.roomName!.replace("-", "\n")}
                     </Text>
                 )}
-                {courseScheduleData.courseInfoVisible.teacher && (
+                {courseInfoVisible.teacher && (
                     <Text style={itemStyle.text} ellipsizeMode="tail" numberOfLines={5}>
                         <Icon name="account" style={itemStyle.text} />
                         {"\n" + course._ori.teacherName}

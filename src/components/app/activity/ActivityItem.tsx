@@ -1,7 +1,6 @@
 import {Pressable, PressableProps, StyleSheet, ViewStyle} from "react-native";
 import {IActivity} from "@/type/app/activity.ts";
-import React, {useContext, useMemo} from "react";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
+import React, {useMemo} from "react";
 import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
@@ -16,11 +15,10 @@ interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ri
 
 export function ActivityItem(props: ActivityItemProps) {
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store, courseScheduleStyle} = useCourse();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
-    const {courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {item} = props;
     const span = item.timeSpan.reduceRight((pv, cv) => pv - cv) + 1;

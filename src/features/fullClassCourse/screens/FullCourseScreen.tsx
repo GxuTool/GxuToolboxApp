@@ -1,5 +1,5 @@
 import {ActivityIndicator, SectionList, StyleSheet, View} from "react-native";
-import {useContext, useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {Schools, SchoolTermValue} from "@/type/global.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useClassScheduleData} from "@/features/classCourseSchedule/hooks/useClassScheduleData.ts";
@@ -7,7 +7,7 @@ import {Button, Divider, Text} from "@rneui/themed";
 import {IClassList} from "@/features/classCourseSchedule/type/schema/classList.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import moment from "moment";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 
 type ClassItem = IClassList[number];
 type SchoolType = (typeof Schools)[number];
@@ -154,11 +154,12 @@ export const FullCourseScreen = () => {
     const week = moment().diff(startDay, "week") + 1;
     const day = moment().isoWeekday();
 
-    const {courseScheduleData} = useContext(CourseScheduleContext)!;
+    const {store} = useCourse();
+    const timeSpanList = store(s => s.timeSpanList);
 
     function getCurrentTimeSpan() {
         let res = -1;
-        courseScheduleData.timeSpanList.forEach((timeSpan, index, list) => {
+        timeSpanList.forEach((timeSpan, index, list) => {
             const start = index > 0 ? list[index - 1].split("\n")[1] : "00:00";
             const end = timeSpan.split("\n")[1];
             const startTime = moment(start, "hh:mm");
