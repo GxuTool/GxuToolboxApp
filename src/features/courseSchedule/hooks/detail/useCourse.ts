@@ -5,12 +5,13 @@ import {useCallback, useEffect, useMemo} from "react";
 import {useAttendance} from "@/features/courseSchedule/hooks/detail/useAttendance.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+import {Course} from "@/type/infoQuery/course/course.ts";
 
 export function useCourse(
     year: number,
     term: SchoolTermValue,
 ): {
-    items: ScheduleTableItem[];
+    items: ScheduleTableItem<Course>[];
     refresh: () => Promise<void>;
     loading: boolean;
 } {

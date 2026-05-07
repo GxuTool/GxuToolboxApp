@@ -30,6 +30,7 @@ import {useAttendanceAuth} from "@/core/auth/attendance/hooks/useAttendanceAuth.
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
+import {Course} from "@/type/infoQuery/course/course.ts";
 
 // 菜单的类型
 type SheetState =
@@ -97,7 +98,12 @@ export function ScheduleCard() {
                     onItemPress: onItemPress,
                     itemRender: (item, _day, _week) => <NewExamItem item={item} onPress={onItemPress} />,
                 },
-                {data: holidayItems, needShift: false, onItemPress: onItemPress, itemRender: item => <HolidayItem item={item} />},
+                {
+                    data: holidayItems,
+                    needShift: false,
+                    onItemPress: onItemPress,
+                    itemRender: item => <HolidayItem item={item} />,
+                },
                 {
                     data: defaultItem,
                     onItemPress: onItemPress,
@@ -269,7 +275,9 @@ export function ScheduleCard() {
                             onTermChange={setTerm}
                         />
                     )}
-                    {sheet.type === "itemDetail" && sheet.item?.raw && <CourseDetail course={sheet.item.raw} />}
+                    {sheet.type === "itemDetail" && sheet.item?.raw && (
+                        <CourseDetail course={sheet.item.raw as Course} />
+                    )}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
                     )}

@@ -12,7 +12,6 @@ import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/Teach
 
 interface Props extends ViewProps {
     course: Course;
-    onClick: () => void;
 }
 
 interface Info {
