@@ -8,9 +8,9 @@ import moment from "moment/moment";
 import {CourseScheduleClass, CourseClass} from "@/class/jw/course.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/core/store.ts";
-import {http} from "@/core/http.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourseData} from "@/hooks/useCourseData.ts";
+import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 
 type Props = {
     week: number;
@@ -23,8 +23,10 @@ export function CanvasSchedule(props: Props) {
     const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const timeSpanList = store(s => s.timeSpanList);
+    const {store: shiftStore, init: initShift} = useShift();
+    const timeShift = shiftStore(s => s.shiftRules);
+
     const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
-    const [timeShift, setTimeShift] = useState<[string, string][]>([]);
 
     const {width: screenWidth} = Dimensions.get("window");
     const startDay = moment(ucStore(s => s.jw.startDay));
@@ -66,17 +68,9 @@ export function CanvasSchedule(props: Props) {
         }
     }
 
-    /**
-     * 调课信息
-     */
-    async function getTimeShift() {
-        const {data} = await http.get("https://file.unde.site/GxuToolApp/data.json");
-        if (data) setTimeShift(data.timeShift);
-    }
-
     useEffect(() => {
         getCoursesData();
-        getTimeShift();
+        initShift();
     }, [timeSpanHeight]);
 
     /**
