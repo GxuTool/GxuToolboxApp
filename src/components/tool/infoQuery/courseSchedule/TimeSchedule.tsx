@@ -207,8 +207,8 @@ export function TimeSchedule<T = any>(props: TimeScheduleProps<T>) {
                                 ];
                                 return (
                                     <View key={`${tdIndex}-${gi}`}>
-                                        {group.length > 1 && td.stackRender
-                                            ? td.stackRender(group, day, currentWeek, timeRange)
+                                        {group.length > 1
+                                            ? (td.stackRender?.(group, day, currentWeek, timeRange) ?? null)
                                             : group.map((item, ii) => (
                                                   <View key={ii}>
                                                       {td.itemRender?.(item, day, currentWeek)}

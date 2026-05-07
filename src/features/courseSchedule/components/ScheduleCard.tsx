@@ -31,6 +31,8 @@ import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.
 import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
 import {Course} from "@/type/infoQuery/course/course.ts";
+import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseItem.tsx";
+import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
 
 // 菜单的类型
 type SheetState =
@@ -38,7 +40,8 @@ type SheetState =
     | {type: "menu"}
     | {type: "setting"}
     | {type: "share"}
-    | {type: "itemDetail"; item: ScheduleTableItem};
+    | {type: "itemDetail"; item: ScheduleTableItem}
+    | {type: "courseConflict"; courses: Course[]};
 
 /**
  * 课表
@@ -50,6 +53,9 @@ export function ScheduleCard() {
     const {theme} = useTheme();
     const pagerView = usePagerView({pagesAmount: 20});
     const {...rest} = pagerView;
+
+    const conflictStore = useConflictCourseStore;
+    const conflictSheet = useConflictCourseStore(s => s.sheetData);
 
     const {authState: JWauthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
@@ -94,6 +100,21 @@ export function ScheduleCard() {
                 {
                     data: courseItems,
                     itemRender: (item, _day, _week) => <NewCourseItem item={item} onPress={onItemPress} />,
+                    isItemStack: (a, b) => a.begin <= b.end && b.begin <= a.end,
+                    stackRender: (items, _day, _week, timeRange) => {
+                        const courses = items.map(i => i.raw as Course).filter(Boolean);
+                        if (courses.length === 0) return null;
+                        const kchs = courses.map(c => c.kch).sort();
+                        const storedActive = useConflictCourseStore.getState().getActive(kchs);
+                        const activeCourse = storedActive ?? courses[0]?.kch;
+                        return (
+                            <StackCourseItem
+                                course={courses}
+                                activeCourse={activeCourse}
+                                timeRange={timeRange}
+                            />
+                        );
+                    },
                 },
                 {
                     data: examItems,
@@ -231,7 +252,12 @@ export function ScheduleCard() {
             />
             <Divider />
             <PracticalCourseList courseList={practiceItems} />
-            <BottomSheet isVisible={sheet.type !== "closed"} onBackdropPress={() => setSheet({type: "closed"})}>
+            <BottomSheet
+                isVisible={sheet.type !== "closed" || conflictSheet !== null}
+                onBackdropPress={() => {
+                    setSheet({type: "closed"});
+                    conflictStore.getState().closeSheet();
+                }}>
                 <View style={style.bottomSheetContainer}>
                     {sheet.type === "menu" && (
                         <>
@@ -279,6 +305,44 @@ export function ScheduleCard() {
                     )}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
+                    )}
+                    {conflictSheet && (
+                        <>
+                            <Text h4 style={{marginBottom: 12}}>冲突课程</Text>
+                            {conflictSheet.courses.map(c => {
+                                const kchs = conflictSheet.courses.map(x => x.kch).sort();
+                                const storedActive = conflictStore.getState().getActive(kchs);
+                                const activeKch = storedActive ?? conflictSheet.courses[0]?.kch;
+                                const isActive = c.kch === activeKch;
+                                return (
+                                    <Pressable
+                                        key={c.kch}
+                                        onPress={() => {
+                                            conflictStore.getState().setActive(kchs, c.kch);
+                                            conflictStore.getState().closeSheet();
+                                            setSheet({type: "closed"});
+                                        }}
+                                        style={{
+                                            paddingVertical: 12,
+                                            paddingHorizontal: 8,
+                                            borderLeftWidth: isActive ? 3 : 0,
+                                            borderLeftColor: theme.colors.primary,
+                                            backgroundColor: isActive
+                                                ? Color(theme.colors.primary).setAlpha(0.08).rgbaString
+                                                : "transparent",
+                                            marginBottom: 4,
+                                            borderRadius: 4,
+                                        }}>
+                                        <Text style={{fontWeight: isActive ? "bold" : "normal"}}>
+                                            {c.kcmc}
+                                        </Text>
+                                        <Text style={{fontSize: 12, color: theme.colors.grey3}}>
+                                            {[c.xm, c.cdmc].filter(Boolean).join(" · ")}
+                                        </Text>
+                                    </Pressable>
+                                );
+                            })}
+                        </>
                     )}
                 </View>
             </BottomSheet>
