@@ -40,7 +40,7 @@ export interface TimeScheduleProps {
     /** 时候高亮今日，通过第一天和周数计算后和系统时间进行比对 */
     showDayHighlight?: boolean;
 
-    scheduleItems?: TimeScheduleItemData[];
+    scheduleItems: TimeScheduleItemData[];
 
     onItemPress?: (item: any) => void;
 }
@@ -197,10 +197,8 @@ export function TimeSchedule(props: TimeScheduleProps) {
                                 })()}
                             </Text>
                         </View>
-                        {(props.scheduleItems ?? []).map((td, tdIndex) => {
-                            const visibleItems = td.data.filter(item =>
-                                td.isItemShow(item, effectiveDay, currentWeek),
-                            );
+                        {props.scheduleItems.map((td, tdIndex) => {
+                            const visibleItems = td.data.filter(item => td.isItemShow(item, effectiveDay, currentWeek));
                             // 按时段重叠分组
                             const groups = groupByTimeOverlap(visibleItems, td.isItemStack, effectiveDay, currentWeek);
                             return groups.map((group, gi) => {
@@ -214,7 +212,9 @@ export function TimeSchedule(props: TimeScheduleProps) {
                                             ? td.stackRender(group, effectiveDay, currentWeek, timeRange)
                                             : group.map((item, ii) => (
                                                   <View key={ii}>
-                                                      {td.itemRender?.(item, effectiveDay, currentWeek, i => props.onItemPress?.(i))}
+                                                      {td.itemRender?.(item, effectiveDay, currentWeek, i =>
+                                                          props.onItemPress?.(i),
+                                                      )}
                                                   </View>
                                               ))}
                                     </View>

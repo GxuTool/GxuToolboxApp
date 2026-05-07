@@ -130,10 +130,9 @@ export function buildColorMap(
     const palette = ColorPalettes[paletteName];
 
     // ① 只处理 course 类型，聚合出唯一课程 key
-    const courseKeys = [
-        ...new Set(items.filter(item => !item.kind || item.kind === "course").map(item => item.title || item.id)),
-    ];
-
+    const courseKeys = Array.from(
+        new Set(items.filter(item => item?.kind && item.kind === "course").map(item => item.title || item.id)),
+    );
     // ② 构建邻接图：同一天，时段重叠或相差 ≤ 1 即相邻（week 不参与判断）
     const adj = new Map<string, Set<string>>();
     courseKeys.forEach(k => adj.set(k, new Set()));

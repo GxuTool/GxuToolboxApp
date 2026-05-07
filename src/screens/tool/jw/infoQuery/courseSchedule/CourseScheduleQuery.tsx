@@ -18,31 +18,34 @@ import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
+import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
+import moment from "moment/moment";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
     const {store} = useUserConfig();
 
+    const androidRipple = store(s => s.theme.ripple);
     const [year, setYear] = useState(+store(s => s.jw.year));
     const [term, setTerm] = useState<SchoolTermValue>(store(s => s.jw.term));
     const pageView = usePagerView({pagesAmount: 20});
 
-    const {items:courseItems=[],loading}=useCourse(year,term);
+    const {items: courseItems = [], loading} = useCourse(year, term);
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
 
     // 不绑定全局的startDay，根据year和term动态计算，以免造成混乱
     const startDay = useStartDay(year, term);
 
-    const tableData=useMemo(
-        ()=>courseItems.filter((item,idx,arr)=>arr.findIndex(i=>i.title===item.title)===idx),
+    const tableData = useMemo(
+        () => courseItems.filter((item, idx, arr) => arr.findIndex(i => i.title === item.title) === idx),
         [courseItems],
     );
     const style = StyleSheet.create({
         container: {
             padding: "3%",
         },
-        coursePadding:{
-            marginHorizontal:-12,
+        coursePadding: {
+            marginHorizontal: -12,
         },
         tableText: {
             color: theme.colors.black,
@@ -82,7 +85,7 @@ export function CourseScheduleQuery() {
             dataIndex: "qq",
             render: qq =>
                 qq?.trim() ? (
-                    <Pressable android_ripple={store(s => s.theme.ripple)} onPress={() => qqLink(qq)}>
+                    <Pressable android_ripple={androidRipple} onPress={() => qqLink(qq)}>
                         <Text style={style.tableText}>{qq}</Text>
                     </Pressable>
                 ) : (
@@ -107,7 +110,7 @@ export function CourseScheduleQuery() {
                         includeWholeYear={false}
                     />
                 </View>
-                {loading&&<ActivityIndicator size="large" />}
+                {loading && <ActivityIndicator size="large" />}
                 <Divider />
                 <Text h4>预览</Text>
                 <Flex style={{padding: 10}} align="flex-start" direction="column" gap={10}>
@@ -122,7 +125,21 @@ export function CourseScheduleQuery() {
                     />
                 </Flex>
                 <View style={style.coursePadding}>
-                    <TimeScheduleView startDay={startDay} pageView={pageView} scheduleItems={courseItems} />
+                    <TimeScheduleView
+                        startDay={startDay}
+                        pageView={pageView}
+                        scheduleItems={[
+                            {
+                                data: courseItems,
+                                isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) => {
+                                    return item.week === week && item.day === day.isoWeekday();
+                                },
+                                itemRender: (item, _day, _week, onPress) => (
+                                    <NewCourseItem item={item} onPress={onPress} />
+                                ),
+                            },
+                        ]}
+                    />
                 </View>
                 {practiceItems && (
                     <>

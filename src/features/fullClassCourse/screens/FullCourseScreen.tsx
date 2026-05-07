@@ -154,8 +154,8 @@ export const FullCourseScreen = () => {
     const week = moment().diff(startDay, "week") + 1;
     const day = moment().isoWeekday();
 
-    const {store} = useCourse();
-    const timeSpanList = store(s => s.timeSpanList);
+    const {store: courseStore} = useCourse();
+    const timeSpanList = courseStore(s => s.timeSpanList);
 
     function getCurrentTimeSpan() {
         let res = -1;

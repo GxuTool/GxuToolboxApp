@@ -19,10 +19,7 @@ export function TimeScheduleView(props: TimeScheduleViewProps) {
 
     const paletteName = (store(s => s.theme.palette) as PaletteName) || "macaron";
     const customColors = store(s => s.theme.customColors) || {};
-    const flatItems = useMemo(
-        () => (props.scheduleItems ?? []).flatMap(td => td.data),
-        [props.scheduleItems],
-    );
+    const flatItems = useMemo(() => props.scheduleItems.flatMap(td => td.data), [props.scheduleItems]);
     const colorMap = useMemo(
         () => buildColorMap(flatItems, paletteName, customColors),
         [flatItems, paletteName, customColors],
@@ -35,10 +32,7 @@ export function TimeScheduleView(props: TimeScheduleViewProps) {
             StyleSheet.create({
                 pagerView: {
                     width: "100%",
-                    height:
-                        timeSpanHeight * (timeSpanHeight <= 40 ? 14 : 13) +
-                        weekdayHeight +
-                        50,
+                    height: timeSpanHeight * (timeSpanHeight <= 40 ? 14 : 13) + weekdayHeight + 50,
                 },
             }),
         [timeSpanHeight, weekdayHeight],
