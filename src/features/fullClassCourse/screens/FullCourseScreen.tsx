@@ -7,7 +7,7 @@ import {Button, Divider, Text} from "@rneui/themed";
 import {IClassList} from "@/features/classCourseSchedule/type/schema/classList.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import moment from "moment";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 
 type ClassItem = IClassList[number];
 type SchoolType = (typeof Schools)[number];
@@ -154,8 +154,8 @@ export const FullCourseScreen = () => {
     const week = moment().diff(startDay, "week") + 1;
     const day = moment().isoWeekday();
 
-    const {store: courseStore} = useCourse();
-    const timeSpanList = courseStore(s => s.timeSpanList);
+    const {store} = useCourseData();
+    const timeSpanList = store(s => s.timeSpanList);
 
     function getCurrentTimeSpan() {
         let res = -1;

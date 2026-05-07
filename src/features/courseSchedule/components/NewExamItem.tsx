@@ -1,6 +1,6 @@
 import {Pressable, StyleSheet} from "react-native";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
@@ -17,7 +17,7 @@ interface NewExamItemProps {
 }
 export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();

@@ -4,7 +4,7 @@ import {Color} from "@/shared/color.ts";
 import {Text, useTheme} from "@rneui/themed";
 import {useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
@@ -47,7 +47,7 @@ export interface TimeScheduleProps {
 
 export function TimeSchedule(props: TimeScheduleProps) {
     const {store: ucStore} = useUserConfig();
-    const {store, courseScheduleStyle} = useCourse();
+    const {store, courseScheduleStyle} = useCourseData();
     const weekdayList = store(s => s.weekdayList);
     const timeSpanList = store(s => s.timeSpanList);
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);

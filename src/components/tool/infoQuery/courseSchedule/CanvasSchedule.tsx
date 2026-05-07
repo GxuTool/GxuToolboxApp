@@ -10,7 +10,7 @@ import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/core/store.ts";
 import {http} from "@/core/http.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 
 type Props = {
     week: number;
@@ -20,7 +20,7 @@ type Props = {
 export function CanvasSchedule(props: Props) {
     const {theme} = useTheme();
     const {store: ucStore} = useUserConfig();
-    const {store, courseScheduleStyle} = useCourse();
+    const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const timeSpanList = store(s => s.timeSpanList);
     const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();

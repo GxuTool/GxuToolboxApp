@@ -112,7 +112,7 @@ const useCourseStore = create<CourseStoreState & CourseStoreAction>()((set, get)
     },
 }));
 
-export const useCourse = () => {
+export const useCourseData = () => {
     const {theme: rneuiTheme} = useTheme();
     const shiftInit = useShift().init;
     const courseTheme = useCourseStore(s => s.theme);

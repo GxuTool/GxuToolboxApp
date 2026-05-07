@@ -5,7 +5,7 @@ import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 
 interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ripple"> {
     style?: ViewStyle;
@@ -15,7 +15,7 @@ interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ri
 
 export function ActivityItem(props: ActivityItemProps) {
     const {store: ucStore} = useUserConfig();
-    const {store, courseScheduleStyle} = useCourse();
+    const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);

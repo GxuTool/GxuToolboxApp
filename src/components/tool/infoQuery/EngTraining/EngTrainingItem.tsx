@@ -4,7 +4,7 @@ import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 
 type EngTrainingExp = {
     date: string;
@@ -20,7 +20,7 @@ interface Props {
 }
 
 export function EngTrainingItem(props: Props) {
-    const {store, courseScheduleStyle} = useCourse();
+    const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);

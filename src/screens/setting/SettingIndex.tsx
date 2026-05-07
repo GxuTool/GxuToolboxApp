@@ -8,11 +8,11 @@ import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx";
 import {ToastAndroid} from "react-native";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 
 export function SettingIndex() {
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store} = useCourseData();
 
     function selectBg() {
         launchImageLibrary({

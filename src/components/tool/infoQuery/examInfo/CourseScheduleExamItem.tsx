@@ -7,7 +7,7 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import moment from "moment/moment";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 
 interface Props {
     examInfo: ExamInfo;
@@ -16,7 +16,7 @@ interface Props {
 
 export function CourseScheduleExamItem(props: Props) {
     const {store: ucStore} = useUserConfig();
-    const {store, courseScheduleStyle} = useCourse();
+    const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);

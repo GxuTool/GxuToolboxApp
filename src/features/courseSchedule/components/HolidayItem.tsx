@@ -1,6 +1,6 @@
 import {Pressable, StyleSheet, View} from "react-native";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
 import {Text, useTheme} from "@rneui/themed";
@@ -15,7 +15,7 @@ interface HolidayItemProps {
 
 export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();

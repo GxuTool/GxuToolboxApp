@@ -3,7 +3,7 @@ import {StyleSheet, View} from "react-native";
 import {TimeSchedule, TimeScheduleProps} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {usePagerView} from "react-native-pager-view";
 import moment from "moment/moment";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 import {buildColorMap, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {ColorMapContext} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 
@@ -12,7 +12,7 @@ export interface TimeScheduleViewProps extends TimeScheduleProps {
 }
 
 export function TimeScheduleView(props: TimeScheduleViewProps) {
-    const {store} = useCourse();
+    const {store} = useCourseData();
     const {AnimatedPagerView, ref, ...rest} = props.pageView;
     const startDay = props.startDay ?? moment();
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());

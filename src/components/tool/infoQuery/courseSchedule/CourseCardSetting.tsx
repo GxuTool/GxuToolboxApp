@@ -9,7 +9,7 @@ import {UnDateTimePicker} from "@/components/un-ui/UnDateTimePicker.tsx";
 import moment from "moment/moment";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourse.ts";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {ColorPalettes, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {Color} from "@/shared/color.ts";
@@ -28,7 +28,7 @@ export function CourseCardSetting(props: Props) {
     const {theme} = useTheme();
 
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const courseInfoVisible = store(s => s.courseInfoVisible);
 
