@@ -1,24 +1,26 @@
-import {create} from "zustand";
-import {Course} from "@/type/infoQuery/course/course.ts";
+import {create} from "zustand/react";
+import {store as storage} from "@/core/store.ts";
+
+const STORAGE_KEY = "conflictCourseStore";
 
 interface ConflictGroup {
-    courses: string[]; // 排序后的 Course['kch'][]
-    active: string; // 当前激活的 Course['kch']
+    courses: string[];
+    active: string;
 }
 
 interface ConflictCourseState {
     conflictGroups: ConflictGroup[];
-    sheetData: {courses: Course[]} | null;
 
     setActive: (courses: string[], active: string) => void;
     getActive: (courses: string[]) => string | undefined;
-    openSheet: (courses: Course[]) => void;
-    closeSheet: () => void;
 }
 
-export const useConflictCourseStore = create<ConflictCourseState>((set, get) => ({
+const conflictCourseStore = create<
+    ConflictCourseState & {
+        init: () => Promise<void>;
+    }
+>()((set, get) => ({
     conflictGroups: [],
-    sheetData: null,
 
     setActive: (courses, active) => {
         const sorted = [...courses].sort();
@@ -28,11 +30,38 @@ export const useConflictCourseStore = create<ConflictCourseState>((set, get) => 
                 {courses: sorted, active},
             ],
         }));
+        storage.save({key: STORAGE_KEY, data: get().conflictGroups});
     },
+
     getActive: courses => {
         const sorted = [...courses].sort();
         return get().conflictGroups.find(g => g.courses.join(",") === sorted.join(","))?.active;
     },
-    openSheet: courses => set({sheetData: {courses}}),
-    closeSheet: () => set({sheetData: null}),
+
+    init: async () => {
+        try {
+            const cached = await storage.load({key: STORAGE_KEY});
+            if (cached) {
+                set({conflictGroups: cached as ConflictGroup[]});
+            }
+        } catch {
+            // 首次启动无缓存
+        }
+    },
 }));
+
+export const useConflictCourseStore = () => {
+    return {
+        store: conflictCourseStore,
+        init: conflictCourseStore.getState().init,
+        load: async (): Promise<ConflictGroup[] | null> => {
+            try {
+                return await storage.load({key: STORAGE_KEY});
+            } catch {
+                return null;
+            }
+        },
+        save: (data: ConflictGroup[]) => storage.save({key: STORAGE_KEY, data}),
+        remove: () => storage.remove({key: STORAGE_KEY}),
+    };
+};

@@ -56,8 +56,7 @@ export function ScheduleCard() {
     const pagerView = usePagerView({pagesAmount: 20});
     const {...rest} = pagerView;
 
-    const conflictStore = useConflictCourseStore;
-    const conflictSheet = useConflictCourseStore(s => s.sheetData);
+    const {store: conflictStore} = useConflictCourseStore();
 
     const {authState: JWauthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
@@ -104,9 +103,16 @@ export function ScheduleCard() {
                         const courses = items.map(i => i.raw as Course).filter(Boolean);
                         if (courses.length === 0) return null;
                         const kchs = courses.map(c => c.kch).sort();
-                        const storedActive = useConflictCourseStore.getState().getActive(kchs);
+                        const storedActive = conflictStore.getState().getActive(kchs);
                         const activeCourse = storedActive ?? courses[0]?.kch;
-                        return <StackCourseItem course={courses} activeCourse={activeCourse} timeRange={timeRange} />;
+                        return (
+                            <StackCourseItem
+                                course={courses}
+                                activeCourse={activeCourse}
+                                timeRange={timeRange}
+                                onPress={c => setSheet({type: "courseConflict", courses: c})}
+                            />
+                        );
                     },
                 } as TimeScheduleItemData<ScheduleTableItem<Course>>,
                 {
@@ -246,11 +252,8 @@ export function ScheduleCard() {
             <Divider />
             <PracticalCourseList courseList={practiceItems} />
             <BottomSheet
-                isVisible={sheet.type !== "closed" || conflictSheet !== null}
-                onBackdropPress={() => {
-                    setSheet({type: "closed"});
-                    conflictStore.getState().closeSheet();
-                }}>
+                isVisible={sheet.type !== "closed"}
+                onBackdropPress={() => setSheet({type: "closed"})}>
                 <View style={style.bottomSheetContainer}>
                     {sheet.type === "menu" && (
                         <>
@@ -299,23 +302,20 @@ export function ScheduleCard() {
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
                     )}
-                    {conflictSheet &&
+                    {sheet.type === "courseConflict" &&
                         (() => {
-                            const kchs = conflictSheet.courses.map(x => x.kch).sort();
-                            const conflictStoreState = conflictStore.getState();
-                            const storedActive = conflictStoreState.getActive(kchs);
-                            const activeKch = storedActive ?? conflictSheet.courses[0]?.kch;
+                            const kchs = sheet.courses.map(x => x.kch).sort();
+                            const storedActive = conflictStore.getState().getActive(kchs);
+                            const activeKch = storedActive ?? sheet.courses[0]?.kch;
                             return (
                                 <ConflictCourseList
-                                    courses={conflictSheet.courses}
+                                    courses={sheet.courses}
                                     activeKch={activeKch}
                                     onSelect={course => {
-                                        conflictStoreState.setActive(kchs, course.kch);
-                                        conflictStoreState.closeSheet();
+                                        conflictStore.getState().setActive(kchs, course.kch);
                                         setSheet({type: "closed"});
                                     }}
                                     onPressActive={course => {
-                                        conflictStoreState.closeSheet();
                                         setSheet({
                                             type: "itemDetail",
                                             item: {

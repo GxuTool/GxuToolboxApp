@@ -15,26 +15,26 @@ interface StackCourseItemProps {
     course: Course[];
     activeCourse: Course["kch"];
     timeRange: [number, number];
+    onPress?: (courses: Course[]) => void;
 }
 
-export const StackCourseItem = memo(({course, activeCourse, timeRange}: StackCourseItemProps) => {
+export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}: StackCourseItemProps) => {
     const {store: ucStore} = useUserConfig();
     const {store} = useCourseData();
+    const {store: conflictStore} = useConflictCourseStore();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
 
     const courseKchs = useMemo(() => course.map(c => c.kch).sort(), [course]);
-    const storedActive = useConflictCourseStore(s => s.getActive(courseKchs));
+    const storedActive = conflictStore(s => s.getActive(courseKchs));
     const effectiveActive = storedActive ?? activeCourse;
 
     const active = course.find(c => c.kch === effectiveActive) ?? course[0];
 
     const handlePress = () => {
-        if (course.length > 1) {
-            useConflictCourseStore.getState().openSheet(course);
-        }
+        onPress?.(course);
     };
 
     const span = timeRange[1] - timeRange[0] + 1;
