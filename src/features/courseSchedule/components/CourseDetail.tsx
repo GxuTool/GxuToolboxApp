@@ -47,9 +47,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
     const info = {
         label: <Text style={style.infoLabel}>{label}</Text>,
         value: (
-            <Pressable
-                android_ripple={ripple}
-                onPress={() => copy(value + "", `复制${item.label}成功`)}>
+            <Pressable android_ripple={ripple} onPress={() => copy(value + "", `复制${item.label}成功`)}>
                 <Text style={style.infoData}>{value}</Text>
             </Pressable>
         ),
@@ -144,7 +142,7 @@ export function CourseDetail(props: Props) {
                 {/*    </Flex>*/}
                 {/*</Flex>*/}
             </ListItem>
-            <TeacherInfoSheet isVisible={visible} name={(props.course as any)._ori.xm} onClose={() => setVisible(false)} />
+            <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
         </View>
     );
 }

@@ -88,7 +88,7 @@ export function ScheduleCard() {
                     data: examItems,
                     itemRender: (item, _day, _week, onPress) => <NewExamItem item={item} onPress={onPress} />,
                 },
-                {data: holidayItems, itemRender: item => <HolidayItem item={item} />},
+                {data: holidayItems, needShift: false, itemRender: item => <HolidayItem item={item} />},
                 {
                     data: defaultItem,
                     itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />,
