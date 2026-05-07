@@ -14,8 +14,6 @@ export interface TimeScheduleItemData<T = any> {
     stackRender?: (items: T[], day: moment.Moment, week: number, timeRange: [number, number]) => ReactNode;
     /** 是否需要应用调课，默认 true */
     needShift?: boolean;
-    /** 元素点击回调 */
-    onItemPress?: (item: T, day: moment.Moment, week: number) => void;
 }
 
 export interface ScheduleTableItem<T = any> {

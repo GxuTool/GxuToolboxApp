@@ -70,7 +70,10 @@ export function ScheduleCard() {
         initExam(year, term, startDay);
     }, [year, term]);
 
-    let defaultItem: ScheduleTableItem[] = JWauthState.status !== "no_account" ? [] : defaultItems;
+    const defaultItem: ScheduleTableItem[] = useMemo(
+        () => (JWauthState.status !== "no_account" ? [] : defaultItems),
+        [JWauthState.status],
+    );
 
     const rawItems: ScheduleTableItem[] = useMemo(
         () => [...courseItems, ...examItems, ...holidayItems, ...defaultItem],
@@ -90,23 +93,19 @@ export function ScheduleCard() {
             [
                 {
                     data: courseItems,
-                    onItemPress: onItemPress,
                     itemRender: (item, _day, _week) => <NewCourseItem item={item} onPress={onItemPress} />,
                 },
                 {
                     data: examItems,
-                    onItemPress: onItemPress,
                     itemRender: (item, _day, _week) => <NewExamItem item={item} onPress={onItemPress} />,
                 },
                 {
                     data: holidayItems,
                     needShift: false,
-                    onItemPress: onItemPress,
-                    itemRender: item => <HolidayItem item={item} />,
+                    itemRender: item => <HolidayItem item={item} onPress={onItemPress} />,
                 },
                 {
                     data: defaultItem,
-                    onItemPress: onItemPress,
                     itemRender: (item, _day, _week) => <NewCourseItem item={item} onPress={onItemPress} />,
                 },
             ]
