@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, {memo, useMemo} from "react";
 import {StyleSheet, View} from "react-native";
 import {TimeSchedule, TimeScheduleProps} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {usePagerView} from "react-native-pager-view";
@@ -11,7 +11,7 @@ export interface TimeScheduleViewProps extends TimeScheduleProps {
     pageView: ReturnType<typeof usePagerView>;
 }
 
-export function TimeScheduleView(props: TimeScheduleViewProps) {
+export const TimeScheduleView = memo(function TimeScheduleView(props: TimeScheduleViewProps) {
     const {store} = useCourseData();
     const {AnimatedPagerView, ref, ...rest} = props.pageView;
     const startDay = props.startDay ?? moment();
@@ -66,4 +66,4 @@ export function TimeScheduleView(props: TimeScheduleViewProps) {
             </View>
         </ColorMapContext.Provider>
     );
-}
+});
