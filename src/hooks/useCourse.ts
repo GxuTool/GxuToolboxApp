@@ -7,6 +7,7 @@ import {generateCourseScheduleStyle} from "@/js/jw/course.ts";
 import {PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {deepMerge} from "@/utils/objectUtils.ts";
 import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
+import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 
 const STORAGE_KEY = "courseScheduleStore";
 
@@ -16,6 +17,7 @@ export interface CourseStoreState {
     randomColor: string[];
     weekdayList: string[];
     timeSpanList: `${string}\n${string}`[];
+    activeSchedule?: CourseScheduleQueryRes;
     theme: {
         timeSpanHeight: number;
         weekdayHeight: number;
