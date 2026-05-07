@@ -33,6 +33,7 @@ import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx"
 import {Course} from "@/type/infoQuery/course/course.ts";
 import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseItem.tsx";
 import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
+import {ConflictCourseList} from "@/features/courseSchedule/components/ConflictCourseList.tsx";
 
 // 菜单的类型
 type SheetState =
@@ -306,44 +307,39 @@ export function ScheduleCard() {
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
                     )}
-                    {conflictSheet && (
-                        <>
-                            <Text h4 style={{marginBottom: 12}}>冲突课程</Text>
-                            {conflictSheet.courses.map(c => {
-                                const kchs = conflictSheet.courses.map(x => x.kch).sort();
-                                const storedActive = conflictStore.getState().getActive(kchs);
-                                const activeKch = storedActive ?? conflictSheet.courses[0]?.kch;
-                                const isActive = c.kch === activeKch;
-                                return (
-                                    <Pressable
-                                        key={c.kch}
-                                        onPress={() => {
-                                            conflictStore.getState().setActive(kchs, c.kch);
-                                            conflictStore.getState().closeSheet();
-                                            setSheet({type: "closed"});
-                                        }}
-                                        style={{
-                                            paddingVertical: 12,
-                                            paddingHorizontal: 8,
-                                            borderLeftWidth: isActive ? 3 : 0,
-                                            borderLeftColor: theme.colors.primary,
-                                            backgroundColor: isActive
-                                                ? Color(theme.colors.primary).setAlpha(0.08).rgbaString
-                                                : "transparent",
-                                            marginBottom: 4,
-                                            borderRadius: 4,
-                                        }}>
-                                        <Text style={{fontWeight: isActive ? "bold" : "normal"}}>
-                                            {c.kcmc}
-                                        </Text>
-                                        <Text style={{fontSize: 12, color: theme.colors.grey3}}>
-                                            {[c.xm, c.cdmc].filter(Boolean).join(" · ")}
-                                        </Text>
-                                    </Pressable>
-                                );
-                            })}
-                        </>
-                    )}
+                    {conflictSheet && (() => {
+                        const kchs = conflictSheet.courses.map(x => x.kch).sort();
+                        const storedActive = conflictStore.getState().getActive(kchs);
+                        const activeKch = storedActive ?? conflictSheet.courses[0]?.kch;
+                        return (
+                            <ConflictCourseList
+                                courses={conflictSheet.courses}
+                                activeKch={activeKch}
+                                onSelect={course => {
+                                    conflictStore.getState().setActive(kchs, course.kch);
+                                    conflictStore.getState().closeSheet();
+                                    setSheet({type: "closed"});
+                                }}
+                                onPressActive={course => {
+                                    conflictStore.getState().closeSheet();
+                                    setSheet({
+                                        type: "itemDetail",
+                                        item: {
+                                            id: course.kch,
+                                            week: 0,
+                                            day: 1 as ScheduleTableItem["day"],
+                                            begin: 1 as ScheduleTableItem["begin"],
+                                            end: 1 as ScheduleTableItem["begin"],
+                                            title: course.kcmc,
+                                            location: course.cdmc,
+                                            teacher: course.xm,
+                                            raw: course,
+                                        },
+                                    });
+                                }}
+                            />
+                        );
+                    })()}
                 </View>
             </BottomSheet>
         </View>
