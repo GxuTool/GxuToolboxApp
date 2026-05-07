@@ -77,21 +77,31 @@ export function ScheduleCard() {
     );
     const nextCourse = useNextCourse(rawItems, startDay);
 
+    const [sheet, setSheet] = useState<SheetState>({type: "closed"});
+
+    const onItemPress = useCallback(
+        (item: ScheduleTableItem, _day: moment.Moment, _week: number) => setSheet({type: "itemDetail", item}),
+        [],
+    );
+
     const scheduleItems: TimeScheduleItemData[] = useMemo(
         () =>
             [
                 {
                     data: courseItems,
-                    itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />,
+                    onItemPress: onItemPress,
+                    itemRender: (item, _day, _week) => <NewCourseItem item={item} onPress={onItemPress} />,
                 },
                 {
                     data: examItems,
-                    itemRender: (item, _day, _week, onPress) => <NewExamItem item={item} onPress={onPress} />,
+                    onItemPress: onItemPress,
+                    itemRender: (item, _day, _week) => <NewExamItem item={item} onPress={onItemPress} />,
                 },
-                {data: holidayItems, needShift: false, itemRender: item => <HolidayItem item={item} />},
+                {data: holidayItems, needShift: false, onItemPress: onItemPress, itemRender: item => <HolidayItem item={item} />},
                 {
                     data: defaultItem,
-                    itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />,
+                    onItemPress: onItemPress,
+                    itemRender: (item, _day, _week) => <NewCourseItem item={item} onPress={onItemPress} />,
                 },
             ]
                 .filter(td => td.data.length > 0)
@@ -101,12 +111,10 @@ export function ScheduleCard() {
                         return item.week === week && item.day === day.isoWeekday();
                     },
                 })),
-        [courseItems, examItems, holidayItems, defaultItem],
+        [courseItems, examItems, holidayItems, defaultItem, onItemPress],
     );
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
-
-    const [sheet, setSheet] = useState<SheetState>({type: "closed"});
 
     const [refreshing, setRefreshing] = useState(false);
 
@@ -157,11 +165,6 @@ export function ScheduleCard() {
                 },
             }),
         [theme],
-    );
-
-    const onItemPress = useCallback(
-        (item: ScheduleTableItem) => setSheet({type: "itemDetail", item}),
-        [], // setSheet 是稳定引用
     );
 
     return (
@@ -220,7 +223,6 @@ export function ScheduleCard() {
                 startDay={startDay}
                 pageView={pagerView}
                 scheduleItems={scheduleItems}
-                onItemPress={onItemPress}
             />
             <Divider />
             <PracticalCourseList courseList={practiceItems} />

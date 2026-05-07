@@ -134,8 +134,8 @@ export function CourseScheduleQuery() {
                                 isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) => {
                                     return item.week === week && item.day === day.isoWeekday();
                                 },
-                                itemRender: (item, _day, _week, onPress) => (
-                                    <NewCourseItem item={item} onPress={onPress} />
+                                itemRender: (item, _day, _week) => (
+                                    <NewCourseItem item={item} />
                                 ),
                             },
                         ]}

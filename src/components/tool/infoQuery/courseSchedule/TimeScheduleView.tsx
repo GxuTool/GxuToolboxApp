@@ -60,7 +60,7 @@ export const TimeScheduleView = memo(function TimeScheduleView(props: TimeSchedu
                                     <TimeSchedule {...props} currentWeek={index + 1} />
                                 </View>
                             )),
-                        [rest.pages.length, props.scheduleItems, props.startDay, props.onItemPress],
+                        [rest.pages.length, props.scheduleItems, props.startDay],
                     )}
                 </AnimatedPagerView>
             </View>

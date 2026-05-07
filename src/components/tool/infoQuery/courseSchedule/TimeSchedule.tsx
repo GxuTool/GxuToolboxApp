@@ -28,7 +28,7 @@ function groupByTimeOverlap<T>(
     return groups;
 }
 
-export interface TimeScheduleProps {
+export interface TimeScheduleProps<T = any> {
     /** 学期的第一天 */
     startDay?: moment.MomentInput;
     /** 课表当前周，1-20 */
@@ -40,12 +40,10 @@ export interface TimeScheduleProps {
     /** 时候高亮今日，通过第一天和周数计算后和系统时间进行比对 */
     showDayHighlight?: boolean;
 
-    scheduleItems: TimeScheduleItemData[];
-
-    onItemPress?: (item: any) => void;
+    scheduleItems: TimeScheduleItemData<T>[];
 }
 
-export function TimeSchedule(props: TimeScheduleProps) {
+export function TimeSchedule<T = any>(props: TimeScheduleProps<T>) {
     const {store: ucStore} = useUserConfig();
     const {store, courseScheduleStyle} = useCourseData();
     const weekdayList = store(s => s.weekdayList);
@@ -213,9 +211,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
                                             ? td.stackRender(group, day, currentWeek, timeRange)
                                             : group.map((item, ii) => (
                                                   <View key={ii}>
-                                                      {td.itemRender?.(item, day, currentWeek, i =>
-                                                          props.onItemPress?.(i),
-                                                      )}
+                                                      {td.itemRender?.(item, day, currentWeek)}
                                                   </View>
                                               ))}
                                     </View>
