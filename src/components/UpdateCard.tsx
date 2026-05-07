@@ -53,7 +53,7 @@ export function UpdateCard() {
     });
 
     async function init() {
-        const {data} = await axios.get<VersionRes>("https://file.unde.site/GxuToolApp/version.json");
+        const {data} = await axios.get<VersionRes>(`https://file.unde.site/GxuToolApp/version.json?_=${Date.now()}`);
         const newVersion = data[channel].find(version => version.versionCode > PackageJSON.versionCode);
         if (newVersion) {
             setVisible(true);

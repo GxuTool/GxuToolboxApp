@@ -12,6 +12,8 @@ export interface TimeScheduleItemData<T = any> {
     isItemStack?: (a: T, b: T, ori: T[], day: moment.Moment, week: number) => boolean;
     /** 冲突栈渲染：同一时段重叠的多项数据合并渲染 */
     stackRender?: (items: T[], day: moment.Moment, week: number, timeRange: [number, number]) => ReactNode;
+    /** 是否需要应用调课，默认 true */
+    needShift?: boolean;
 }
 
 export interface ScheduleTableItem<T = any> {

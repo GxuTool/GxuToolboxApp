@@ -198,9 +198,10 @@ export function TimeSchedule(props: TimeScheduleProps) {
                             </Text>
                         </View>
                         {props.scheduleItems.map((td, tdIndex) => {
-                            const visibleItems = td.data.filter(item => td.isItemShow(item, effectiveDay, currentWeek));
+                            const day = td.needShift === false ? currentDay : effectiveDay;
+                            const visibleItems = td.data.filter(item => td.isItemShow(item, day, currentWeek));
                             // 按时段重叠分组
-                            const groups = groupByTimeOverlap(visibleItems, td.isItemStack, effectiveDay, currentWeek);
+                            const groups = groupByTimeOverlap(visibleItems, td.isItemStack, day, currentWeek);
                             return groups.map((group, gi) => {
                                 const timeRange: [number, number] = [
                                     Math.min(...group.map(g => (g as any).begin ?? 1)),
@@ -209,10 +210,10 @@ export function TimeSchedule(props: TimeScheduleProps) {
                                 return (
                                     <View key={`${tdIndex}-${gi}`}>
                                         {group.length > 1 && td.stackRender
-                                            ? td.stackRender(group, effectiveDay, currentWeek, timeRange)
+                                            ? td.stackRender(group, day, currentWeek, timeRange)
                                             : group.map((item, ii) => (
                                                   <View key={ii}>
-                                                      {td.itemRender?.(item, effectiveDay, currentWeek, i =>
+                                                      {td.itemRender?.(item, day, currentWeek, i =>
                                                           props.onItemPress?.(i),
                                                       )}
                                                   </View>
