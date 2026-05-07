@@ -15,6 +15,9 @@ import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeS
 import {useFilter} from "@/features/classCourseSchedule/hooks/useFilter.ts";
 import {useClassScheduleData} from "@/features/classCourseSchedule/hooks/useClassScheduleData.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
+import moment from "moment/moment";
+import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
+import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 
 export function ClassCourseSchedule() {
     const {openInJw} = useWebView();
@@ -141,7 +144,20 @@ export function ClassCourseSchedule() {
                                 onValueChange={v => pageView.setPage(v - 1)}
                             />
                         </Flex>
-                        <TimeScheduleView startDay={startDay} pageView={pageView} scheduleItems={theorySchedule} />
+                        <TimeScheduleView
+                            startDay={startDay}
+                            pageView={pageView}
+                            scheduleItems={[
+                                {
+                                    data: theorySchedule,
+                                    isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) =>
+                                        item.week === week && item.day === day.isoWeekday(),
+                                    itemRender: (item, _day, _week, onPress) => (
+                                        <NewCourseItem item={item} onPress={onPress} />
+                                    ),
+                                } as TimeScheduleItemData,
+                            ]}
+                        />
                         {practicalSchedule && (
                             <>
                                 <Card.Divider />
