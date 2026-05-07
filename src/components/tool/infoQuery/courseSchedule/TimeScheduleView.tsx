@@ -3,7 +3,7 @@ import {StyleSheet, View} from "react-native";
 import {TimeSchedule, TimeScheduleProps} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {usePagerView} from "react-native-pager-view";
 import moment from "moment/moment";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {buildColorMap, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {ColorMapContext} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 

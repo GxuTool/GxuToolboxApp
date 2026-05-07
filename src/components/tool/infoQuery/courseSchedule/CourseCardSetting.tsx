@@ -9,7 +9,7 @@ import {UnDateTimePicker} from "@/components/un-ui/UnDateTimePicker.tsx";
 import moment from "moment/moment";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {ColorPalettes, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {Color} from "@/shared/color.ts";

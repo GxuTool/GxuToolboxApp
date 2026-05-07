@@ -10,7 +10,7 @@ import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/core/store.ts";
 import {http} from "@/core/http.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 type Props = {
     week: number;

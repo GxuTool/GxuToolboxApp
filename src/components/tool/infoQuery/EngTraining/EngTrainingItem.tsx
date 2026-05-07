@@ -4,7 +4,7 @@ import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 type EngTrainingExp = {
     date: string;

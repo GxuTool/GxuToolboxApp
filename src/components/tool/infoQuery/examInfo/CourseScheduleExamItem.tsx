@@ -7,7 +7,7 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import moment from "moment/moment";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 interface Props {
     examInfo: ExamInfo;

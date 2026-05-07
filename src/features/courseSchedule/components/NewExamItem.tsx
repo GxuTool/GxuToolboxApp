@@ -1,6 +1,6 @@
 import {Pressable, StyleSheet} from "react-native";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";

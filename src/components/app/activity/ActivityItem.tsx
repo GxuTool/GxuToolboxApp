@@ -5,7 +5,7 @@ import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ripple"> {
     style?: ViewStyle;

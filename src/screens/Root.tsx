@@ -2,7 +2,7 @@ import {ImageBackground, StatusBar, StyleSheet, useColorScheme, View, ViewProps}
 import {DarkTheme, DefaultTheme, NavigationContainer} from "@react-navigation/native";
 import {RootStack} from "@/route/RootStack.tsx";
 import React, {useEffect} from "react";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {createTheme, useTheme} from "@rneui/themed";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";

@@ -5,7 +5,7 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {useEffect, useState} from "react";
 import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 type PracticeItem = ICourse["practiceList"][number];
 

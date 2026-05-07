@@ -1,6 +1,6 @@
 // useEntityColor.ts
 import {createContext, useCallback, useContext} from "react";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {PaletteName, resolveEventsColor} from "../utils/colorPalette.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 

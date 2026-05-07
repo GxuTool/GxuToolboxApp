@@ -7,7 +7,7 @@ import {Button, Divider, Text} from "@rneui/themed";
 import {IClassList} from "@/features/classCourseSchedule/type/schema/classList.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import moment from "moment";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 type ClassItem = IClassList[number];
 type SchoolType = (typeof Schools)[number];

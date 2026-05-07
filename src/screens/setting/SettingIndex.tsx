@@ -8,7 +8,7 @@ import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx";
 import {ToastAndroid} from "react-native";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 export function SettingIndex() {
     const {store: ucStore} = useUserConfig();

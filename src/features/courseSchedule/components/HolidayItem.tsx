@@ -1,6 +1,6 @@
 import {Pressable, StyleSheet, View} from "react-native";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
 import {Text, useTheme} from "@rneui/themed";

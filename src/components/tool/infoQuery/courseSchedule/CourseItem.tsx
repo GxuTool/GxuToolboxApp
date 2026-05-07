@@ -7,7 +7,7 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {CourseClass} from "@/class/jw/course.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourseData} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
 
 interface Props {

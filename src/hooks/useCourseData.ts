@@ -9,9 +9,9 @@ import {deepMerge} from "@/utils/objectUtils.ts";
 import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 
-const STORAGE_KEY = "courseScheduleStore";
+const STORAGE_KEY = "courseDataStore";
 
-export interface CourseStoreState {
+export interface CourseDataStoreState {
     courseInfoVisible: Record<string, boolean>;
     startDay: string;
     randomColor: string[];
@@ -29,11 +29,11 @@ export interface CourseStoreState {
     };
 }
 
-export interface CourseStoreAction {
-    update: <T extends keyof CourseStoreState>(k: T, v: CourseStoreState[T]) => void;
+export interface CourseDataStoreAction {
+    update: <T extends keyof CourseDataStoreState>(k: T, v: CourseDataStoreState[T]) => void;
 }
 
-const defaultState: CourseStoreState = {
+const courseDataDefault: CourseDataStoreState = {
     courseInfoVisible: {
         name: true,
         position: true,
@@ -91,7 +91,7 @@ const defaultState: CourseStoreState = {
     },
 };
 
-const persistableKeys = [
+const courseDataPersistKeys = [
     "courseInfoVisible",
     "startDay",
     "randomColor",
@@ -100,14 +100,14 @@ const persistableKeys = [
     "theme",
 ] as const;
 
-const useCourseStore = create<CourseStoreState & CourseStoreAction>()((set, get) => ({
-    ...defaultState,
+const useCourseDataStore = create<CourseDataStoreState & CourseDataStoreAction>()((set, get) => ({
+    ...courseDataDefault,
 
     update: (k, v) => {
-        set({[k]: v} as Partial<CourseStoreState>);
+        set({[k]: v} as Partial<CourseDataStoreState>);
         const state = get();
         const data: Record<string, unknown> = {};
-        for (const key of persistableKeys) {
+        for (const key of courseDataPersistKeys) {
             data[key] = state[key];
         }
         storage.save({key: STORAGE_KEY, data});
@@ -117,14 +117,14 @@ const useCourseStore = create<CourseStoreState & CourseStoreAction>()((set, get)
 export const useCourseData = () => {
     const {theme: rneuiTheme} = useTheme();
     const shiftInit = useShift().init;
-    const courseTheme = useCourseStore(s => s.theme);
+    const courseTheme = useCourseDataStore(s => s.theme);
 
     async function init() {
         try {
             await shiftInit();
             const cached = await storage.load({key: STORAGE_KEY});
             if (cached) {
-                useCourseStore.setState(deepMerge(defaultState, cached));
+                useCourseDataStore.setState(deepMerge(courseDataDefault, cached));
             }
         } catch {
             // 首次启动无缓存，使用默认值
@@ -137,12 +137,12 @@ export const useCourseData = () => {
     );
 
     return {
-        store: useCourseStore,
+        store: useCourseDataStore,
         courseScheduleStyle,
         /** 在应用启动时调用，从本地存储读取缓存数据还原到 store */
         init,
         /** 直接从存储加载数据（不走缓存），失败返回 null */
-        load: async (): Promise<CourseStoreState | null> => {
+        load: async (): Promise<CourseDataStoreState | null> => {
             try {
                 return await storage.load({key: STORAGE_KEY});
             } catch {
@@ -150,7 +150,7 @@ export const useCourseData = () => {
             }
         },
         /** 直接保存数据到存储 */
-        save: (data: CourseStoreState) => storage.save({key: STORAGE_KEY, data}),
+        save: (data: CourseDataStoreState) => storage.save({key: STORAGE_KEY, data}),
         /** 删除存储中的数据 */
         remove: () => storage.remove({key: STORAGE_KEY}),
     };
