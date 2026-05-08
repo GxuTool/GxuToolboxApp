@@ -1,6 +1,6 @@
-import React from "react";
+import React, {useCallback, useState} from "react";
 import {ActivityIndicator, ScrollView, StyleSheet, View} from "react-native";
-import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
+import {BottomSheet, Button, Card, Divider, Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Schools} from "@/type/global.ts";
 import {usePagerView} from "react-native-pager-view";
@@ -18,6 +18,9 @@ import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts
 import moment from "moment/moment";
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
+import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
+import {Course} from "@/type/infoQuery/course/course.ts";
+import {Color} from "@/shared/color.ts";
 
 export function ClassCourseSchedule() {
     const {openInJw} = useWebView();
@@ -42,6 +45,14 @@ export function ClassCourseSchedule() {
         useClassScheduleData();
 
     const startDay = useStartDay(+year, term);
+
+    const [itemDetailShow, setItemDetailShow] = useState(false);
+    const [itemDetail, setItemDetail] = useState<ScheduleTableItem>();
+
+    const onItemPress = useCallback((item: ScheduleTableItem) => {
+        setItemDetail(item);
+        setItemDetailShow(true);
+    }, []);
 
     return (
         <ScrollView>
@@ -153,7 +164,7 @@ export function ClassCourseSchedule() {
                                     isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) =>
                                         item.week === week && item.day === day.isoWeekday(),
                                     itemRender: (item, _day, _week) => (
-                                        <NewCourseItem item={item} />
+                                        <NewCourseItem item={item} onPress={onItemPress} />
                                     ),
                                 } as TimeScheduleItemData,
                             ]}
@@ -167,19 +178,19 @@ export function ClassCourseSchedule() {
                     </>
                 )}
             </View>
-            {/*<BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>*/}
-            {/*    <View*/}
-            {/*        style={{*/}
-            {/*            backgroundColor: theme.colors.background,*/}
-            {/*            borderTopLeftRadius: 8,*/}
-            {/*            borderTopRightRadius: 8,*/}
-            {/*            borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,*/}
-            {/*            borderWidth: 1,*/}
-            {/*            padding: "2.5%",*/}
-            {/*        }}>*/}
-            {/*        <CourseDetail course={itemDetail} />*/}
-            {/*    </View>*/}
-            {/*</BottomSheet>*/}
+            <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
+                <View
+                    style={{
+                        backgroundColor: theme.colors.background,
+                        borderTopLeftRadius: 8,
+                        borderTopRightRadius: 8,
+                        borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
+                        borderWidth: 1,
+                        padding: "2.5%",
+                    }}>
+                    {itemDetail?.raw && <CourseDetail course={itemDetail.raw as Course} />}
+                </View>
+            </BottomSheet>
         </ScrollView>
     );
 }

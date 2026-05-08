@@ -1,7 +1,7 @@
 import {ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {BottomSheet, Card, Divider, Text, useTheme} from "@rneui/themed";
-import React, {useMemo, useState} from "react";
+import React, {useCallback, useMemo, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
@@ -10,9 +10,9 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {UnTable, UnTableCols} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
-import {CourseClass} from "@/class/jw/course.ts";
 import {Color} from "@/shared/color.ts";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
+import {Course} from "@/type/infoQuery/course/course.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
@@ -95,7 +95,12 @@ export function CourseScheduleQuery() {
     ];
 
     const [itemDetailShow, setItemDetailShow] = useState(false);
-    const [itemDetail, setItemDetail] = useState<CourseClass>();
+    const [itemDetail, setItemDetail] = useState<ScheduleTableItem>();
+
+    const onItemPress = useCallback((item: ScheduleTableItem) => {
+        setItemDetail(item);
+        setItemDetailShow(true);
+    }, []);
 
     return (
         <ScrollView>
@@ -135,7 +140,7 @@ export function CourseScheduleQuery() {
                                     return item.week === week && item.day === day.isoWeekday();
                                 },
                                 itemRender: (item, _day, _week) => (
-                                    <NewCourseItem item={item} />
+                                    <NewCourseItem item={item} onPress={onItemPress} />
                                 ),
                             },
                         ]}
@@ -163,7 +168,7 @@ export function CourseScheduleQuery() {
                         borderWidth: 1,
                         padding: "2.5%",
                     }}>
-                    <CourseDetail course={itemDetail} />
+                    {itemDetail?.raw && <CourseDetail course={itemDetail.raw as Course} />}
                 </View>
             </BottomSheet>
         </ScrollView>
