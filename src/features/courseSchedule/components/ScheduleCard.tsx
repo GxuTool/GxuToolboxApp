@@ -21,6 +21,7 @@ import {useNextCourse} from "@/features/courseSchedule/hooks/detail/useNextCours
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
+import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {useHoliday} from "@/features/courseSchedule/hooks/detail/useHoliday.ts";
 import {defaultItems} from "@/features/courseSchedule/utils/defaultItems.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
@@ -58,6 +59,8 @@ export function ScheduleCard() {
 
     const {store: conflictStore} = useConflictCourseStore();
 
+    const {init: initPhyExp, patchItem, patchCourse} = usePhyExp();
+
     const {authState: JWauthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
     const {authState: attendanceAuthState} = useAttendanceAuth();
@@ -75,6 +78,7 @@ export function ScheduleCard() {
 
     useEffect(() => {
         initExam(year, term, startDay);
+        initPhyExp();
     }, [year, term]);
 
     const defaultItem: ScheduleTableItem[] = useMemo(
@@ -97,10 +101,12 @@ export function ScheduleCard() {
             [
                 {
                     data: courseItems,
-                    itemRender: (item, _day, _week) => <NewCourseItem item={item} onPress={onItemPress} />,
+                    itemRender: (item, day, _week) => (
+                        <NewCourseItem item={patchItem(item, day)} onPress={onItemPress} />
+                    ),
                     isItemStack: (a, b) => a.begin <= b.end && b.begin <= a.end,
-                    stackRender: (items, _day, _week, timeRange) => {
-                        const courses = items.map(i => i.raw as Course).filter(Boolean);
+                    stackRender: (items, day, _week, timeRange) => {
+                        const courses = items.map(i => patchCourse(i.raw as Course, day)).filter(Boolean);
                         if (courses.length === 0) return null;
                         const kchs = courses.map(c => c.kch).sort();
                         const storedActive = conflictStore.getState().getActive(kchs);

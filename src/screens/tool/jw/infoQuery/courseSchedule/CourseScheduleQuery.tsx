@@ -1,7 +1,7 @@
 import {ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {BottomSheet, Card, Divider, Text, useTheme} from "@rneui/themed";
-import React, {useCallback, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
@@ -17,6 +17,7 @@ import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
+import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import moment from "moment/moment";
@@ -32,9 +33,14 @@ export function CourseScheduleQuery() {
 
     const {items: courseItems = [], loading} = useCourse(year, term);
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
+    const {init: initPhyExp, patchItem} = usePhyExp();
 
     // 不绑定全局的startDay，根据year和term动态计算，以免造成混乱
     const startDay = useStartDay(year, term);
+
+    useEffect(() => {
+        initPhyExp();
+    }, [year, term]);
 
     const tableData = useMemo(
         () => courseItems.filter((item, idx, arr) => arr.findIndex(i => i.title === item.title) === idx),
@@ -139,8 +145,8 @@ export function CourseScheduleQuery() {
                                 isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) => {
                                     return item.week === week && item.day === day.isoWeekday();
                                 },
-                                itemRender: (item, _day, _week) => (
-                                    <NewCourseItem item={item} onPress={onItemPress} />
+                                itemRender: (item, day, _week) => (
+                                    <NewCourseItem item={patchItem(item, day)} onPress={onItemPress} />
                                 ),
                             },
                         ]}
