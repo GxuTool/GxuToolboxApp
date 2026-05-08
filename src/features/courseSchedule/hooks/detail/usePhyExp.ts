@@ -52,7 +52,7 @@ export const usePhyExp = () => {
         if (item.title !== "大学物理实验") return item;
         const list = usePhyExpStore.getState().phyExpList;
         if (list.length === 0) return item;
-        const dateStr = day.format("YYYY-MM-DD");
+        const dateStr = day.format("YYYYMMDD");
         const exp = list.find(e => e.skrq === dateStr);
         if (!exp) return item;
         return {
@@ -67,7 +67,7 @@ export const usePhyExp = () => {
         if (course.kcmc !== "大学物理实验") return course;
         const list = usePhyExpStore.getState().phyExpList;
         if (list.length === 0) return course;
-        const dateStr = day.format("YYYY-MM-DD");
+        const dateStr = day.format("YYYYMMDD");
         const exp = list.find(e => e.skrq === dateStr);
         if (!exp) return course;
         return {

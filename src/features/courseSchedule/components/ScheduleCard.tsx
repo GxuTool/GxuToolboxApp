@@ -43,8 +43,8 @@ type SheetState =
     | {type: "menu"}
     | {type: "setting"}
     | {type: "share"}
-    | {type: "itemDetail"; item: ScheduleTableItem}
-    | {type: "courseConflict"; courses: Course[]};
+    | {type: "itemDetail"; item: ScheduleTableItem; day: moment.Moment}
+    | {type: "courseConflict"; courses: Course[]; day: moment.Moment};
 
 /**
  * 课表
@@ -94,15 +94,18 @@ export function ScheduleCard() {
 
     const [sheet, setSheet] = useState<SheetState>({type: "closed"});
 
-    const onItemPress = useCallback((item: ScheduleTableItem) => setSheet({type: "itemDetail", item}), []);
+    const onItemPress = useCallback(
+        (item: ScheduleTableItem, day: moment.Moment) => setSheet({type: "itemDetail", item, day}),
+        [],
+    );
 
     const scheduleItems: TimeScheduleItemData[] = useMemo(
         () =>
             [
                 {
                     data: courseItems,
-                    itemRender: (item, day, _week) => (
-                        <NewCourseItem item={patchItem(item, day)} onPress={onItemPress} />
+                    itemRender: (item, day) => (
+                        <NewCourseItem item={patchItem(item, day)} onPress={() => onItemPress(item, day)} />
                     ),
                     isItemStack: (a, b) => a.begin <= b.end && b.begin <= a.end,
                     stackRender: (items, day, _week, timeRange) => {
@@ -116,23 +119,23 @@ export function ScheduleCard() {
                                 course={courses}
                                 activeCourse={activeCourse}
                                 timeRange={timeRange}
-                                onPress={c => setSheet({type: "courseConflict", courses: c})}
+                                onPress={c => setSheet({type: "courseConflict", courses: c, day})}
                             />
                         );
                     },
                 } as TimeScheduleItemData<ScheduleTableItem<Course>>,
                 {
                     data: examItems,
-                    itemRender: (item, _day, _week) => <NewExamItem item={item} onPress={onItemPress} />,
+                    itemRender: (item, day) => <NewExamItem item={item} onPress={() => onItemPress(item, day)} />,
                 } as TimeScheduleItemData<ScheduleTableItem<ExamInfo>>,
                 {
                     data: holidayItems,
                     needShift: false,
-                    itemRender: item => <HolidayItem item={item} onPress={onItemPress} />,
+                    itemRender: (item, day) => <HolidayItem item={item} onPress={() => onItemPress(item, day)} />,
                 },
                 {
                     data: defaultItem,
-                    itemRender: (item, _day, _week) => <NewCourseItem item={item} onPress={onItemPress} />,
+                    itemRender: (item, day) => <NewCourseItem item={item} onPress={() => onItemPress(item, day)} />,
                 },
             ]
                 .filter(td => td.data.length > 0)
@@ -257,9 +260,7 @@ export function ScheduleCard() {
             />
             <Divider />
             <PracticalCourseList courseList={practiceItems} />
-            <BottomSheet
-                isVisible={sheet.type !== "closed"}
-                onBackdropPress={() => setSheet({type: "closed"})}>
+            <BottomSheet isVisible={sheet.type !== "closed"} onBackdropPress={() => setSheet({type: "closed"})}>
                 <View style={style.bottomSheetContainer}>
                     {sheet.type === "menu" && (
                         <>
@@ -303,7 +304,7 @@ export function ScheduleCard() {
                         />
                     )}
                     {sheet.type === "itemDetail" && sheet.item?.raw && (
-                        <CourseDetail course={sheet.item.raw as Course} />
+                        <CourseDetail course={patchCourse(sheet.item.raw, sheet.day) as Course} />
                     )}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
@@ -324,6 +325,7 @@ export function ScheduleCard() {
                                     onPressActive={course => {
                                         setSheet({
                                             type: "itemDetail",
+                                            day: sheet.day,
                                             item: {
                                                 id: course.kch,
                                                 week: 0,
