@@ -33,19 +33,43 @@ export interface UnJsonEditorProps extends ViewProps {
     showCopy?: boolean;
 }
 
-type ExpandedPaths = Record<string, boolean>;
+export interface UnJsonEditorModalProps extends Omit<UnJsonEditorProps, "style"> {
+    visible: boolean;
+    onClose: () => void;
+    title?: string;
+    animationType?: "none" | "slide" | "fade";
+}
 
-type JsonFieldProps = {
+// ─── Line types ───────────────────────────────────────────
+
+var LINE_KIND_PRIMITIVE = 0;
+var LINE_KIND_COLLAPSIBLE = 1;
+
+type JsonLine = {
+    key: string;
     value: unknown;
-    path: (string | number)[];
     depth: number;
-    editable: boolean;
-    expandedPaths: ExpandedPaths;
-    onToggleExpand: (pathKey: string) => void;
-    onChange: (path: (string | number)[], newValue: unknown) => void;
+    path: (string | number)[];
+    kind: number;
+    collapsibleType?: "object" | "array";
+    childCount?: number;
 };
 
-// ─── Utilities ───────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────
+
+var TYPE_COLORS = {
+    string: "#4caf50",
+    number: "#42a5f5",
+    boolean: "#ab47bc",
+    null: "#9e9e9e",
+    key: "#333333",
+};
+
+var MONO_FONT = Platform.select({ ios: "Menlo", android: "monospace" });
+
+var AUTO_EXPAND_DEPTH = 2;
+
+// ─── Utilities ────────────────────────────────────────────
 
 function pathKey(path: (string | number)[]): string {
     return path.join(".");
@@ -73,37 +97,174 @@ function setByPath(obj: unknown, path: (string | number)[], value: unknown): unk
     return obj;
 }
 
-// ─── Type colors ─────────────────────────────────────────
+function getByPath(obj: unknown, path: (string | number)[]): unknown {
+    if (path.length === 0) return obj;
+    var current = obj;
+    for (var i = 0; i < path.length; i++) {
+        if (current === null || current === undefined) return undefined;
+        if (Array.isArray(current)) {
+            current = (current as unknown[])[path[i] as number];
+        } else if (typeof current === "object") {
+            current = (current as Record<string, unknown>)[path[i] as string];
+        } else {
+            return undefined;
+        }
+    }
+    return current;
+}
 
-var TYPE_COLORS = {
-    string: "#4caf50",
-    number: "#42a5f5",
-    boolean: "#ab47bc",
-    null: "#9e9e9e",
-    key: "#333333",
+// ─── Flatten JSON tree into lines ─────────────────────────
+
+function flattenJson(
+    value: unknown,
+    key: string,
+    path: (string | number)[],
+    depth: number,
+    result: JsonLine[],
+): void {
+    // Primitive values
+    if (
+        value === null ||
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+    ) {
+        result.push({
+            key: key,
+            value: value,
+            depth: depth,
+            path: path,
+            kind: LINE_KIND_PRIMITIVE,
+        });
+        return;
+    }
+
+    // Array
+    if (Array.isArray(value)) {
+        var arr = value as unknown[];
+        result.push({
+            key: key,
+            value: value,
+            depth: depth,
+            path: path,
+            kind: LINE_KIND_COLLAPSIBLE,
+            collapsibleType: "array",
+            childCount: arr.length,
+        });
+        for (var i = 0; i < arr.length; i++) {
+            flattenJson(arr[i], "[" + i + "]", path.concat([i]), depth + 1, result);
+        }
+        return;
+    }
+
+    // Object
+    if (value && typeof value === "object") {
+        var obj = value as Record<string, unknown>;
+        var keys = Object.keys(obj);
+        result.push({
+            key: key,
+            value: value,
+            depth: depth,
+            path: path,
+            kind: LINE_KIND_COLLAPSIBLE,
+            collapsibleType: "object",
+            childCount: keys.length,
+        });
+        for (var j = 0; j < keys.length; j++) {
+            var k = keys[j];
+            flattenJson(obj[k], k, path.concat([k]), depth + 1, result);
+        }
+        return;
+    }
+
+    // Fallback
+    result.push({
+        key: key,
+        value: value,
+        depth: depth,
+        path: path,
+        kind: LINE_KIND_PRIMITIVE,
+    });
+}
+
+// ─── Filter visible lines ─────────────────────────────────
+
+function computeVisibleLines(
+    allLines: JsonLine[],
+    collapsedState: Record<string, boolean>,
+    autoExpandDepth: number,
+): JsonLine[] {
+    var result: JsonLine[] = [];
+    var collapsedStack: number[] = [];
+
+    for (var i = 0; i < allLines.length; i++) {
+        var line = allLines[i];
+
+        // Pop collapsed stack when depth moves out of collapsed region
+        while (
+            collapsedStack.length > 0 &&
+            line.depth <= collapsedStack[collapsedStack.length - 1]
+        ) {
+            collapsedStack.pop();
+        }
+
+        // Skip if inside a collapsed region
+        if (collapsedStack.length > 0) {
+            continue;
+        }
+
+        // Check if this collapsible line is collapsed
+        if (line.kind === LINE_KIND_COLLAPSIBLE) {
+            var pk = pathKey(line.path);
+            // Collapsed if: manually collapsed, OR beyond autoExpandDepth and never expanded
+            if (collapsedState[pk] !== undefined) {
+                // User has explicitly toggled this path
+                if (collapsedState[pk]) {
+                    result.push(line);
+                    collapsedStack.push(line.depth);
+                    continue;
+                }
+                // explicitly expanded — fall through to push
+            } else if (line.depth >= autoExpandDepth) {
+                // Beyond auto-expand and never toggled → collapsed by default
+                result.push(line);
+                collapsedStack.push(line.depth);
+                continue;
+            }
+        }
+
+        result.push(line);
+    }
+
+    return result;
+}
+
+// ─── PrimitiveLine ────────────────────────────────────────
+
+type PrimitiveLineProps = {
+    line: JsonLine;
+    editable: boolean;
+    editingKey: boolean;
+    onStartEditKey: (pathKey: string) => void;
+    onFinishEditKey: (path: (string | number)[], oldKey: string, newKey: string) => void;
+    onValueChange: (path: (string | number)[], newValue: unknown) => void;
+    onDelete: (path: (string | number)[]) => void;
+    theme: ReturnType<typeof useTheme>["theme"];
 };
 
-var MONO_FONT = Platform.select({ ios: "Menlo", android: "monospace" });
+function PrimitiveLine(props: PrimitiveLineProps) {
+    var line = props.line;
+    var theme = props.theme;
+    var value = line.value;
+    var dimColor = Color(theme.colors.black).setAlpha(0.5).rgbaString;
 
-// ─── JsonField ───────────────────────────────────────────
-
-function JsonField({
-    value,
-    path,
-    depth,
-    editable,
-    expandedPaths,
-    onToggleExpand,
-    onChange,
-}: JsonFieldProps) {
-    var theme = useTheme().theme;
-    var pKey = pathKey(path);
-    var isExpanded = !!expandedPaths[pKey] || depth < 2;
     var nullEditingState = useState(false);
     var nullEditing = nullEditingState[0];
     var setNullEditing = nullEditingState[1];
 
-    var dimColor = Color(theme.colors.black).setAlpha(0.5).rgbaString;
+    var keyEditValueState = useState(line.key);
+    var keyEditValue = keyEditValueState[0];
+    var setKeyEditValue = keyEditValueState[1];
 
     var styles = useMemo(
         function () {
@@ -112,14 +273,15 @@ function JsonField({
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 6,
-                    marginVertical: 2,
-                    marginLeft: depth > 0 ? 8 : 0,
-                },
-                headerRow: {
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 4,
                     paddingVertical: 4,
+                    paddingRight: 4,
+                },
+                indentSpacer: {},
+                keyText: {
+                    fontFamily: MONO_FONT,
+                    fontSize: 13,
+                    fontWeight: "600",
+                    color: TYPE_COLORS.key,
                 },
                 keyInput: {
                     fontFamily: MONO_FONT,
@@ -130,12 +292,21 @@ function JsonField({
                     paddingVertical: 0,
                     paddingHorizontal: 2,
                     minWidth: 40,
+                    maxWidth: 120,
                 },
-                keyText: {
+                colon: {
                     fontFamily: MONO_FONT,
                     fontSize: 13,
-                    fontWeight: "600",
-                    color: TYPE_COLORS.key,
+                    color: dimColor,
+                },
+                valueString: { fontFamily: MONO_FONT, fontSize: 13, color: TYPE_COLORS.string },
+                valueNumber: { fontFamily: MONO_FONT, fontSize: 13, color: TYPE_COLORS.number },
+                valueBoolean: { fontFamily: MONO_FONT, fontSize: 13, color: TYPE_COLORS.boolean },
+                valueNull: {
+                    fontFamily: MONO_FONT,
+                    fontSize: 13,
+                    color: TYPE_COLORS.null,
+                    fontStyle: "italic",
                 },
                 stringInput: {
                     fontFamily: MONO_FONT,
@@ -148,15 +319,6 @@ function JsonField({
                     minWidth: 60,
                     flex: 1,
                 },
-                valueText: {
-                    fontFamily: MONO_FONT,
-                    fontSize: 13,
-                },
-                tag: {
-                    fontFamily: MONO_FONT,
-                    fontSize: 11,
-                    color: dimColor,
-                },
                 nullPressable: {
                     paddingHorizontal: 6,
                     paddingVertical: 2,
@@ -165,331 +327,353 @@ function JsonField({
                     borderColor: theme.colors.grey4,
                     borderStyle: "dashed",
                 },
-                indent: {
-                    marginLeft: depth > 0 ? 16 : 0,
-                },
                 deleteBtn: {
                     padding: 2,
+                    marginLeft: 4,
                 },
             });
         },
-        [theme, dimColor, depth],
+        [theme, dimColor],
     );
 
-    // ── Null ──────────────────────────────────────────
-
-    if (value === null) {
-        if (editable) {
-            if (nullEditing) {
-                return (
-                    <TextInput
-                        style={styles.stringInput}
-                        value=""
-                        placeholder="null"
-                        placeholderTextColor={dimColor}
-                        onChangeText={function (v) {
-                            onChange(path, v);
-                            setNullEditing(false);
-                        }}
-                        onBlur={function () {
-                            return setNullEditing(false);
-                        }}
-                        autoFocus
-                    />
-                );
-            }
-            return (
-                <UnPressable style={styles.nullPressable} onPress={function () { return setNullEditing(true); }}>
-                    <UnText style={[styles.valueText, { color: TYPE_COLORS.null, fontStyle: "italic" }]}>
-                        null
-                    </UnText>
-                </UnPressable>
-            );
+    var handleKeySubmit = function () {
+        var newKey = keyEditValue.trim();
+        if (newKey && newKey !== line.key) {
+            props.onFinishEditKey(line.path, line.key, newKey);
         }
-        return (
-            <UnText style={[styles.valueText, { color: TYPE_COLORS.null, fontStyle: "italic" }]}>
-                null
-            </UnText>
-        );
-    }
+        setKeyEditValue(line.key);
+    };
 
-    // ── Boolean ───────────────────────────────────────
-
-    if (typeof value === "boolean") {
-        if (editable) {
-            return (
-                <Switch
-                    value={value}
-                    onValueChange={function (v) { return onChange(path, v); }}
-                    trackColor={{ false: theme.colors.grey4, true: TYPE_COLORS.boolean }}
-                />
-            );
-        }
-        return (
-            <UnText style={[styles.valueText, { color: TYPE_COLORS.boolean }]}>
-                {value ? "true" : "false"}
-            </UnText>
-        );
-    }
-
-    // ── Number ────────────────────────────────────────
-
-    if (typeof value === "number") {
-        if (editable) {
-            return (
-                <NumberInput
-                    value={value}
-                    onChange={function (v) {
-                        if (!isNaN(v)) onChange(path, v);
-                    }}
-                />
-            );
-        }
-        return (
-            <UnText style={[styles.valueText, { color: TYPE_COLORS.number }]}>
-                {String(value)}
-            </UnText>
-        );
-    }
-
-    // ── String ────────────────────────────────────────
-
-    if (typeof value === "string") {
-        if (editable) {
+    var renderKey = function () {
+        if (props.editable && props.editingKey) {
             return (
                 <TextInput
-                    style={styles.stringInput}
-                    value={value}
-                    onChangeText={function (v) { return onChange(path, v); }}
+                    style={styles.keyInput}
+                    value={keyEditValue}
+                    onChangeText={function (v) { return setKeyEditValue(v); }}
+                    onSubmitEditing={handleKeySubmit}
+                    onBlur={handleKeySubmit}
+                    autoFocus
                     autoCapitalize="none"
                     autoCorrect={false}
                 />
             );
         }
-        return (
-            <UnText style={[styles.valueText, { color: TYPE_COLORS.string }]}>
-                {"\"" + value + "\""}
-            </UnText>
-        );
-    }
-
-    // ── Array ─────────────────────────────────────────
-
-    if (Array.isArray(value)) {
-        var arr = value as unknown[];
-
-        var handleDeleteItem = function (index: number) {
-            var copy = arr.slice();
-            copy.splice(index, 1);
-            onChange(path, copy);
-        };
-
-        var handleAddItem = function () {
-            onChange(path, arr.concat([null]));
-        };
-
-        return (
-            <View style={styles.indent}>
+        if (props.editable) {
+            return (
                 <UnPressable
+                    onPress={function () {
+                        setKeyEditValue(line.key);
+                        props.onStartEditKey(pathKey(line.path));
+                    }}
+                    android_ripple={{ color: theme.colors.grey4 }}>
+                    <UnText style={styles.keyText}>{line.key}</UnText>
+                </UnPressable>
+            );
+        }
+        return <UnText style={styles.keyText}>{line.key}</UnText>;
+    };
+
+    var renderValue = function () {
+        // ── Null ──
+        if (value === null) {
+            if (props.editable) {
+                if (nullEditing) {
+                    return (
+                        <TextInput
+                            style={styles.stringInput}
+                            value=""
+                            placeholder="null"
+                            placeholderTextColor={dimColor}
+                            onChangeText={function (v) {
+                                props.onValueChange(line.path, v);
+                                setNullEditing(false);
+                            }}
+                            onBlur={function () { return setNullEditing(false); }}
+                            autoFocus
+                        />
+                    );
+                }
+                return (
+                    <UnPressable
+                        style={styles.nullPressable}
+                        onPress={function () { return setNullEditing(true); }}
+                        android_ripple={{ color: theme.colors.grey4 }}>
+                        <UnText style={styles.valueNull}>null</UnText>
+                    </UnPressable>
+                );
+            }
+            return <UnText style={styles.valueNull}>null</UnText>;
+        }
+
+        // ── Boolean ──
+        if (typeof value === "boolean") {
+            if (props.editable) {
+                return (
+                    <Switch
+                        value={value}
+                        onValueChange={function (v) { return props.onValueChange(line.path, v); }}
+                        trackColor={{ false: theme.colors.grey4, true: TYPE_COLORS.boolean }}
+                    />
+                );
+            }
+            return <UnText style={styles.valueBoolean}>{value ? "true" : "false"}</UnText>;
+        }
+
+        // ── Number ──
+        if (typeof value === "number") {
+            if (props.editable) {
+                return (
+                    <NumberInput
+                        value={value}
+                        onChange={function (v) {
+                            if (!isNaN(v)) props.onValueChange(line.path, v);
+                        }}
+                    />
+                );
+            }
+            return <UnText style={styles.valueNumber}>{String(value)}</UnText>;
+        }
+
+        // ── String ──
+        if (typeof value === "string") {
+            if (props.editable) {
+                return (
+                    <TextInput
+                        style={styles.stringInput}
+                        value={value}
+                        onChangeText={function (v) { return props.onValueChange(line.path, v); }}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                    />
+                );
+            }
+            return <UnText style={styles.valueString}>{"\"" + value + "\""}</UnText>;
+        }
+
+        return <UnText>{String(value)}</UnText>;
+    };
+
+    return (
+        <View style={styles.row}>
+            {/* Indentation spacer */}
+            <View style={{ width: line.depth * 20 }} />
+
+            {/* Key */}
+            {renderKey()}
+
+            {/* Colon */}
+            <UnText style={styles.colon}>:</UnText>
+
+            {/* Value */}
+            <View style={{ flex: 1 }}>{renderValue()}</View>
+
+            {/* Delete button */}
+            {props.editable && (
+                <UnPressable
+                    style={styles.deleteBtn}
+                    onPress={function () { return props.onDelete(line.path); }}
+                    android_ripple={{ color: theme.colors.grey4 }}>
+                    <Icon name="close" size={14} color={dimColor} />
+                </UnPressable>
+            )}
+        </View>
+    );
+}
+
+// ─── CollapsibleLine ──────────────────────────────────────
+
+type CollapsibleLineProps = {
+    line: JsonLine;
+    isCollapsed: boolean;
+    isExpandedEnd: boolean;
+    onToggle: (path: (string | number)[]) => void;
+    editable: boolean;
+    replacing: boolean;
+    onStartReplace: (pathKey: string) => void;
+    onFinishReplace: (path: (string | number)[], text: string) => void;
+    onDelete: (path: (string | number)[]) => void;
+    onAddItem: (path: (string | number)[]) => void;
+    theme: ReturnType<typeof useTheme>["theme"];
+};
+
+function CollapsibleLine(props: CollapsibleLineProps) {
+    var line = props.line;
+    var theme = props.theme;
+    var dimColor = Color(theme.colors.black).setAlpha(0.5).rgbaString;
+    var isObject = line.collapsibleType === "object";
+    var isArray = line.collapsibleType === "array";
+
+    var replaceValueState = useState("");
+    var replaceValue = replaceValueState[0];
+    var setReplaceValue = replaceValueState[1];
+
+    var styles = useMemo(
+        function () {
+            return StyleSheet.create({
+                headerRow: {
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                    paddingVertical: 4,
+                },
+                keyText: {
+                    fontFamily: MONO_FONT,
+                    fontSize: 13,
+                    fontWeight: "600",
+                    color: TYPE_COLORS.key,
+                },
+                colon: {
+                    fontFamily: MONO_FONT,
+                    fontSize: 13,
+                    color: dimColor,
+                },
+                tag: {
+                    fontFamily: MONO_FONT,
+                    fontSize: 11,
+                    color: dimColor,
+                },
+                replaceInput: {
+                    fontFamily: MONO_FONT,
+                    fontSize: 12,
+                    color: theme.colors.black,
+                    borderBottomWidth: 1,
+                    borderBottomColor: theme.colors.grey4,
+                    paddingVertical: 0,
+                    paddingHorizontal: 4,
+                    minWidth: 80,
+                    maxWidth: 150,
+                },
+                actionBtn: {
+                    padding: 2,
+                    marginLeft: 4,
+                },
+                closeTag: {
+                    marginLeft: (line.depth + 1) * 20,
+                    paddingVertical: 2,
+                },
+                addRow: {
+                    marginLeft: (line.depth + 1) * 20,
+                    paddingVertical: 4,
+                },
+            });
+        },
+        [theme, dimColor, line.depth],
+    );
+
+    var handleReplaceSubmit = function () {
+        props.onFinishReplace(line.path, replaceValue);
+        setReplaceValue("");
+    };
+
+    var badge = isObject
+        ? "{…} " + line.childCount + " keys"
+        : "[…] " + line.childCount + " items";
+
+    var renderContent = function () {
+        // Replacing mode
+        if (props.replacing) {
+            return (
+                <TextInput
+                    style={styles.replaceInput}
+                    value={replaceValue}
+                    onChangeText={function (v) { return setReplaceValue(v); }}
+                    onSubmitEditing={handleReplaceSubmit}
+                    onBlur={handleReplaceSubmit}
+                    placeholder={isObject ? "new value" : "new value"}
+                    placeholderTextColor={dimColor}
+                    autoFocus
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                />
+            );
+        }
+
+        // Collapsed: show type badge
+        if (props.isCollapsed) {
+            return <UnText style={styles.tag}>{badge}</UnText>;
+        }
+
+        // Expanded: show opening bracket
+        return <UnText style={styles.tag}>{isObject ? "{" : "["}</UnText>;
+    };
+
+    return (
+        <View>
+            {/* Header row */}
+            <View style={[styles.headerRow, { marginLeft: line.depth * 20 }]}>
+                {/* Toggle chevron + key */}
+                <UnPressable
+                    onPress={function () { return props.onToggle(line.path); }}
                     android_ripple={{ color: theme.colors.grey4 }}
-                    onPress={function () { return onToggleExpand(pKey); }}>
-                    <View style={styles.headerRow}>
+                    style={{ flex: 1 }}>
+                    <Flex inline gap={4} align="center">
                         <Icon
-                            name={isExpanded ? "chevron-down" : "chevron-right"}
+                            name={props.isCollapsed ? "chevron-right" : "chevron-down"}
                             size={16}
                             color={dimColor}
                         />
-                        <UnText style={styles.tag}>
-                            {isExpanded ? "[" : "[ … ] " + arr.length + " items"}
-                        </UnText>
-                    </View>
+                        <UnText style={styles.keyText}>{line.key}</UnText>
+                        <UnText style={styles.colon}>:</UnText>
+                        {renderContent()}
+                    </Flex>
                 </UnPressable>
-                {isExpanded && (
-                    <View>
-                        {arr.map(function (item, i) {
-                            return (
-                                <View key={String(i)} style={styles.row}>
-                                    <UnText style={styles.tag}>{"[" + i + "]"}</UnText>
-                                    <JsonField
-                                        value={item}
-                                        path={path.concat([i])}
-                                        depth={depth + 1}
-                                        editable={editable}
-                                        expandedPaths={expandedPaths}
-                                        onToggleExpand={onToggleExpand}
-                                        onChange={onChange}
-                                    />
-                                    {editable && (
-                                        <UnPressable
-                                            style={styles.deleteBtn}
-                                            onPress={function () { return handleDeleteItem(i); }}
-                                            android_ripple={{ color: theme.colors.grey4 }}>
-                                            <Icon name="close" size={14} color={dimColor} />
-                                        </UnPressable>
-                                    )}
-                                </View>
-                            );
-                        })}
-                        {arr.length === 0 && (
-                            <UnText style={[styles.tag, { marginLeft: 24 }]}>empty</UnText>
-                        )}
-                        {editable && (
-                            <UnPressable
-                                style={{ marginLeft: 24, marginTop: 4 }}
-                                onPress={handleAddItem}
-                                android_ripple={{ color: theme.colors.grey4 }}>
-                                <Flex inline gap={4}>
-                                    <Icon name="plus" size={14} color={dimColor} />
-                                    <UnText style={styles.tag}>add item</UnText>
-                                </Flex>
-                            </UnPressable>
-                        )}
-                        <UnText style={styles.tag}>]</UnText>
-                    </View>
+
+                {/* Replace button */}
+                {props.editable && !props.replacing && (
+                    <UnPressable
+                        style={styles.actionBtn}
+                        onPress={function () {
+                            props.onStartReplace(pathKey(line.path));
+                            setReplaceValue("");
+                        }}
+                        android_ripple={{ color: theme.colors.grey4 }}>
+                        <Icon name="pencil" size={14} color={dimColor} />
+                    </UnPressable>
+                )}
+
+                {/* Delete button */}
+                {props.editable && (
+                    <UnPressable
+                        style={styles.actionBtn}
+                        onPress={function () { return props.onDelete(line.path); }}
+                        android_ripple={{ color: theme.colors.grey4 }}>
+                        <Icon name="close" size={14} color={dimColor} />
+                    </UnPressable>
                 )}
             </View>
-        );
-    }
 
-    // ── Object ────────────────────────────────────────
-
-    if (typeof value === "object") {
-        var obj = value as Record<string, unknown>;
-        var keys = Object.keys(obj);
-
-        var handleRenameKey = function (oldKey: string, newKey: string) {
-            if (oldKey === newKey) return;
-            var newObj: Record<string, unknown> = {};
-            var allKeys = Object.keys(obj);
-            for (var i = 0; i < allKeys.length; i++) {
-                var k = allKeys[i];
-                if (k === oldKey) {
-                    newObj[newKey] = obj[k];
-                } else {
-                    newObj[k] = obj[k];
-                }
-            }
-            onChange(path, newObj);
-        };
-
-        var handleDeleteKey = function (key: string) {
-            var copy: Record<string, unknown> = {};
-            var allKeys = Object.keys(obj);
-            for (var i = 0; i < allKeys.length; i++) {
-                var k = allKeys[i];
-                if (k !== key) {
-                    copy[k] = obj[k];
-                }
-            }
-            onChange(path, copy);
-        };
-
-        var handleAddKey = function () {
-            var newKey = "newKey";
-            var counter = 1;
-            while (newKey in obj) {
-                newKey = "newKey_" + counter;
-                counter++;
-            }
-            var copy: Record<string, unknown> = {};
-            var allKeys = Object.keys(obj);
-            for (var i = 0; i < allKeys.length; i++) {
-                copy[allKeys[i]] = obj[allKeys[i]];
-            }
-            copy[newKey] = null;
-            onChange(path, copy);
-        };
-
-        return (
-            <View style={styles.indent}>
-                <UnPressable
-                    android_ripple={{ color: theme.colors.grey4 }}
-                    onPress={function () { return onToggleExpand(pKey); }}>
-                    <View style={styles.headerRow}>
-                        <Icon
-                            name={isExpanded ? "chevron-down" : "chevron-right"}
-                            size={16}
-                            color={dimColor}
-                        />
-                        <UnText style={styles.tag}>
-                            {isExpanded ? "{" : "{ … } " + keys.length + " keys"}
-                        </UnText>
-                    </View>
-                </UnPressable>
-                {isExpanded && (
-                    <View>
-                        {keys.map(function (key) {
-                            var val = obj[key];
-                            return (
-                                <View key={key} style={styles.row}>
-                                    {editable ? (
-                                        <TextInput
-                                            style={styles.keyInput}
-                                            value={key}
-                                            onChangeText={function (newKey) { return handleRenameKey(key, newKey); }}
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                        />
-                                    ) : (
-                                        <UnText style={styles.keyText}>{key}</UnText>
-                                    )}
-                                    <UnText style={styles.tag}>:</UnText>
-                                    <JsonField
-                                        value={val}
-                                        path={path.concat([key])}
-                                        depth={depth + 1}
-                                        editable={editable}
-                                        expandedPaths={expandedPaths}
-                                        onToggleExpand={onToggleExpand}
-                                        onChange={onChange}
-                                    />
-                                    {editable && (
-                                        <UnPressable
-                                            style={styles.deleteBtn}
-                                            onPress={function () { return handleDeleteKey(key); }}
-                                            android_ripple={{ color: theme.colors.grey4 }}>
-                                            <Icon name="close" size={14} color={dimColor} />
-                                        </UnPressable>
-                                    )}
-                                </View>
-                            );
-                        })}
-                        {keys.length === 0 && (
-                            <UnText style={[styles.tag, { marginLeft: 24 }]}>empty</UnText>
-                        )}
-                        {editable && (
+            {/* Closing tag + add button when expanded */}
+            {!props.isCollapsed && props.isExpandedEnd && (
+                <View>
+                    {/* Add button */}
+                    {props.editable && (
+                        <View style={styles.addRow}>
                             <UnPressable
-                                style={{ marginLeft: 24, marginTop: 4 }}
-                                onPress={handleAddKey}
+                                onPress={function () { return props.onAddItem(line.path); }}
                                 android_ripple={{ color: theme.colors.grey4 }}>
-                                <Flex inline gap={4}>
+                                <Flex inline gap={4} align="center">
                                     <Icon name="plus" size={14} color={dimColor} />
-                                    <UnText style={styles.tag}>add key</UnText>
+                                    <UnText style={styles.tag}>
+                                        {isObject ? "add key" : "add item"}
+                                    </UnText>
                                 </Flex>
                             </UnPressable>
-                        )}
-                        <UnText style={styles.tag}>{"}"}</UnText>
+                        </View>
+                    )}
+                    {/* Closing bracket */}
+                    <View style={styles.closeTag}>
+                        <UnText style={styles.tag}>
+                            {isObject ? "}" : "]"}
+                        </UnText>
                     </View>
-                )}
-            </View>
-        );
-    }
-
-    // ── Fallback ──────────────────────────────────────
-
-    return <UnText style={styles.tag}>{String(value)}</UnText>;
+                </View>
+            )}
+        </View>
+    );
 }
 
-// ─── Modal Props ──────────────────────────────────────────
-
-export interface UnJsonEditorModalProps extends Omit<UnJsonEditorProps, "style"> {
-    visible: boolean;
-    onClose: () => void;
-    title?: string;
-    animationType?: "none" | "slide" | "fade";
-}
-
-// ─── UnJsonEditor ────────────────────────────────────────
+// ─── UnJsonEditor ─────────────────────────────────────────
 
 function UnJsonEditorFn({
     value,
@@ -504,7 +688,7 @@ function UnJsonEditorFn({
     ...viewProps
 }: UnJsonEditorProps) {
     var theme = useTheme().theme;
-    var _defaultEditable = defaultEditable !== undefined ? defaultEditable : false;
+    var _defaultEditable = defaultEditable !== undefined ? defaultEditable : true;
     var _readOnly = readOnly !== undefined ? readOnly : false;
     var _showCopy = showCopy !== undefined ? showCopy : true;
 
@@ -516,19 +700,30 @@ function UnJsonEditorFn({
     var internalValue = internalValueState[0];
     var setInternalValue = internalValueState[1];
 
-    var expandedPathsState = useState<ExpandedPaths>({});
-    var expandedPaths = expandedPathsState[0];
-    var setExpandedPaths = expandedPathsState[1];
+    var collapsedState = useState<Record<string, boolean>>({});
+    var collapsed = collapsedState[0];
+    var setCollapsed = collapsedState[1];
+
+    var editingKeyPathState = useState<string | null>(null);
+    var editingKeyPath = editingKeyPathState[0];
+    var setEditingKeyPath = editingKeyPathState[1];
+
+    var replacingPathState = useState<string | null>(null);
+    var replacingPath = replacingPathState[0];
+    var setReplacingPath = replacingPathState[1];
 
     var isEditable = controlledEditable !== undefined ? controlledEditable : internalEditable;
     var currentValue = onChange ? value : internalValue;
 
     // Sync external value changes
-    React.useEffect(function () {
-        if (onChange) {
-            setInternalValue(value);
-        }
-    }, [value, onChange]);
+    React.useEffect(
+        function () {
+            if (onChange) {
+                setInternalValue(value);
+            }
+        },
+        [value, onChange],
+    );
 
     var dimColor = Color(theme.colors.black).setAlpha(0.5).rgbaString;
 
@@ -564,6 +759,26 @@ function UnJsonEditorFn({
         [theme, dimColor],
     );
 
+    // Flatten JSON tree into lines
+    var allLines = useMemo(
+        function () {
+            var lines: JsonLine[] = [];
+            if (currentValue !== undefined) {
+                flattenJson(currentValue, "root", [], 0, lines);
+            }
+            return lines;
+        },
+        [currentValue],
+    );
+
+    // Filter to visible lines based on collapsed state
+    var visibleLines = useMemo(
+        function () {
+            return computeVisibleLines(allLines, collapsed, AUTO_EXPAND_DEPTH);
+        },
+        [allLines, collapsed],
+    );
+
     var handleFieldChange = useCallback(
         function (path: (string | number)[], newValue: unknown) {
             var newRoot = setByPath(currentValue, path, newValue);
@@ -574,6 +789,98 @@ function UnJsonEditorFn({
             }
         },
         [currentValue, onChange],
+    );
+
+    var handleKeyRename = useCallback(
+        function (path: (string | number)[], oldKey: string, newKey: string) {
+            if (oldKey === newKey) return;
+            var parentPath = path.slice(0, path.length - 1);
+            var parentValue = getByPath(currentValue, parentPath);
+            if (parentValue && typeof parentValue === "object" && !Array.isArray(parentValue)) {
+                var obj = parentValue as Record<string, unknown>;
+                var newObj: Record<string, unknown> = {};
+                var keys = Object.keys(obj);
+                for (var i = 0; i < keys.length; i++) {
+                    var k = keys[i];
+                    if (k === oldKey) {
+                        newObj[newKey] = obj[k];
+                    } else {
+                        newObj[k] = obj[k];
+                    }
+                }
+                handleFieldChange(parentPath, newObj);
+                setEditingKeyPath(null);
+            }
+        },
+        [currentValue, handleFieldChange],
+    );
+
+    var handleDelete = useCallback(
+        function (path: (string | number)[]) {
+            if (path.length === 0) return;
+            var parentPath = path.slice(0, path.length - 1);
+            var lastSeg = path[path.length - 1];
+            var parentValue = getByPath(currentValue, parentPath);
+            if (Array.isArray(parentValue)) {
+                var arrCopy = (parentValue as unknown[]).slice();
+                arrCopy.splice(lastSeg as number, 1);
+                handleFieldChange(parentPath, arrCopy);
+            } else if (parentValue && typeof parentValue === "object") {
+                var obj = parentValue as Record<string, unknown>;
+                var newObj: Record<string, unknown> = {};
+                var keys = Object.keys(obj);
+                for (var i = 0; i < keys.length; i++) {
+                    var k = keys[i];
+                    if (k !== String(lastSeg)) {
+                        newObj[k] = obj[k];
+                    }
+                }
+                handleFieldChange(parentPath, newObj);
+            }
+        },
+        [currentValue, handleFieldChange],
+    );
+
+    var handleReplaceCollapsible = useCallback(
+        function (path: (string | number)[], text: string) {
+            var trimmed = text.trim();
+            var newValue: unknown = trimmed;
+            if (trimmed === "null") newValue = null;
+            else if (trimmed === "true") newValue = true;
+            else if (trimmed === "false") newValue = false;
+            else {
+                var num = parseFloat(trimmed);
+                if (!isNaN(num) && String(num) === trimmed) newValue = num;
+            }
+            handleFieldChange(path, newValue);
+            setReplacingPath(null);
+        },
+        [handleFieldChange],
+    );
+
+    var handleAddItem = useCallback(
+        function (path: (string | number)[]) {
+            var container = getByPath(currentValue, path);
+            if (Array.isArray(container)) {
+                handleFieldChange(path, (container as unknown[]).concat([null]));
+            } else if (container && typeof container === "object") {
+                var obj = container as Record<string, unknown>;
+                var newKey = "newKey";
+                var counter = 1;
+                while (newKey in obj) {
+                    newKey = "newKey_" + counter;
+                    counter = counter + 1;
+                }
+                var newObj: Record<string, unknown> = {};
+                var keys = Object.keys(obj);
+                for (var i = 0; i < keys.length; i++) {
+                    newObj[keys[i]] = obj[keys[i]];
+                }
+                newObj[newKey] = null;
+                handleFieldChange(path, newObj);
+            }
+        },
+        [currentValue, handleFieldChange],
     );
 
     var toggleEditable = useCallback(
@@ -598,18 +905,19 @@ function UnJsonEditorFn({
         [currentValue],
     );
 
-    var handleToggleExpand = useCallback(
-        function (pKey: string) {
-            setExpandedPaths(function (prev) {
-                var next: ExpandedPaths = {};
+    var handleToggleCollapse = useCallback(
+        function (path: (string | number)[]) {
+            var pk = pathKey(path);
+            setCollapsed(function (prev) {
+                var next: Record<string, boolean> = {};
                 var prevKeys = Object.keys(prev);
                 for (var i = 0; i < prevKeys.length; i++) {
                     next[prevKeys[i]] = prev[prevKeys[i]];
                 }
-                if (next[pKey]) {
-                    delete next[pKey];
+                if (next[pk]) {
+                    next[pk] = false;
                 } else {
-                    next[pKey] = true;
+                    next[pk] = true;
                 }
                 return next;
             });
@@ -653,15 +961,54 @@ function UnJsonEditorFn({
                 style={maxHeight ? { maxHeight: maxHeight } : undefined}
                 nestedScrollEnabled
                 keyboardShouldPersistTaps="handled">
-                <JsonField
-                    value={currentValue}
-                    path={[]}
-                    depth={0}
-                    editable={isEditable && !_readOnly}
-                    expandedPaths={expandedPaths}
-                    onToggleExpand={handleToggleExpand}
-                    onChange={handleFieldChange}
-                />
+                {visibleLines.map(function (line, index) {
+                    // Check if this is the last expanded child of a collapsible
+                    var isExpandedEnd = false;
+                    if (line.kind === LINE_KIND_PRIMITIVE || line.kind === LINE_KIND_COLLAPSIBLE) {
+                        var nextLine = visibleLines[index + 1];
+                        if (!nextLine || nextLine.depth <= line.depth) {
+                            isExpandedEnd = true;
+                        }
+                    }
+
+                    if (line.kind === LINE_KIND_COLLAPSIBLE) {
+                        var pk = pathKey(line.path);
+                        var isCollapsed = !!collapsed[pk] ||
+                            (line.depth >= AUTO_EXPAND_DEPTH && collapsed[pk] === undefined);
+                        return (
+                            <CollapsibleLine
+                                key={pk}
+                                line={line}
+                                isCollapsed={isCollapsed}
+                                isExpandedEnd={isExpandedEnd}
+                                onToggle={handleToggleCollapse}
+                                editable={isEditable && !_readOnly}
+                                replacing={replacingPath === pk}
+                                onStartReplace={function (key) { return setReplacingPath(key); }}
+                                onFinishReplace={handleReplaceCollapsible}
+                                onDelete={handleDelete}
+                                onAddItem={handleAddItem}
+                                theme={theme}
+                            />
+                        );
+                    }
+
+                    // Primitive line
+                    var linePk = pathKey(line.path);
+                    return (
+                        <PrimitiveLine
+                            key={linePk}
+                            line={line}
+                            editable={isEditable && !_readOnly}
+                            editingKey={editingKeyPath === linePk}
+                            onStartEditKey={function (key) { return setEditingKeyPath(key); }}
+                            onFinishEditKey={handleKeyRename}
+                            onValueChange={handleFieldChange}
+                            onDelete={handleDelete}
+                            theme={theme}
+                        />
+                    );
+                })}
             </ScrollView>
         </View>
     );
@@ -721,7 +1068,11 @@ function UnJsonEditorModal({
             presentationStyle="pageSheet">
             <SafeAreaView style={styles.safeArea}>
                 <StatusBar
-                    barStyle={theme.colors.black === "#000000" || Color(theme.colors.black).luminance < 0.5 ? "light-content" : "dark-content"}
+                    barStyle={
+                        theme.colors.black === "#000000" || Color(theme.colors.black).luminance < 0.5
+                            ? "light-content"
+                            : "dark-content"
+                    }
                 />
                 <View style={styles.header}>
                     <UnPressable
@@ -730,16 +1081,11 @@ function UnJsonEditorModal({
                         android_ripple={{ color: theme.colors.grey4 }}>
                         <Icon name="close" size={22} color={theme.colors.black} />
                     </UnPressable>
-                    <UnText style={styles.headerTitle}>
-                        {title || "JSON Editor"}
-                    </UnText>
+                    <UnText style={styles.headerTitle}>{title || "JSON Editor"}</UnText>
                     <View style={{ width: 30 }} />
                 </View>
                 <View style={styles.body}>
-                    <UnJsonEditorFn
-                        {...editorProps}
-                        style={{ flex: 1 }}
-                    />
+                    <UnJsonEditorFn {...editorProps} style={{ flex: 1 }} />
                 </View>
             </SafeAreaView>
         </Modal>
