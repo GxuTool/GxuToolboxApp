@@ -1,36 +1,45 @@
-import {FlexAlignType, StyleProp, StyleSheet, View, ViewProps, ViewStyle} from "react-native";
-import React from "react";
+import { FlexAlignType, StyleProp, StyleSheet, View, ViewProps, ViewStyle } from "react-native";
+import React, { useMemo } from "react";
 
-interface Props {
-    gap: number;
-    inline: boolean;
-    direction: "row" | "column";
-    align: FlexAlignType;
-    justify: "center" | "flex-start" | "flex-end" | "space-between" | "space-around" | "space-evenly";
-    childrenStyle?: StyleProp<ViewStyle>;
+export interface FlexProps extends ViewProps {
+    gap?: number;
+    inline?: boolean;
+    flex?: number;
+    direction?: "row" | "column" | "row-reverse" | "column-reverse";
+    align?: FlexAlignType;
+    justify?: "center" | "flex-start" | "flex-end" | "space-between" | "space-around" | "space-evenly";
 }
 
-export type FlexProps = Partial<Props & ViewProps>;
-export default function Flex(props: FlexProps) {
-    const style = StyleSheet.create({
-        unUiFlex: {
-            flex: !props.inline ? 1 : undefined,
-            flexDirection: props.direction ?? "row",
-            gap: props.gap ?? 0,
-            alignItems: props.align ?? "center",
-            justifyContent: props.justify ?? "flex-start",
-        },
-    });
+const Flex: React.FC<FlexProps> = ({
+    gap = 0,
+    inline = false,
+    flex,
+    direction = "row",
+    align = "center",
+    justify = "flex-start",
+    style,
+    children,
+    ...restProps
+}) => {
+    const flexValue = flex !== undefined ? flex : (inline ? undefined : 1);
+
+    const flexStyle = useMemo<StyleProp<ViewStyle>>(
+        () => ({
+            flex: flexValue,
+            alignSelf: "stretch",
+            flexDirection: direction,
+            gap,
+            alignItems: align,
+            justifyContent: justify,
+        }),
+        [flexValue, direction, gap, align, justify]
+    );
+
     return (
-        <View {...props} style={[props.style, style.unUiFlex]}>
-            {React.Children.map(props.children, child => {
-                if (React.isValidElement(child)) {
-                    return React.cloneElement(child as React.ReactElement<any>, {
-                        style: [{height: "auto"}, props.childrenStyle, child.props?.style],
-                    });
-                }
-                return child;
-            })}
+        <View {...restProps} style={[style, flexStyle]}>
+            {children}
         </View>
     );
-}
+};
+
+export default Flex;

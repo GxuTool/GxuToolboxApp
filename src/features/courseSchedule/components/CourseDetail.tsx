@@ -1,14 +1,14 @@
 import {Course} from "@/type/infoQuery/course/course.ts";
-import {Pressable, StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
-import {ListItem, Text, useTheme} from "@rneui/themed";
-import {Icon} from "@/components/un-ui/Icon.tsx";
+import {Pressable, StyleSheet, ToastAndroid, ViewProps} from "react-native";
+import {Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
 import React, {useState} from "react";
 import {Color} from "@/shared/color.ts";
-import {Pos} from "@/js/pos.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/TeacherInfoSheet.tsx";
+import {UnText} from "@/components/un-ui";
+import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 
 interface Props extends ViewProps {
     course: Course;
@@ -89,6 +89,7 @@ function PropItem({item, ...props}: {item: Info} & Props) {
 
 export function CourseDetail(props: Props) {
     const [visible, setVisible] = useState(false);
+    const {theme} = useTheme();
 
     const {store} = useUserConfig();
     const infoList = Object.entries(store(s => s.preference.courseDetail))
@@ -100,48 +101,92 @@ export function CourseDetail(props: Props) {
                     label,
                 }) as Info,
         );
-    StyleSheet.create({
-        infoIcon: {
-            width: 20,
-        },
-        infoLabel: {
-            fontSize: 20,
-            fontWeight: "bold",
-        },
-        infoData: {
-            fontSize: 16,
-        },
-    });
     return (
-        <View {...props}>
+        <Flex {...props} gap={4} direction="column">
+            <CourseInfoCard course={props.course} />
             <Flex justify="center">
                 <Text>点击属性，复制到剪切板</Text>
             </Flex>
-            {infoList.map((item, index) => (
-                <ListItem bottomDivider={index !== infoList.length - 1} key={index}>
-                    <PropItem item={item} {...props} onClick={() => setVisible(true)} />
-                </ListItem>
-            ))}
-            <ListItem>
-                {/*<Flex justify="space-between" gap={30}>*/}
-                {/*    <Flex gap={10} inline>*/}
-                {/*        <Flex inline justify="center" style={style.infoIcon}>*/}
-                {/*            <Icon type="fontawesome" name="code" size={20} />*/}
-                {/*        </Flex>*/}
-                {/*        <Text style={style.infoLabel}>复制课程信息JSON</Text>*/}
-                {/*    </Flex>*/}
-                {/*    <Flex justify="flex-end">*/}
-                {/*        <Pressable*/}
-                {/*            android_ripple={userConfig.theme.ripple}*/}
-                {/*            onPress={() =>*/}
-                {/*                copy(JSON.stringify(props.course, null, 4) + "" ?? "", "复制课程信息JSON成功")*/}
-                {/*            }>*/}
-                {/*            <Text style={style.infoData}>&#123; ... &#125;</Text>*/}
-                {/*        </Pressable>*/}
-                {/*    </Flex>*/}
-                {/*</Flex>*/}
-            </ListItem>
+            <Flex gap={10}>
+                <CoursePropItem course={props.course} prop="kcmc" label="课程名称" />
+                <CoursePropItem course={props.course} prop="cdmc" label="上课地点" />
+            </Flex>
+            <Flex gap={10}>
+                <CoursePropItem course={props.course} prop="xm" label="上课教师" />
+                <CoursePropItem course={props.course} prop="khfsmc" label="考核方式" />
+                <CoursePropItem course={props.course} prop="xf" label="学分" />
+            </Flex>
+            <Flex gap={10}>
+                <CoursePropItem course={props.course} prop="xkrs" label="选课人数" />
+                <CoursePropItem course={props.course} prop="zzrl" label="座位数" />
+                <CoursePropItem course={props.course} prop="qqqh" label="QQ群" />
+            </Flex>
             <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
-        </View>
+        </Flex>
+    );
+}
+
+function CourseInfoCard(props: {course: Course}) {
+    const {theme} = useTheme();
+    const {getColor} = useBlocksColor();
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(getColor({title: props.course.kcmc})).setAlpha(theme.mode === "light" ? 0.5 : 0.3)
+                .rgbaString,
+        },
+    });
+    return (
+        <Flex direction="column" style={styles.card} align="flex-start">
+            <UnText weight="bold" size={16}>
+                {props.course.kcmc}
+            </UnText>
+            <UnText size={12} color={theme.colors.grey1}>
+                {props.course.cdmc}，{props.course.xm}，{props.course.kclb}，{props.course.khfsmc}，{props.course.kcbj}
+                ，{props.course.xqjmc}
+                {props.course.jcs}节，{props.course.zcd}
+            </UnText>
+        </Flex>
+    );
+}
+
+function CoursePropItem<K extends keyof Course>(props: {
+    course: Course;
+    prop: K;
+    label: string;
+    labelRender?: (value: Course[K], item: Course) => React.ReactNode;
+    valueRender?: (value: Course[K], item: Course) => React.ReactNode;
+    onClick?: (value: Course[K], item: Course) => void;
+}) {
+    const {theme} = useTheme();
+    const {getColor} = useBlocksColor();
+    const {store} = useUserConfig();
+    const androidRipple = store(s => s.theme.ripple);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+        },
+    });
+    const value = props.course[props.prop];
+    return (
+        <Pressable
+            android_ripple={androidRipple}
+            style={{flex: 1}}
+            onPress={() =>
+                props.onClick
+                    ? props.onClick(value, props.course)
+                    : copy(value.toString() || "-", `复制${props.label}成功`)
+            }>
+            <Flex direction="column" style={styles.card} gap={4} align="flex-start">
+                <UnText weight="bold" size={16}>
+                    {props.label}
+                </UnText>
+                <UnText numberOfLines={4}>{value.toString() || "-"}</UnText>
+            </Flex>
+        </Pressable>
     );
 }
