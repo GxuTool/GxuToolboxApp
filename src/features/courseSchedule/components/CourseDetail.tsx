@@ -7,7 +7,7 @@ import React, {useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/TeacherInfoSheet.tsx";
-import {UnText} from "@/components/un-ui";
+import {Icon, UnText} from "@/components/un-ui";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 
 interface Props extends ViewProps {
@@ -122,6 +122,7 @@ export function CourseDetail(props: Props) {
                 <CoursePropItem course={props.course} prop="qqqh" label="QQ群" />
             </Flex>
             <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
+            <CourseDebugCard course={props.course}/>
         </Flex>
     );
 }
@@ -149,6 +150,32 @@ function CourseInfoCard(props: {course: Course}) {
                 {props.course.jcs}节，{props.course.zcd}
             </UnText>
         </Flex>
+    );
+}
+function CourseDebugCard(props: {course: Course}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+    const {store} = useUserConfig();
+    const androidRipple = store(s => s.theme.ripple);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <>
+            <Pressable android_ripple={androidRipple} onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4} inline>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        查看课程数据
+                    </UnText>
+                </Flex>
+            </Pressable>
+        </>
     );
 }
 

@@ -147,6 +147,9 @@ export function ScheduleCard() {
                 })),
         [courseItems, examItems, holidayItems, defaultItem, onItemPress],
     );
+    useEffect(() => {
+        console.log('refreshed');
+    }, [scheduleItems]);
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 

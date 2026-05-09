@@ -8,6 +8,8 @@ import {UnText, UnTextProps} from "./UnText.tsx";
 import {UnCard, UnCardProps} from "@/components/un-ui/UnCard.tsx";
 import {UnTooltip} from "@/components/un-ui/UnTooltip.tsx";
 import {UnTable, UnTableCol, UnTableCols, UnTableProps} from "@/components/un-ui/UnTable.tsx";
+import {UnJsonEditor, UnJsonEditorModalProps, UnJsonEditorProps} from "@/components/un-ui/UnJsonEditor";
+import {UnPressable, UnPressableProps} from "@/components/un-ui/UnPressable";
 
 function vw(v: number) {
     return (v / 100) * Dimensions.get("window").width;
@@ -23,8 +25,11 @@ export type {
     UnTermSelectorProps,
     UnTextProps,
     UnCardProps,
+    UnJsonEditorModalProps,
+    UnJsonEditorProps,
+    UnPressableProps,
     UnTableProps,
     UnTableCol,
     UnTableCols,
 };
-export {Flex, Icon, NumberInput, UnRefreshControl, UnTermSelector, UnText, UnTooltip, UnCard, UnTable, vw, vh};
+export {Flex, Icon, NumberInput, UnJsonEditor, UnPressable, UnRefreshControl, UnTermSelector, UnText, UnTooltip, UnCard, UnTable, vw, vh};

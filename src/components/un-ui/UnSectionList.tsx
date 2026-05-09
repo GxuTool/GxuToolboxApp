@@ -1,10 +1,11 @@
-import {Linking, Pressable, SectionList, SectionListProps, StyleSheet, ToastAndroid, View} from "react-native";
+import {Linking, SectionList, SectionListProps, StyleSheet, ToastAndroid, View} from "react-native";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
+import {UnPressable} from "@/components/un-ui";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 export interface UnListSection {
@@ -26,7 +27,6 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
     const navigation = useNavigation();
     const {theme} = useTheme();
     const bgOpacity = store(s => s.theme.bgOpacity);
-    const ripple = store(s => s.theme.ripple);
 
     const bgColor = Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
         0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * bgOpacity) / 100,
@@ -96,13 +96,12 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
         switch (item.type) {
             case "navigation":
                 return (
-                    <Pressable
+                    <UnPressable
                         onPress={() => navigation.navigate(item.value)}
-                        style={itemStyle}
-                        android_ripple={ripple}>
+                        style={itemStyle}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Icon name="chevron-right" size={16} />
-                    </Pressable>
+                    </UnPressable>
                 );
             case "text":
                 return (
@@ -113,16 +112,15 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                 );
             case "link":
                 return (
-                    <Pressable
+                    <UnPressable
                         onPress={() => openUrl(item.url)}
-                        style={itemStyle}
-                        android_ripple={ripple}>
+                        style={itemStyle}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Text style={style.linkText}>
                             <Icon name="link" size={10} />
                             {item.value ?? item.url}
                         </Text>
-                    </Pressable>
+                    </UnPressable>
                 );
             case "any":
                 return (
