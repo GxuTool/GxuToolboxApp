@@ -1,10 +1,10 @@
-import {Pressable, PressableAndroidRippleConfig, ScrollView, StyleSheet, View} from "react-native";
+import {PressableAndroidRippleConfig, ScrollView, StyleSheet, View} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import React from "react";
-import {Flex, UnCard} from "@/components/un-ui";
+import {Flex, UnCard, UnPressable} from "@/components/un-ui";
 import {useWebView} from "@/hooks/app.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
@@ -35,7 +35,6 @@ export function ToolboxIndex() {
     const {openInWeb} = useWebView();
     const {store} = useUserConfig();
     const bgOpacity = store(s => s.theme.bgOpacity);
-    const ripple = store(s => s.theme.ripple);
 
     const toolList = [
         {
@@ -256,16 +255,15 @@ export function ToolboxIndex() {
                     key={`tool-${section.title}`}>
                     <Flex style={style.toolListContainer}>
                         {section.data.map(tool => (
-                            <Pressable
+                            <UnPressable
                                 key={`tool-${section.title}-${tool.label}`}
                                 style={style.settingItem}
-                                android_ripple={ripple}
-                                onPress={() => itemClick(tool)}>
+                                onPress={function() { return itemClick(tool); }}>
                                 <Flex direction="column" inline>
                                     <View style={style.toolIcon}>{tool.icon}</View>
                                     <Text style={style.toolLabel}>{tool.label}</Text>
                                 </Flex>
-                            </Pressable>
+                            </UnPressable>
                         ))}
                     </Flex>
                 </UnCard>

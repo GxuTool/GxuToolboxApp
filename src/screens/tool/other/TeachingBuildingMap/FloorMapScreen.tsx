@@ -1,4 +1,5 @@
-import{Image,ScrollView,StyleSheet,Pressable} from "react-native";
+import{Image,ScrollView,StyleSheet} from "react-native";
+import {UnPressable} from "@/components/un-ui";
 import React,{useState} from "react";
 import ImageViewing from "react-native-image-viewing";
 
@@ -11,9 +12,9 @@ export function FloorMapScreen({route}:any){
     return(
         <>
         <ScrollView contentContainerStyle={styles.container}>
-            <Pressable style={styles.imageButton}onPress={()=>setclick(true)}>
+            <UnPressable style={styles.imageButton}onPress={function(){return setclick(true);}}>
             <Image source={floor.image}style={styles.image}resizeMode="contain"/>
-            </Pressable>
+            </UnPressable>
         </ScrollView>
     <ImageViewing
         images={images}

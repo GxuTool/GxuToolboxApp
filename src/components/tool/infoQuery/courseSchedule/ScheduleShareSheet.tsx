@@ -1,5 +1,5 @@
-import {Dimensions, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
-import {Flex, Icon} from "@/components/un-ui";
+import {Dimensions, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {Flex, Icon, UnPressable} from "@/components/un-ui";
 import {Button, Text, useTheme} from "@rneui/themed";
 import React, {useRef} from "react";
 import {Color} from "@/shared/color.ts";
@@ -9,7 +9,6 @@ import RNFS from "react-native-fs";
 import {CameraRoll} from "@react-native-camera-roll/camera-roll";
 import Share, {ShareOptions} from "react-native-share";
 import Canvas from "react-native-canvas";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 type Props = {
     week: number;
@@ -18,9 +17,6 @@ type Props = {
 
 export function ScheduleShareSheet(props: Props) {
     const {theme} = useTheme();
-    const {store} = useUserConfig();
-    const ripple = store(s => s.theme.ripple);
-
     const {width: screenWidth, height: screenHeight} = Dimensions.get("window");
     const styles = StyleSheet.create({
         bottomSheetContainer: {
@@ -115,28 +111,26 @@ export function ScheduleShareSheet(props: Props) {
                 </Flex>
                 <Flex style={styles.flexContainer}>
                     <Flex justify={"center"} direction={"column"}>
-                        <Pressable
-                            android_ripple={ripple}
-                            onPress={async () => {
+                        <UnPressable
+                            onPress={async function() {
                                 await saveToLocal();
                             }}>
                             <Flex justify={"center"}>
                                 <Icon name="arrow-collapse-down" size={20} />
                             </Flex>
                             <Text>保存到相册</Text>
-                        </Pressable>
+                        </UnPressable>
                     </Flex>
                     <Flex justify={"center"} direction={"column"}>
-                        <Pressable
-                            android_ripple={ripple}
-                            onPress={async () => {
+                        <UnPressable
+                            onPress={async function() {
                                 await shareSchedule();
                             }}>
                             <Flex justify={"center"}>
                                 <Icon name="share" size={20} />
                             </Flex>
                             <Text>分享课表</Text>
-                        </Pressable>
+                        </UnPressable>
                     </Flex>
                 </Flex>
                 <Flex style={{marginBottom: 5}}>

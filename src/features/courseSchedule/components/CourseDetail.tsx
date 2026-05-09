@@ -1,5 +1,5 @@
 import {Course} from "@/type/infoQuery/course/course.ts";
-import {Pressable, StyleSheet, ToastAndroid, ViewProps} from "react-native";
+import {StyleSheet, ToastAndroid, ViewProps} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -7,7 +7,7 @@ import React, {useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/TeacherInfoSheet.tsx";
-import {Icon, UnText} from "@/components/un-ui";
+import {Icon, UnPressable, UnText} from "@/components/un-ui";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 
 interface Props extends ViewProps {
@@ -25,8 +25,6 @@ function copy(value: string, tip: string) {
 }
 
 function PropItem({item, ...props}: {item: Info} & Props) {
-    const {store} = useUserConfig();
-    const ripple = store(s => s.theme.ripple);
     const {theme} = useTheme();
     const label = item.label;
     const course = (props.course as any)._ori ?? props.course;
@@ -46,15 +44,15 @@ function PropItem({item, ...props}: {item: Info} & Props) {
     const info = {
         label: <Text style={style.infoLabel}>{label}</Text>,
         value: (
-            <Pressable android_ripple={ripple} onPress={() => copy(value + "", `复制${item.label}成功`)}>
+            <UnPressable onPress={function() { return copy(value + "", "复制" + item.label + "成功"); }}>
                 <Text style={style.infoData}>{value}</Text>
-            </Pressable>
+            </UnPressable>
         ),
     };
     switch (item.key) {
         case "cdmc":
             info.label = (
-                <Pressable android_ripple={ripple} onPress={() => Pos.parseAndSearchInMap(value + "")}>
+                <UnPressable onPress={function() { return Pos.parseAndSearchInMap(value + ""); }}>
                     <Flex gap={5} align="center">
                         <Text style={style.infoLabel}>{label}</Text>
                         <Icon
@@ -65,16 +63,16 @@ function PropItem({item, ...props}: {item: Info} & Props) {
                             size={20}
                         />
                     </Flex>
-                </Pressable>
+                </UnPressable>
             );
             break;
         case "xm":
             info.label = (
-                <Pressable android_ripple={ripple} onPress={() => props.onClick()}>
+                <UnPressable onPress={function() { return props.onClick(); }}>
                     <Flex gap={5} align="center">
                         <Text style={style.infoLabel}>{label}</Text>
                     </Flex>
-                </Pressable>
+                </UnPressable>
             );
     }
     return (
@@ -155,8 +153,6 @@ function CourseInfoCard(props: {course: Course}) {
 function CourseDebugCard(props: {course: Course}) {
     const {theme} = useTheme();
     const [modalOpen, setModalOpen] = useState(false);
-    const {store} = useUserConfig();
-    const androidRipple = store(s => s.theme.ripple);
 
     const styles = StyleSheet.create({
         card: {
@@ -167,14 +163,14 @@ function CourseDebugCard(props: {course: Course}) {
     });
     return (
         <>
-            <Pressable android_ripple={androidRipple} onPress={() => setModalOpen(true)}>
+            <UnPressable onPress={function() { return setModalOpen(true); }}>
                 <Flex style={styles.card} justify="flex-start" gap={4} inline>
                     <Icon name="console" size={16} inline />
                     <UnText weight="bold" size={16}>
                         查看课程数据
                     </UnText>
                 </Flex>
-            </Pressable>
+            </UnPressable>
         </>
     );
 }
@@ -189,8 +185,6 @@ function CoursePropItem<K extends keyof Course>(props: {
 }) {
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
-    const {store} = useUserConfig();
-    const androidRipple = store(s => s.theme.ripple);
 
     const styles = StyleSheet.create({
         card: {
@@ -200,20 +194,19 @@ function CoursePropItem<K extends keyof Course>(props: {
     });
     const value = props.course[props.prop];
     return (
-        <Pressable
-            android_ripple={androidRipple}
+        <UnPressable
             style={{flex: 1}}
-            onPress={() =>
-                props.onClick
+            onPress={function() {
+                return props.onClick
                     ? props.onClick(value, props.course)
-                    : copy(value.toString() || "-", `复制${props.label}成功`)
-            }>
+                    : copy(value.toString() || "-", "复制" + props.label + "成功");
+            }}>
             <Flex direction="column" style={styles.card} gap={4} align="flex-start">
                 <UnText weight="bold" size={16}>
                     {props.label}
                 </UnText>
                 <UnText numberOfLines={4}>{value.toString() || "-"}</UnText>
             </Flex>
-        </Pressable>
+        </UnPressable>
     );
 }

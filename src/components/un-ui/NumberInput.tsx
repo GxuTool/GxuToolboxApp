@@ -83,7 +83,7 @@ export function NumberInput(props: NumberInputProps) {
                         }
                     />
                 </Flex>
-            </Pressable>
+            </UnPressable>
             <View>
                 <TextInput
                     blurOnSubmit={true}
@@ -126,7 +126,7 @@ export function NumberInput(props: NumberInputProps) {
                         }
                     />
                 </Flex>
-            </Pressable>
+            </UnPressable>
         </Flex>
     );
 }

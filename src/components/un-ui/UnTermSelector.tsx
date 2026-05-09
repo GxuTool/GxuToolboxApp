@@ -59,7 +59,7 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                                 }}
                                 style={selectedAll ? style.selectedOption : style.option}>
                                 <UnText>全部学期</UnText>
-                            </Pressable>
+                            </UnPressable>
                             <Divider />
                         </>
                     )}
@@ -69,10 +69,9 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                                 <UnPressable
                                     onPress={() => setSelectedYear(+year[0])}
                                     key={year[1]}
-                                    style={+year[0] === +selectedYear ? style.selectedOption : style.option}
-                                    android_ripple={ripple}>
+                                    style={+year[0] === +selectedYear ? style.selectedOption : style.option}>
                                     <UnText>{year[1]}学年</UnText>
-                                </Pressable>
+                                </UnPressable>
                             ))}
                         </ScrollView>
                         <Divider orientation="vertical" />
@@ -84,7 +83,7 @@ export function UnTermSelector(props: UnTermSelectorProps) {
     
                                     style={term[0] === selectedTerm ? style.selectedOption : style.option}>
                                     <UnText>{term[1]}</UnText>
-                                </Pressable>
+                                </UnPressable>
                             ))}
                         </ScrollView>
                     </Flex>

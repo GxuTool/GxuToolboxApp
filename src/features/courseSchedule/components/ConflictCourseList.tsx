@@ -1,5 +1,5 @@
-import {Pressable} from "react-native";
 import React from "react";
+import {UnPressable} from "@/components/un-ui";
 import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import {Course} from "@/type/infoQuery/course/course.ts";
@@ -22,9 +22,9 @@ export function ConflictCourseList({courses, activeKch, onSelect, onPressActive}
             {courses.map(c => {
                 const isActive = c.kch === activeKch;
                 return (
-                    <Pressable
+                    <UnPressable
                         key={c.kch}
-                        onPress={() => (isActive ? onPressActive(c) : onSelect(c))}
+                        onPress={function() { return isActive ? onPressActive(c) : onSelect(c); }}
                         style={{
                             paddingVertical: 12,
                             paddingHorizontal: 8,
@@ -40,7 +40,7 @@ export function ConflictCourseList({courses, activeKch, onSelect, onPressActive}
                         <Text style={{fontSize: 12, color: theme.colors.grey3}}>
                             {[c.xm, c.cdmc].filter(Boolean).join(" · ")}
                         </Text>
-                    </Pressable>
+                    </UnPressable>
                 );
             })}
         </>

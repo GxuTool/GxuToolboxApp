@@ -1,10 +1,11 @@
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {Dialog, Image, Input, Text, useTheme} from "@rneui/themed";
 import {useEffect, useState} from "react";
-import {ActivityIndicator, Pressable, StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, StyleSheet, ToastAndroid, View} from "react-native";
 import {http} from "@/core/http.ts";
 import {userMgr} from "@/js/mgr/user.ts";
 import {authApi} from "@/js/auth/auth.ts";
+import {UnPressable} from "@/components/un-ui";
 
 export interface AttendanceQuickLoginProps {
     visible?: boolean;
@@ -74,13 +75,13 @@ export function AttendanceQuickLogin(props: AttendanceQuickLoginProps) {
                 <>
                     <View style={style.container}>
                         <Text>填入验证码，使用内存中的账号登录考勤系统</Text>
-                        <Pressable onPress={refreshCaptchaCode}>
+                        <UnPressable onPress={refreshCaptchaCode}>
                             <Image
                                 style={style.image}
                                 source={{uri: captchaCodeUri}}
                                 PlaceholderContent={<ActivityIndicator />}
                             />
-                        </Pressable>
+                        </UnPressable>
                         <Input
                             onChange={e => setCaptchaCode(e.nativeEvent.text)}
                             value={captchaCode}

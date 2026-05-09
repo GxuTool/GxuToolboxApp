@@ -1,9 +1,10 @@
-import { FlatList, Pressable, StyleSheet, View, Image } from "react-native";
+import { FlatList, StyleSheet, View, Image } from "react-native";
 import { Text, useTheme } from "@rneui/themed";
 import { TeachBuildingList } from "./data";
 import React, { useState } from "react";
 import ImageViewing from "react-native-image-viewing";
 import { Icon } from "@/components/un-ui/Icon.tsx";
+import { UnPressable } from "@/components/un-ui";
 
 export function TeachBuildingListScreen() {
   const {theme}=useTheme();
@@ -25,9 +26,9 @@ export function TeachBuildingListScreen() {
         ListFooterComponent={ExpandBuildingId && !ExpandFloor?<View style={styles.bottomSpacer}/>:null}
         renderItem={({item})=>(
           <View style={styles.section}>
-            <Pressable
+            <UnPressable
               style={styles.item}
-              onPress={()=>{
+              onPress={function(){
                 setExpandBuildingId((current) => {
                   const nextBuildingId=current===item.id?null:item.id;
                   setExpandFloor(null);
@@ -45,7 +46,7 @@ export function TeachBuildingListScreen() {
                   color={theme.colors.black}
                 />
               </View>
-            </Pressable>
+            </UnPressable>
             {ExpandBuildingId===item.id&&(
               <View style={styles.floorList}>
                 {item.floors.map((floor) => {
@@ -53,11 +54,11 @@ export function TeachBuildingListScreen() {
                   const isFloorExpanded=ExpandFloor===floorKey;
                   return (
                     <View key={floorKey}>
-                      <Pressable
+                      <UnPressable
                         style={styles.floorItem}
-                        onPress={()=>
-                          setExpandFloor((current) => (current===floorKey?null:floorKey))
-                        }
+                        onPress={function() {
+                          return setExpandFloor(function(current) { return current===floorKey?null:floorKey; });
+                        }}
                       >
                         <View style={styles.titleRow}>
                           <Text style={[styles.floorText,{color:theme.colors.black}]}>
@@ -69,15 +70,15 @@ export function TeachBuildingListScreen() {
                             color={theme.colors.black}
                           />
                         </View>
-                      </Pressable>
+                      </UnPressable>
                       {isFloorExpanded&&(
                         <View style={styles.previewCard}>
-                          <Pressable
+                          <UnPressable
                             style={styles.previewImageButton}
-                            onPress={()=>openViewer(floor.image)}
+                            onPress={function(){ return openViewer(floor.image); }}
                           >
                             <Image source={floor.image}style={styles.previewImage} resizeMode="contain"/>
-                          </Pressable>
+                          </UnPressable>
                         </View>
                       )}
                     </View>

@@ -1,10 +1,10 @@
-import {Pressable, PressableProps, StyleSheet, ViewStyle} from "react-native";
+import {PressableProps, StyleSheet, ViewStyle} from "react-native";
 import {IActivity} from "@/type/app/activity.ts";
 import React, {useMemo} from "react";
 import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourseData} from "@/hooks/useCourseData.ts";
 
 interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ripple"> {
@@ -14,7 +14,6 @@ interface ActivityItemProps extends Omit<PressableProps, "onPress" | "android_ri
 }
 
 export function ActivityItem(props: ActivityItemProps) {
-    const {store: ucStore} = useUserConfig();
     const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -54,11 +53,10 @@ export function ActivityItem(props: ActivityItemProps) {
     ]);
     return (
         // 课程元素
-        <Pressable
-            onPress={e => {
+        <UnPressable
+            onPress={function(e) {
                 props.onPress?.(item);
             }}
-            android_ripple={ucStore(s => s.theme.ripple)}
             style={[props.style, courseScheduleStyle.courseItem, itemStyle.item]}>
             <Flex direction="column" gap={5}>
                 <Text style={[itemStyle.text, {fontWeight: "bold"}]}>{item.name}</Text>
@@ -72,6 +70,6 @@ export function ActivityItem(props: ActivityItemProps) {
                     </Text>
                 )}
             </Flex>
-        </Pressable>
+        </UnPressable>
     );
 }

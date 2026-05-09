@@ -1,12 +1,12 @@
 import React, {useMemo} from "react";
-import {Pressable, StyleSheet, ViewStyle} from "react-native";
+import {StyleSheet, ViewStyle} from "react-native";
 import {Color} from "@/shared/color.ts";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {CourseClass} from "@/class/jw/course.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourseData} from "@/hooks/useCourseData.ts";
 import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
 
@@ -18,7 +18,6 @@ interface Props {
 }
 
 export function CourseItem(props: Props) {
-    const {store: ucStore} = useUserConfig();
     const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -58,11 +57,10 @@ export function CourseItem(props: Props) {
     ]);
     return (
         // 课程元素
-        <Pressable
-            onPress={e => {
+        <UnPressable
+            onPress={function(e) {
                 props.onCoursePress?.(course);
             }}
-            android_ripple={ucStore(s => s.theme.ripple)}
             style={[props.style, itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
                 {courseInfoVisible.name && (
@@ -94,6 +92,6 @@ export function CourseItem(props: Props) {
                     </Text>
                 )}
             </Flex>
-        </Pressable>
+        </UnPressable>
     );
 }

@@ -1,8 +1,8 @@
-import {Pressable, StyleSheet} from "react-native";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {StyleSheet} from "react-native";
 import {useCourseData} from "@/hooks/useCourseData.ts";
 import React, {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Badge, Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -19,7 +19,6 @@ interface StackCourseItemProps {
 }
 
 export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}: StackCourseItemProps) => {
-    const {store: ucStore} = useUserConfig();
     const {store} = useCourseData();
     const {store: conflictStore} = useConflictCourseStore();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
@@ -77,7 +76,7 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
     );
 
     return (
-        <Pressable style={styles.container} onPress={handlePress} android_ripple={ucStore(s => s.theme.ripple)}>
+        <UnPressable style={styles.container} onPress={handlePress}>
             {course.length > 1 && (
                 <Badge
                     value={course.length}
@@ -115,6 +114,6 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
                     </Text>
                 )}
             </Flex>
-        </Pressable>
+        </UnPressable>
     );
 });

@@ -1,6 +1,7 @@
 import React from "react";
-import {Pressable, StyleProp, View, ViewStyle} from "react-native";
+import {StyleProp, View, ViewStyle} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {SchoolTermValue, SchoolYearValue} from "@/type/global.ts";
@@ -65,9 +66,9 @@ export function CourseCardSetting(props: Props) {
                 {(Object.keys(infoVisibleOptions) as (keyof typeof infoVisibleOptions)[]).map(key => {
                     const active = courseInfoVisible[key];
                     return (
-                        <Pressable
+                        <UnPressable
                             key={key}
-                            onPress={() => changeCourseInfoVisible(key, !active)}
+                            onPress={function() { return changeCourseInfoVisible(key, !active); }}
                             style={{
                                 paddingVertical: 6,
                                 paddingHorizontal: 14,
@@ -85,7 +86,7 @@ export function CourseCardSetting(props: Props) {
                                 }}>
                                 {infoVisibleOptions[key]}
                             </Text>
-                        </Pressable>
+                        </UnPressable>
                     );
                 })}
             </View>
@@ -173,9 +174,9 @@ export function CourseCardSetting(props: Props) {
                         vivid: "鲜明",
                     };
                     return (
-                        <Pressable
+                        <UnPressable
                             key={name}
-                            onPress={() => {
+                            onPress={function() {
                                 store.getState().update("theme", { ...store.getState().theme, palette: name });
                             }}
                             style={{
@@ -210,7 +211,7 @@ export function CourseCardSetting(props: Props) {
                                     />
                                 ))}
                             </View>
-                        </Pressable>
+                        </UnPressable>
                     );
                 })}
             </View>

@@ -1,12 +1,12 @@
 import React, {useMemo} from "react";
-import {Pressable, StyleSheet} from "react-native";
+import {StyleSheet} from "react-native";
 import {Color} from "@/shared/color.ts";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import moment from "moment/moment";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourseData} from "@/hooks/useCourseData.ts";
 
 interface Props {
@@ -15,7 +15,6 @@ interface Props {
 }
 
 export function CourseScheduleExamItem(props: Props) {
-    const {store: ucStore} = useUserConfig();
     const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const weekdayHeight = store(s => s.theme.weekdayHeight);
@@ -80,11 +79,10 @@ export function CourseScheduleExamItem(props: Props) {
 
     return (
         // 课程元素
-        <Pressable
-            onPress={e => {
+        <UnPressable
+            onPress={function(e) {
                 props.onPress?.(examInfo);
             }}
-            android_ripple={ucStore(s => s.theme.ripple)}
             style={[itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
                 <Text style={itemStyle.text}>考试</Text>
@@ -95,6 +93,6 @@ export function CourseScheduleExamItem(props: Props) {
                 </Text>
                 <Text style={itemStyle.text}>{`<${examInfo.zwh}>`}</Text>
             </Flex>
-        </Pressable>
+        </UnPressable>
     );
 }

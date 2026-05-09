@@ -1,9 +1,9 @@
-import {Dimensions, Pressable, ScrollView, StyleSheet, View} from "react-native";
+import {Dimensions, ScrollView, StyleSheet, View} from "react-native";
 import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
 import {BottomSheet, Divider, Image, ListItem, TabView, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
 import {DetailResData, SimpleTeacherInfo} from "@/type/api/teacherInfo/info.ts";
-import {Flex, UnText, vh} from "@/components/un-ui";
+import {Flex, UnPressable, UnText, vh} from "@/components/un-ui";
 import {Color} from "@/shared/color.ts";
 import {CollapsedInfo} from "@/components/tool/infoQuery/courseSchedule/CollapsedInfo.tsx";
 
@@ -59,12 +59,12 @@ export function TeacherInfoSheet(props: Props) {
                             paddingTop: 4,
                         }}>
                         <UnText size={18}>教师个人信息</UnText>
-                        <Pressable
-                            onPress={() => {
+                        <UnPressable
+                            onPress={function() {
                                 setTabIndex(0);
                             }}>
                             <UnText size={16}>返回</UnText>
-                        </Pressable>
+                        </UnPressable>
                     </View>
                 )}
                 <TabView value={tabIndex} animationType={"timing"}>

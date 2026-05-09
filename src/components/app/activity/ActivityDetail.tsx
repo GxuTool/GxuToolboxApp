@@ -1,10 +1,10 @@
-import {Pressable, StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
+import {StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
 import {ListItem, Text} from "@rneui/themed";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
 import React from "react";
 import {IActivity} from "@/type/app/activity.ts";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 interface Props extends ViewProps {
     activity: IActivity;
@@ -22,7 +22,6 @@ function copy(value: string, tip: string) {
 }
 
 function PropItem({item, ...props}: {item: Info} & Props) {
-    const {store} = useUserConfig();
     const label = item.label;
     const value = item.render !== undefined ? item.render(props.activity[item.key], props.activity) : props.activity[item.key];
     const style = StyleSheet.create({
@@ -40,11 +39,10 @@ function PropItem({item, ...props}: {item: Info} & Props) {
     const info = {
         label: <Text style={style.infoLabel}>{label}</Text>,
         value: (
-            <Pressable
-                android_ripple={store(s => s.theme.ripple)}
-                onPress={() => typeof value === "string" && copy(value + "", `复制${item.label}成功`)}>
+            <UnPressable
+                onPress={function() { return typeof value === "string" && copy(value + "", "复制" + item.label + "成功"); }}>
                 <Text style={style.infoData}>{value}</Text>
-            </Pressable>
+            </UnPressable>
         ),
     };
     return (

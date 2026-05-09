@@ -1,5 +1,5 @@
 import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
-import {Pressable, StyleSheet, View} from "react-native";
+import {StyleSheet, View} from "react-native";
 import React, {useCallback, useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -11,7 +11,7 @@ import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/Cour
 import {useNavigation} from "@react-navigation/native";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {UnText} from "@/components/un-ui";
+import {UnPressable, UnText} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
@@ -67,7 +67,6 @@ export function ScheduleCard() {
 
     const [year, setYear] = useState(+ucStore(s => s.jw.year));
     const [term, setTerm] = useState<SchoolTermValue>(ucStore(s => s.jw.term));
-    const ripple = ucStore(s => s.theme.ripple);
     const startDay = useStartDay(year, term);
 
     const {items: courseItems = [], refresh: refreshCourse} = useCourse(year, term);
@@ -209,9 +208,8 @@ export function ScheduleCard() {
             <Flex justify="space-between" style={style.cardTitle}>
                 <Flex direction="row" align="center" gap={8}>
                     <Text h4>日程表</Text>
-                    <Pressable
-                        android_ripple={ucStore(s => s.theme.ripple)}
-                        onPress={() => setSheet({type: "menu"})}
+                    <UnPressable
+                        onPress={function() { return setSheet({type: "menu"}); }}
                         style={{flexDirection: "row", alignItems: "center", gap: 8}}>
                         {[JWauthState, unifiedAuthState, attendanceAuthState].map(i =>
                             i?.status !== "authenticated" ? (
@@ -220,24 +218,24 @@ export function ScheduleCard() {
                                 <Icon name="account-network-outline" size={24} color={theme.colors.success} />
                             ),
                         )}
-                    </Pressable>
+                    </UnPressable>
                 </Flex>
                 <Flex gap={15} justify="flex-end">
-                    <Pressable onPress={handleRefresh} disabled={refreshing}>
+                    <UnPressable onPress={handleRefresh} disabled={refreshing}>
                         <Icon
                             name={refreshing ? "loading" : "refresh"}
                             size={24}
                             style={refreshing ? {opacity: 0.5} : undefined}
                         />
-                    </Pressable>
+                    </UnPressable>
                     {rest.activePage + 1 !== realCurrentWeek && (
-                        <Pressable android_ripple={ripple} onPress={() => rest.setPage(realCurrentWeek - 1)}>
+                        <UnPressable onPress={function() { return rest.setPage(realCurrentWeek - 1); }}>
                             <Icon name="history" size={24} />
-                        </Pressable>
+                        </UnPressable>
                     )}
-                    <Pressable android_ripple={ripple} onPress={() => setSheet({type: "menu"})}>
+                    <UnPressable onPress={function() { return setSheet({type: "menu"}); }}>
                         <Icon name="menu" size={24} />
-                    </Pressable>
+                    </UnPressable>
                 </Flex>
             </Flex>
             <Divider />
@@ -273,8 +271,8 @@ export function ScheduleCard() {
                                 attendanceAuth={attendanceAuthState}
                                 menuItemStyle={style.menuItem}
                             />
-                            <Pressable
-                                onPress={() => {
+                            <UnPressable
+                                onPress={function() {
                                     setSheet({type: "closed"});
                                     navigation.navigate("ScheduleEdit");
                                 }}>
@@ -282,19 +280,19 @@ export function ScheduleCard() {
                                     <Icon name="table-edit" size={22} />
                                     <UnText>事件编辑</UnText>
                                 </View>
-                            </Pressable>
-                            <Pressable onPress={() => setSheet({type: "share"})}>
+                            </UnPressable>
+                            <UnPressable onPress={function() { return setSheet({type: "share"}); }}>
                                 <View style={style.menuItem}>
                                     <Icon type="antdesign" name="share-alt" size={22} />
                                     <UnText>分享课表</UnText>
                                 </View>
-                            </Pressable>
-                            <Pressable onPress={() => setSheet({type: "setting"})}>
+                            </UnPressable>
+                            <UnPressable onPress={function() { return setSheet({type: "setting"}); }}>
                                 <View style={style.menuItem}>
                                     <Icon name="cog" size={22} />
                                     <UnText>课表设置</UnText>
                                 </View>
-                            </Pressable>
+                            </UnPressable>
                         </>
                     )}
                     {sheet.type === "setting" && (

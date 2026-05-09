@@ -1,9 +1,9 @@
-import {Pressable, StyleSheet} from "react-native";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {StyleSheet} from "react-native";
 import {useCourseData} from "@/hooks/useCourseData.ts";
 import {ScheduleTableItem} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleTable.tsx";
 import {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -16,7 +16,6 @@ interface NewExamItemProps {
     onPress?: (item: ScheduleTableItem<ExamInfo>) => void;
 }
 export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
-    const {store: ucStore} = useUserConfig();
     const {store} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
@@ -78,10 +77,9 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
     );
 
     return (
-        <Pressable
+        <UnPressable
             style={styles.container}
-            onPress={() => onPress?.(item)}
-            android_ripple={ucStore(s => s.theme.ripple)}>
+            onPress={function() { return onPress?.(item); }}>
             <Flex direction="column" gap={2} style={{padding: 4, paddingTop: 10, height: "100%"}} align="center">
                 <Text style={styles.badge}>考试</Text>
                 <Text style={styles.title}>{item.title}</Text>
@@ -93,6 +91,6 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
                 )}
                 {!!seat && <Text style={styles.meta}>{`${seat}`}</Text>}
             </Flex>
-        </Pressable>
+        </UnPressable>
     );
 });

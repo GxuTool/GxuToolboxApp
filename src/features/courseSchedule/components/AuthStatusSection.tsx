@@ -1,4 +1,5 @@
-import {Pressable, View} from "react-native";
+import {View} from "react-native";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {Text, useTheme} from "@rneui/themed";
@@ -30,10 +31,10 @@ export function AuthStatusSection({jwAuth, unifiedAuth, attendanceAuth, menuItem
                 账号状态
             </Text>
             {items.map(item => (
-                <Pressable
+                <UnPressable
                     key={item.label}
                     style={menuItemStyle}
-                    onPress={() => navigation.navigate("setting", {screen: item.screen})}>
+                    onPress={function() { return navigation.navigate("setting", {screen: item.screen}); }}>
                     <Flex align="center" gap={16} style={{flex: 1}}>
                         <Icon name={item.icon} size={22} color={theme.colors.grey2} />
                         <Text style={{flex: 1}}>{item.label}</Text>
@@ -47,7 +48,7 @@ export function AuthStatusSection({jwAuth, unifiedAuth, attendanceAuth, menuItem
                             }
                         />
                     </Flex>
-                </Pressable>
+                </UnPressable>
             ))}
         </View>
     );

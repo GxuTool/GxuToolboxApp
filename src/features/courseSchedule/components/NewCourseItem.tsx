@@ -1,9 +1,9 @@
-import {Pressable, StyleSheet, View} from "react-native";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {StyleSheet, View} from "react-native";
 import {useCourseData} from "@/hooks/useCourseData.ts";
 
 import React, {memo, useMemo} from "react";
 import {Color} from "@/shared/color.ts";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -20,7 +20,6 @@ interface NewCourseItemProps {
 }
 
 export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItemProps) => {
-    const {store: ucStore} = useUserConfig();
     const {store} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
     const courseItemMargin = store(s => s.theme.courseItemMargin);
@@ -77,10 +76,9 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
     );
 
     return (
-        <Pressable
+        <UnPressable
             style={styles.container}
-            onPress={() => onPress?.(item)}
-            android_ripple={ucStore(s => s.theme.ripple)}>
+            onPress={function() { return onPress?.(item); }}>
             {conflictCount && conflictCount > 1 && (
                 <View style={styles.badge}>
                     <Text style={styles.badgeText}>{conflictCount}</Text>
@@ -124,6 +122,6 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     </Text>
                 )}
             </Flex>
-        </Pressable>
+        </UnPressable>
     );
 });

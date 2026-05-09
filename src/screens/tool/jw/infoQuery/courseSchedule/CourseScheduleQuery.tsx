@@ -1,4 +1,5 @@
-import {ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, Linking, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {BottomSheet, Card, Divider, Text, useTheme} from "@rneui/themed";
 import React, {useCallback, useEffect, useMemo, useState} from "react";
@@ -26,7 +27,6 @@ export function CourseScheduleQuery() {
     const {theme} = useTheme();
     const {store} = useUserConfig();
 
-    const androidRipple = store(s => s.theme.ripple);
     const [year, setYear] = useState(+store(s => s.jw.year));
     const [term, setTerm] = useState<SchoolTermValue>(store(s => s.jw.term));
     const pageView = usePagerView({pagesAmount: 20});
@@ -91,9 +91,9 @@ export function CourseScheduleQuery() {
             dataIndex: "qq",
             render: qq =>
                 qq?.trim() ? (
-                    <Pressable android_ripple={androidRipple} onPress={() => qqLink(qq)}>
+                    <UnPressable onPress={function() { return qqLink(qq); }}>
                         <Text style={style.tableText}>{qq}</Text>
-                    </Pressable>
+                    </UnPressable>
                 ) : (
                     "-"
                 ),
