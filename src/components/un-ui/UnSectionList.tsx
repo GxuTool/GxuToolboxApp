@@ -96,9 +96,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
         switch (item.type) {
             case "navigation":
                 return (
-                    <UnPressable
-                        onPress={() => navigation.navigate(item.value)}
-                        style={itemStyle}>
+                    <UnPressable onPress={() => navigation.navigate(item.value)} style={itemStyle}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Icon name="chevron-right" size={16} />
                     </UnPressable>
@@ -112,13 +110,10 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                 );
             case "link":
                 return (
-                    <UnPressable
-                        onPress={() => openUrl(item.url)}
-                        style={itemStyle}>
+                    <UnPressable onPress={() => openUrl(item.url)} style={itemStyle}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Text style={style.linkText}>
-                            <Icon name="link" size={10} />
-                            {item.value ?? item.url}
+                            {item.value ?? item.url} <Icon name="open-in-new" size={12} />
                         </Text>
                     </UnPressable>
                 );

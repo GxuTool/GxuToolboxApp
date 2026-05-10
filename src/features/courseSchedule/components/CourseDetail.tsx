@@ -1,5 +1,5 @@
 import {Course} from "@/type/infoQuery/course/course.ts";
-import {StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
+import {Linking, StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -105,7 +105,7 @@ export function CourseDetail(props: Props) {
     const devMode = store(s => s.devMode);
     return (
         <CourseContext.Provider value={props.course}>
-            <Flex {...props} gap={4} direction="column">
+            <Flex {...props} gap={16} direction="column">
                 <CourseInfoCard />
                 <Flex justify="center">
                     <Text>点击属性，复制到剪切板</Text>
@@ -152,7 +152,30 @@ export function CourseDetail(props: Props) {
                 <Flex gap={10}>
                     <CoursePropItem prop="xkrs" label="选课人数" />
                     <CoursePropItem prop="zzrl" label="座位数" />
-                    <CoursePropItem prop="qqqh" label="QQ群" />
+                    <CoursePropItem
+                        prop="qqqh"
+                        label="QQ群"
+                        labelRender={() => (
+                            <Flex gap={5} align="center" inline>
+                                <UnText weight="bold" size={16}>
+                                    QQ群
+                                </UnText>
+                                <Icon
+                                    name="open-in-new"
+                                    color={Color.mix(theme.colors.primary, theme.colors.black).rgbaString}
+                                    size={16}
+                                />
+                            </Flex>
+                        )}
+                        onClick={async qq => {
+                            const url = `mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${qq}&card_type=group&source=qrcode`;
+                            await Linking.openURL(url).catch(e => {
+                                console.error(e);
+                                ToastAndroid.show("无法直接跳转QQ，已将QQ群号复制至剪切板", ToastAndroid.SHORT);
+                                Clipboard.setString(qq);
+                            });
+                        }}
+                    />
                 </Flex>
                 <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
                 {devMode && <CourseDebugCard />}
@@ -249,7 +272,7 @@ function CoursePropItem<K extends keyof Course>(props: {
         <UnPressable
             style={{flex: 1}}
             onPress={function () {
-                return props.onClick
+                return props.onClick !== undefined
                     ? props.onClick(value, course)
                     : copy(value.toString() || "-", "复制" + props.label + "成功");
             }}>
