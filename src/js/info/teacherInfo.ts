@@ -11,14 +11,16 @@ const http = axios.create({
 export const teacherInfoApi = {
     /**
      * 获取教师基础信息
-     * @param name 教师姓名
+     * @param key 教师姓名/单位名称/职称/一级学科
+     * @param page 页数
      */
-    getBaseInfo: async (name: string): Promise<BaseInfoRes> => {
+    getBaseInfo: async (key: string, page: number = 1): Promise<BaseInfoRes> => {
         const res = await http.get<BaseInfoRes>("/findByCondition", {
             params: {
-                xm: name,
-                pageNum: 1,
-                pageSize: 1000,
+                xm: key,
+                indexSearchKey: key,
+                pageNum: page,
+                pageSize: 12,
             },
         });
         return res.data;
@@ -39,4 +41,20 @@ export const teacherInfoApi = {
         });
         return res.data;
     },
+
+    /**
+     * 按姓氏首字母查询
+     * @param letter 姓氏字母
+     * @param page 页数
+     */
+    getInfoByFirstLetter: async (letter: string, page: number): Promise<BaseInfoRes> => {
+        const res = await http.get("/findByCondition", {
+            params: {
+                firstLetter: letter,
+                pageNum: page,
+                pageSize: 12,
+            }
+        });
+        return res.data;
+    }
 };
