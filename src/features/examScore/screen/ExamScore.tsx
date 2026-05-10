@@ -13,9 +13,11 @@ import {useNavigation} from "@react-navigation/native";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
 import {electiveAPI} from "@/features/electiveStrategy/api";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 
 export function ExamScore() {
     const {store: ucStore} = useUserConfig();
+    const devMode = ucStore(s => s.devMode);
     const {theme} = useTheme();
     const navigation = useNavigation();
     const [apiRes, setApiRes] = useState<ExamScoreQueryRes>({} as ExamScoreQueryRes);
@@ -145,8 +147,40 @@ export function ExamScore() {
                             </View>
                         </View>
                     )}
+                    {devMode && (
+                        <Flex gap={8} direction="column">
+                            <ScheduleDataDebugCard label="查看考试成绩数据" data={apiRes} />
+                            <ScheduleDataDebugCard label="查看未出分科目" data={notScore} />
+                        </Flex>
+                    )}
                 </Flex>
             </View>
         </ScrollView>
+    );
+}
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
     );
 }

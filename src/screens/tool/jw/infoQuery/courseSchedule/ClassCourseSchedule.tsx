@@ -21,10 +21,14 @@ import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
 import {Course} from "@/type/infoQuery/course/course.ts";
 import {Color} from "@/shared/color.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 
 export function ClassCourseSchedule() {
     const {openInJw} = useWebView();
     const {theme} = useTheme();
+    const {store} = useUserConfig();
+    const devMode = store(s => s.devMode);
 
     const {
         school,
@@ -177,6 +181,13 @@ export function ClassCourseSchedule() {
                         )}
                     </>
                 )}
+                {devMode && (
+                    <Flex gap={8} direction="column">
+                        <ScheduleDataDebugCard label="查看班级列表" data={list} />
+                        <ScheduleDataDebugCard label="查看班级理论课表" data={theorySchedule} />
+                        <ScheduleDataDebugCard label="查看班级实践课表" data={practicalSchedule} />
+                    </Flex>
+                )}
             </View>
             <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
                 <View
@@ -199,3 +210,29 @@ const style = StyleSheet.create({
     container: {padding: "5%"},
     label: {textAlign: "right"},
 });
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
+    );
+}

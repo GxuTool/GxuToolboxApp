@@ -1,7 +1,10 @@
 import {ScrollView, StyleSheet, ToastAndroid} from "react-native";
 import {Button, Tab, TabView, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
+import {Color} from "@/shared/color.ts";
 import {TimeSchedule} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
+import {Icon, UnJsonEditor, UnPressable} from "@/components/un-ui";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {
     Flex,
     NumberInput,
@@ -109,6 +112,8 @@ interface ScreenType {
 }
 
 function TableScreen(props: ScreenType) {
+    const {store} = useUserConfig();
+    const devMode = store(s => s.devMode);
     const [week, setWeek] = useState(
         +moment.duration(moment().diff(props.calender?.firstWeekBegin)).asWeeks().toFixed() + 1,
     );
@@ -176,12 +181,20 @@ function TableScreen(props: ScreenType) {
                 showDayHighlight
                 showTimeSpanHighlight
             />
+            {devMode && (
+                <Flex gap={8} direction="column">
+                    <ScheduleDataDebugCard label="查看考勤课表数据" data={courseList} />
+                    <ScheduleDataDebugCard label="查看考勤记录数据" data={attendanceData} />
+                </Flex>
+            )}
         </ScrollView>
     );
 }
 
 function RecordScreen(props: ScreenType) {
     const {theme} = useTheme();
+    const {store} = useUserConfig();
+    const devMode = store(s => s.devMode);
     const [page, setPage] = useState(1);
     const [apiRes, setApiRes] = useState<AST.PageRes<AST.AttendanceData>>();
 
@@ -294,7 +307,39 @@ function RecordScreen(props: ScreenType) {
                     </Flex>
                     <Text>每页20条记录</Text>
                 </Flex>
+                {devMode && (
+                    <Flex gap={8} direction="column">
+                        <ScheduleDataDebugCard label="查看考勤记录API数据" data={apiRes} />
+                        <ScheduleDataDebugCard label="查看考勤记录表格数据" data={tableData} />
+                    </Flex>
+                )}
             </Flex>
         </ScrollView>
+    );
+}
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
     );
 }

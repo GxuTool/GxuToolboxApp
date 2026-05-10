@@ -1,6 +1,6 @@
-import {ScrollView} from "react-native";
+import {ScrollView, StyleSheet} from "react-native";
 import React, {useEffect, useState} from "react";
-import {Button, Text} from "@rneui/themed";
+import {Button, Text, useTheme} from "@rneui/themed";
 import "moment/locale/zh-cn";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {store} from "@/core/store.ts";
@@ -8,9 +8,13 @@ import {PhyExp} from "@/type/infoQuery/course/course.ts";
 import {courseApi} from "@/js/jw/course.ts";
 import moment from "moment/moment";
 import {useWebView} from "@/hooks/app.ts";
-import {UnTable, UnTableCols} from "@/components/un-ui";
+import {Icon, UnJsonEditor, UnPressable, UnTable, UnTableCols, UnText} from "@/components/un-ui";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {Color} from "@/shared/color.ts";
 
 export function PhyExpScreen() {
+    const {store} = useUserConfig();
+    const devMode = store(s => s.devMode);
     const [tableData, setTableData] = useState<PhyExp[]>([]);
 
     const cols: UnTableCols<PhyExp> = [
@@ -86,7 +90,34 @@ export function PhyExpScreen() {
                 ) : (
                     <Text>当前学期没有实验课，无法查询过往学期的课程列表</Text>
                 )}
+                {devMode && <ScheduleDataDebugCard label="查看物理实验课数据" data={tableData} />}
             </Flex>
         </ScrollView>
+    );
+}
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
     );
 }

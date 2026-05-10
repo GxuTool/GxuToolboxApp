@@ -1,5 +1,5 @@
 import {ActivityIndicator, Linking, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
-import {UnPressable} from "@/components/un-ui";
+import {Icon, UnJsonEditor, UnPressable, UnTable, UnTableCols, UnText} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {BottomSheet, Card, Divider, Text, useTheme} from "@rneui/themed";
 import React, {useCallback, useEffect, useMemo, useState} from "react";
@@ -9,7 +9,6 @@ import {PracticalCourseList} from "@/features/courseSchedule/components/Practica
 import {usePagerView} from "react-native-pager-view";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {UnTable, UnTableCols} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {Color} from "@/shared/color.ts";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
@@ -26,6 +25,7 @@ import moment from "moment/moment";
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
     const {store} = useUserConfig();
+    const devMode = store(s => s.devMode);
 
     const [year, setYear] = useState(+store(s => s.jw.year));
     const [term, setTerm] = useState<SchoolTermValue>(store(s => s.jw.term));
@@ -158,6 +158,12 @@ export function CourseScheduleQuery() {
                         <PracticalCourseList courseList={practiceItems} />
                     </>
                 )}
+                {devMode && (
+                    <Flex gap={8} direction="column">
+                        <ScheduleDataDebugCard label="查看课程数据" data={courseItems} />
+                        <ScheduleDataDebugCard label="查看实践课数据" data={practiceItems} />
+                    </Flex>
+                )}
                 <Divider />
                 <Text h4>课程列表</Text>
                 <ScrollView horizontal style={{marginTop: 10}}>
@@ -178,5 +184,31 @@ export function CourseScheduleQuery() {
                 </View>
             </BottomSheet>
         </ScrollView>
+    );
+}
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
     );
 }

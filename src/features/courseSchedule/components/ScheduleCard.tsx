@@ -11,7 +11,7 @@ import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/Cour
 import {useNavigation} from "@react-navigation/native";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {UnPressable, UnText} from "@/components/un-ui";
+import {UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
@@ -52,6 +52,7 @@ type SheetState =
  */
 export function ScheduleCard() {
     const {store: ucStore} = useUserConfig();
+    const devMode = ucStore(s => s.devMode);
     const navigation = useNavigation();
     const {theme} = useTheme();
     const pagerView = usePagerView({pagesAmount: 20});
@@ -147,7 +148,7 @@ export function ScheduleCard() {
         [courseItems, examItems, holidayItems, defaultItem, onItemPress],
     );
     useEffect(() => {
-        console.log('refreshed');
+        console.log("refreshed");
     }, [scheduleItems]);
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
@@ -209,7 +210,9 @@ export function ScheduleCard() {
                 <Flex direction="row" align="center" gap={8}>
                     <Text h4>日程表</Text>
                     <UnPressable
-                        onPress={function() { return setSheet({type: "menu"}); }}
+                        onPress={function () {
+                            return setSheet({type: "menu"});
+                        }}
                         style={{flexDirection: "row", alignItems: "center", gap: 8}}>
                         {[JWauthState, unifiedAuthState, attendanceAuthState].map(i =>
                             i?.status !== "authenticated" ? (
@@ -229,11 +232,17 @@ export function ScheduleCard() {
                         />
                     </UnPressable>
                     {rest.activePage + 1 !== realCurrentWeek && (
-                        <UnPressable onPress={function() { return rest.setPage(realCurrentWeek - 1); }}>
+                        <UnPressable
+                            onPress={function () {
+                                return rest.setPage(realCurrentWeek - 1);
+                            }}>
                             <Icon name="history" size={24} />
                         </UnPressable>
                     )}
-                    <UnPressable onPress={function() { return setSheet({type: "menu"}); }}>
+                    <UnPressable
+                        onPress={function () {
+                            return setSheet({type: "menu"});
+                        }}>
                         <Icon name="menu" size={24} />
                     </UnPressable>
                 </Flex>
@@ -261,6 +270,12 @@ export function ScheduleCard() {
             />
             <Divider />
             <PracticalCourseList courseList={practiceItems} />
+            {devMode && (
+                <Flex gap={8} style={{paddingHorizontal: 12}} direction="column">
+                    <ScheduleDataDebugCard label="查看课程数据" data={rawItems} />
+                    <ScheduleDataDebugCard label="查看实践课数据" data={practiceItems} />
+                </Flex>
+            )}
             <BottomSheet isVisible={sheet.type !== "closed"} onBackdropPress={() => setSheet({type: "closed"})}>
                 <View style={style.bottomSheetContainer}>
                     {sheet.type === "menu" && (
@@ -272,7 +287,7 @@ export function ScheduleCard() {
                                 menuItemStyle={style.menuItem}
                             />
                             <UnPressable
-                                onPress={function() {
+                                onPress={function () {
                                     setSheet({type: "closed"});
                                     navigation.navigate("ScheduleEdit");
                                 }}>
@@ -281,13 +296,19 @@ export function ScheduleCard() {
                                     <UnText>事件编辑</UnText>
                                 </View>
                             </UnPressable>
-                            <UnPressable onPress={function() { return setSheet({type: "share"}); }}>
+                            <UnPressable
+                                onPress={function () {
+                                    return setSheet({type: "share"});
+                                }}>
                                 <View style={style.menuItem}>
                                     <Icon type="antdesign" name="share-alt" size={22} />
                                     <UnText>分享课表</UnText>
                                 </View>
                             </UnPressable>
-                            <UnPressable onPress={function() { return setSheet({type: "setting"}); }}>
+                            <UnPressable
+                                onPress={function () {
+                                    return setSheet({type: "setting"});
+                                }}>
                                 <View style={style.menuItem}>
                                     <Icon name="cog" size={22} />
                                     <UnText>课表设置</UnText>
@@ -346,5 +367,31 @@ export function ScheduleCard() {
                 </View>
             </BottomSheet>
         </View>
+    );
+}
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
     );
 }
