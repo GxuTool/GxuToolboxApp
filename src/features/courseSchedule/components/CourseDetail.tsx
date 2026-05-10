@@ -134,7 +134,18 @@ export function CourseDetail(props: Props) {
                     />
                 </Flex>
                 <Flex gap={10}>
-                    <CoursePropItem prop="xm" label="上课教师" />
+                    <CoursePropItem
+                        prop="xm"
+                        label="上课教师"
+                        valueRender={v => <UnText>{v}</UnText>}
+                        labelRender={() => (
+                            <UnPressable onPress={() => setVisible(true)}>
+                                <UnText weight="bold" size={16}>
+                                    上课教师
+                                </UnText>
+                            </UnPressable>
+                        )}
+                    />
                     <CoursePropItem prop="khfsmc" label="考核方式" />
                     <CoursePropItem prop="xf" label="学分" />
                 </Flex>
