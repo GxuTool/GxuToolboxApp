@@ -1,14 +1,17 @@
 import {Course} from "@/type/infoQuery/course/course.ts";
-import {StyleSheet, ToastAndroid, ViewProps} from "react-native";
+import {StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
-import React, {useState} from "react";
+import React, {createContext, useContext, useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/TeacherInfoSheet.tsx";
-import {Icon, UnPressable, UnText} from "@/components/un-ui";
+import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
+import {Pos} from "@/js/pos.ts";
+
+const CourseContext = createContext<Course | null>(null);
 
 interface Props extends ViewProps {
     course: Course;
@@ -24,10 +27,10 @@ function copy(value: string, tip: string) {
     ToastAndroid.show(tip, ToastAndroid.SHORT);
 }
 
-function PropItem({item, ...props}: {item: Info} & Props) {
+function PropItem({item, ...props}: {item: Info}) {
     const {theme} = useTheme();
     const label = item.label;
-    const course = (props.course as any)._ori ?? props.course;
+    const course = (useContext(CourseContext)! as any)._ori ?? useContext(CourseContext)!;
     const value = course[item.key] ?? "";
     const style = StyleSheet.create({
         infoIcon: {
@@ -44,7 +47,10 @@ function PropItem({item, ...props}: {item: Info} & Props) {
     const info = {
         label: <Text style={style.infoLabel}>{label}</Text>,
         value: (
-            <UnPressable onPress={function() { return copy(value + "", "复制" + item.label + "成功"); }}>
+            <UnPressable
+                onPress={function () {
+                    return copy(value + "", "复制" + item.label + "成功");
+                }}>
                 <Text style={style.infoData}>{value}</Text>
             </UnPressable>
         ),
@@ -52,7 +58,10 @@ function PropItem({item, ...props}: {item: Info} & Props) {
     switch (item.key) {
         case "cdmc":
             info.label = (
-                <UnPressable onPress={function() { return Pos.parseAndSearchInMap(value + ""); }}>
+                <UnPressable
+                    onPress={function () {
+                        return Pos.parseAndSearchInMap(value + "");
+                    }}>
                     <Flex gap={5} align="center">
                         <Text style={style.infoLabel}>{label}</Text>
                         <Icon
@@ -68,7 +77,10 @@ function PropItem({item, ...props}: {item: Info} & Props) {
             break;
         case "xm":
             info.label = (
-                <UnPressable onPress={function() { return props.onClick(); }}>
+                <UnPressable
+                    onPress={function () {
+                        return props.onClick();
+                    }}>
                     <Flex gap={5} align="center">
                         <Text style={style.infoLabel}>{label}</Text>
                     </Flex>
@@ -87,45 +99,59 @@ function PropItem({item, ...props}: {item: Info} & Props) {
 
 export function CourseDetail(props: Props) {
     const [visible, setVisible] = useState(false);
-    const {theme} = useTheme();
 
+    const {theme} = useTheme();
     const {store} = useUserConfig();
-    const infoList = Object.entries(store(s => s.preference.courseDetail))
-        .filter(prop => prop[1].show)
-        .map(
-            ([key, {label}]) =>
-                ({
-                    key,
-                    label,
-                }) as Info,
-        );
+    const devMode = store(s => s.devMode);
     return (
-        <Flex {...props} gap={4} direction="column">
-            <CourseInfoCard course={props.course} />
-            <Flex justify="center">
-                <Text>点击属性，复制到剪切板</Text>
+        <CourseContext.Provider value={props.course}>
+            <Flex {...props} gap={4} direction="column">
+                <CourseInfoCard />
+                <Flex justify="center">
+                    <Text>点击属性，复制到剪切板</Text>
+                </Flex>
+                <Flex gap={10}>
+                    <CoursePropItem prop="kcmc" label="课程名称" />
+                    <CoursePropItem
+                        prop="cdmc"
+                        label="上课地点"
+                        valueRender={(v, course) => <UnText>{course["lh"] + v}</UnText>}
+                        labelRender={v => (
+                            <UnPressable onPress={() => Pos.parseAndSearchInMap(v)}>
+                                <Flex gap={5} align="center" inline>
+                                    <UnText weight="bold" size={16}>
+                                        上课地点
+                                    </UnText>
+                                    <Icon
+                                        type="Ionicon"
+                                        name="navigate"
+                                        color={Color.mix(theme.colors.primary, theme.colors.black).rgbaString}
+                                        size={16}
+                                    />
+                                </Flex>
+                            </UnPressable>
+                        )}
+                    />
+                </Flex>
+                <Flex gap={10}>
+                    <CoursePropItem prop="xm" label="上课教师" />
+                    <CoursePropItem prop="khfsmc" label="考核方式" />
+                    <CoursePropItem prop="xf" label="学分" />
+                </Flex>
+                <Flex gap={10}>
+                    <CoursePropItem prop="xkrs" label="选课人数" />
+                    <CoursePropItem prop="zzrl" label="座位数" />
+                    <CoursePropItem prop="qqqh" label="QQ群" />
+                </Flex>
+                <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
+                {devMode && <CourseDebugCard />}
             </Flex>
-            <Flex gap={10}>
-                <CoursePropItem course={props.course} prop="kcmc" label="课程名称" />
-                <CoursePropItem course={props.course} prop="cdmc" label="上课地点" />
-            </Flex>
-            <Flex gap={10}>
-                <CoursePropItem course={props.course} prop="xm" label="上课教师" />
-                <CoursePropItem course={props.course} prop="khfsmc" label="考核方式" />
-                <CoursePropItem course={props.course} prop="xf" label="学分" />
-            </Flex>
-            <Flex gap={10}>
-                <CoursePropItem course={props.course} prop="xkrs" label="选课人数" />
-                <CoursePropItem course={props.course} prop="zzrl" label="座位数" />
-                <CoursePropItem course={props.course} prop="qqqh" label="QQ群" />
-            </Flex>
-            <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
-            <CourseDebugCard course={props.course}/>
-        </Flex>
+        </CourseContext.Provider>
     );
 }
 
-function CourseInfoCard(props: {course: Course}) {
+function CourseInfoCard() {
+    const course = useContext(CourseContext)!;
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
 
@@ -133,24 +159,25 @@ function CourseInfoCard(props: {course: Course}) {
         card: {
             padding: 6,
             borderRadius: 4,
-            backgroundColor: Color(getColor({title: props.course.kcmc})).setAlpha(theme.mode === "light" ? 0.5 : 0.3)
+            backgroundColor: Color(getColor({title: course.kcmc})).setAlpha(theme.mode === "light" ? 0.5 : 0.3)
                 .rgbaString,
         },
     });
     return (
-        <Flex direction="column" style={styles.card} align="flex-start">
+        <View style={styles.card}>
             <UnText weight="bold" size={16}>
-                {props.course.kcmc}
+                {course.kcmc}
             </UnText>
             <UnText size={12} color={theme.colors.grey1}>
-                {props.course.cdmc}，{props.course.xm}，{props.course.kclb}，{props.course.khfsmc}，{props.course.kcbj}
-                ，{props.course.xqjmc}
-                {props.course.jcs}节，{props.course.zcd}
+                {course.cdmc}，{course.xm}，{course.kclb}，{course.khfsmc}，{course.kcbj}，{course.xqjmc}
+                {course.jcs}节，{course.zcd}
             </UnText>
-        </Flex>
+        </View>
     );
 }
-function CourseDebugCard(props: {course: Course}) {
+
+function CourseDebugCard() {
+    const course = useContext(CourseContext);
     const {theme} = useTheme();
     const [modalOpen, setModalOpen] = useState(false);
 
@@ -162,29 +189,31 @@ function CourseDebugCard(props: {course: Course}) {
         },
     });
     return (
-        <>
-            <UnPressable onPress={function() { return setModalOpen(true); }}>
-                <Flex style={styles.card} justify="flex-start" gap={4} inline>
+        <Flex>
+            <UnPressable
+                onPress={function () {
+                    return setModalOpen(true);
+                }}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
                     <Icon name="console" size={16} inline />
                     <UnText weight="bold" size={16}>
                         查看课程数据
                     </UnText>
                 </Flex>
             </UnPressable>
-        </>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={course} />
+        </Flex>
     );
 }
 
 function CoursePropItem<K extends keyof Course>(props: {
-    course: Course;
     prop: K;
     label: string;
     labelRender?: (value: Course[K], item: Course) => React.ReactNode;
     valueRender?: (value: Course[K], item: Course) => React.ReactNode;
     onClick?: (value: Course[K], item: Course) => void;
 }) {
-    const {theme} = useTheme();
-    const {getColor} = useBlocksColor();
+    const course = useContext(CourseContext)!;
 
     const styles = StyleSheet.create({
         card: {
@@ -192,20 +221,30 @@ function CoursePropItem<K extends keyof Course>(props: {
             borderRadius: 4,
         },
     });
-    const value = props.course[props.prop];
+    const value = course[props.prop];
+    const labelNode = props.labelRender ? (
+        props.labelRender(value, course)
+    ) : (
+        <UnText weight="bold" size={16}>
+            {props.label}
+        </UnText>
+    );
+    const valueNode = props.valueRender ? (
+        props.valueRender(value, course)
+    ) : (
+        <UnText numberOfLines={4}>{value.toString() || "-"}</UnText>
+    );
     return (
         <UnPressable
             style={{flex: 1}}
-            onPress={function() {
+            onPress={function () {
                 return props.onClick
-                    ? props.onClick(value, props.course)
+                    ? props.onClick(value, course)
                     : copy(value.toString() || "-", "复制" + props.label + "成功");
             }}>
             <Flex direction="column" style={styles.card} gap={4} align="flex-start">
-                <UnText weight="bold" size={16}>
-                    {props.label}
-                </UnText>
-                <UnText numberOfLines={4}>{value.toString() || "-"}</UnText>
+                {labelNode}
+                {valueNode}
             </Flex>
         </UnPressable>
     );

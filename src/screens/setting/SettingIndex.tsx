@@ -1,4 +1,4 @@
-import {Button} from "@rneui/themed";
+import {Button, Switch} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import packageJson from "@/../package.json";
 import moment from "moment/moment";
@@ -20,7 +20,7 @@ export function SettingIndex() {
         }).then(res => {
             if (!res.didCancel && res.assets && res.assets.length > 0) {
                 const s = ucStore.getState();
-                ucStore.getState().update("theme", { ...s.theme, bgUrl: res.assets[0].uri ?? "" });
+                ucStore.getState().update("theme", {...s.theme, bgUrl: res.assets[0].uri ?? ""});
                 ToastAndroid.show("设置成功", ToastAndroid.SHORT);
             }
         });
@@ -68,7 +68,7 @@ export function SettingIndex() {
                             color={ucStore(s => s.theme.primaryColor)}
                             onColorChange={v => {
                                 const s = ucStore.getState();
-                                ucStore.getState().update("theme", { ...s.theme, primaryColor: v });
+                                ucStore.getState().update("theme", {...s.theme, primaryColor: v});
                             }}
                         />
                     ),
@@ -80,7 +80,7 @@ export function SettingIndex() {
                         <Flex gap={10} inline>
                             <Button
                                 onPress={() => {
-                                    store.getState().update("theme", { ...store.getState().theme, courseColor: {} });
+                                    store.getState().update("theme", {...store.getState().theme, courseColor: {}});
                                     ToastAndroid.show("清空成功", ToastAndroid.SHORT);
                                 }}
                                 size="sm">
@@ -97,7 +97,7 @@ export function SettingIndex() {
                             <Button
                                 onPress={() => {
                                     const s = ucStore.getState();
-                                    ucStore.getState().update("theme", { ...s.theme, bgUrl: "" });
+                                    ucStore.getState().update("theme", {...s.theme, bgUrl: ""});
                                     ToastAndroid.show("清空成功", ToastAndroid.SHORT);
                                 }}
                                 size="sm">
@@ -120,7 +120,7 @@ export function SettingIndex() {
                             value={ucStore(s => s.theme.bgOpacity)}
                             onValueChange={v => {
                                 const s = ucStore.getState();
-                                ucStore.getState().update("theme", { ...s.theme, bgOpacity: v });
+                                ucStore.getState().update("theme", {...s.theme, bgOpacity: v});
                             }}
                         />
                     ),
@@ -130,6 +130,16 @@ export function SettingIndex() {
         {
             title: "软件",
             data: [
+                {
+                    label: "开发模式",
+                    type: "any",
+                    value: (
+                        <Switch
+                            value={ucStore(s => s.devMode)}
+                            onValueChange={v => ucStore.getState().update("devMode", v)}
+                        />
+                    ),
+                },
                 {
                     label: "代码版本号",
                     type: "text",
