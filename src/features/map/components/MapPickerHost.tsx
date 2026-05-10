@@ -61,7 +61,7 @@ export function MapPickerHost() {
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: 0,
             paddingTop: 10,
-            backgroundColor: "#F3F3F3",
+            backgroundColor: theme.colors.grey5,
         },
         handleRow: {
             flexDirection: "row",
@@ -76,7 +76,7 @@ export function MapPickerHost() {
             borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: theme.colors.white,
+            backgroundColor: theme.colors.grey4,
         },
         handleSpacer: {
             width: 28,
@@ -109,11 +109,11 @@ export function MapPickerHost() {
             paddingVertical:10,
         },
         optionButtonPressed: {
-            backgroundColor: "rgba(0, 0, 0, 0.04)",
+            backgroundColor: theme.colors.white,
         },
         optionDivider: {
             height: StyleSheet.hairlineWidth,
-            backgroundColor: "rgba(0, 0, 0, 0.08)",
+            backgroundColor: theme.colors.divider,
             marginLeft: 64,
         },
         appIconOuter: {
