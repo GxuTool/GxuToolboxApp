@@ -1,7 +1,7 @@
 {
     "name": "gxu_tool_app",
-    "version": "2.0.3 beta",
-    "versionCode": 20003,
+    "version": "2.0.4 beta",
+    "versionCode": 20004,
     "private": true,
     "packageManager": "pnpm@10.33.0",
     "scripts": {
