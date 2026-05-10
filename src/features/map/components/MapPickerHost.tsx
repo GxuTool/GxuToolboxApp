@@ -67,7 +67,7 @@ export function MapPickerHost() {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            paddingHorizontal: 18,
+            paddingHorizontal: 17,
             paddingBottom: 8,
         },
         handleIconWrap: {
