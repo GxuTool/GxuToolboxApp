@@ -33,7 +33,7 @@ const styles=StyleSheet.create({
         padding:16,
         borderRadius:12,
         marginBottom:12,
-        backgroundColor:"#ffffff",
+        backgroundColor:"theme.colors.white",
     },
     itemText:{
         fontSize:16,

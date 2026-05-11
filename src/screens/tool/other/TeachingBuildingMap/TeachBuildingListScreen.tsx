@@ -1,10 +1,10 @@
-import { FlatList, StyleSheet, View, Image } from "react-native";
-import { Text, useTheme } from "@rneui/themed";
-import { TeachBuildingList } from "./data";
-import React, { useState } from "react";
+import {FlatList,StyleSheet,View,Image } from "react-native";
+import {Text,useTheme} from "@rneui/themed";
+import {TeachBuildingList} from"./data";
+import React, {useMemo, useState} from "react";
 import ImageViewing from "react-native-image-viewing";
-import { Icon } from "@/components/un-ui/Icon.tsx";
-import { UnPressable } from "@/components/un-ui";
+import {Icon} from "@/components/un-ui/Icon.tsx";
+import {UnPressable}from"@/components/un-ui";
 
 export function TeachBuildingListScreen() {
   const {theme}=useTheme();
@@ -18,6 +18,61 @@ export function TeachBuildingListScreen() {
       setViewImageUri(resolvedImage.uri);
     }
   };
+    const styles =useMemo(()=> StyleSheet.create({
+        container:{
+            flex:1,
+            padding:12,
+        },
+        item:{
+            padding:16,
+            borderRadius:12,
+            marginBottom:4,
+            backgroundColor:theme.colors.white,
+        },
+        titleRow:{
+            flexDirection:"row",
+            alignItems:"center",
+            justifyContent:"space-between",
+        },
+        floorList:{
+            paddingTop:8,
+            paddingHorizontal:8,
+        },
+        floorItem:{
+            paddingHorizontal:16,
+            paddingVertical:12,
+            borderRadius:10,
+            marginTop:8,
+            backgroundColor:theme.colors.white,
+        },
+        section:{
+            marginBottom:0,
+        },
+        floorText:{
+            fontSize:15,
+            fontWeight:"500",
+        },
+        previewCard:{
+            marginTop:8,
+            padding:8,
+            borderRadius:12,
+            backgroundColor:theme.colors.white,
+        },
+        previewImageButton:{
+            width:"100%",
+        },
+        previewImage:{
+            width:"100%",
+            height:260,
+        },
+        bottomSpacer:{
+            height:280,
+        },
+        itemText:{
+            fontSize:16,
+            fontWeight:"600",
+        },
+    }),[theme]);
   return(
     <View style={styles.container}>
       <FlatList
@@ -99,58 +154,4 @@ export function TeachBuildingListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container:{
-    flex:1,
-    padding:12,
-  },
-  item:{
-    padding:16,
-    borderRadius:12,
-    marginBottom:4,
-    backgroundColor:"#ffffff",
-  },
-  titleRow:{
-    flexDirection:"row",
-    alignItems:"center",
-    justifyContent:"space-between",
-  },
-  floorList:{
-    paddingTop:8,
-    paddingHorizontal:8,
-  },
-  floorItem:{
-    paddingHorizontal:16,
-    paddingVertical:12,
-    borderRadius:10,
-    marginTop:8,
-    backgroundColor:"#f3f4f6",
-  },
-  section:{
-    marginBottom:0,
-  },
-  floorText:{
-    fontSize:15,
-    fontWeight:"500",
-  },
-  previewCard:{
-    marginTop:8,
-    padding:8,
-    borderRadius:12,
-    backgroundColor:"#ffffff",
-  },
-  previewImageButton:{
-    width:"100%",
-  },
-  previewImage:{
-    width:"100%",
-    height:260,
-  },
-  bottomSpacer:{
-    height:280,
-  },
-  itemText:{
-    fontSize:16,
-    fontWeight:"600",
-    },
-});
+
