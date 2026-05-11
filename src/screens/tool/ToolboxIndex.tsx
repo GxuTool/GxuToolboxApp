@@ -163,7 +163,7 @@ export function ToolboxIndex() {
                 },
                 {
                     label: "全校实时课表",
-                    icon: <Icon name="map" size={iconSize} />,
+                    icon: <Icon name="calendar-search" size={iconSize} />,
                     type: "navigation",
                     navigation: "FullCourseScreen",
                 },
