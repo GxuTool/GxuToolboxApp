@@ -104,6 +104,8 @@ const useCourseDataStore = create<CourseDataStoreState & CourseDataStoreAction>(
     ...courseDataDefault,
 
     update: (k, v) => {
+        //拒绝undefined
+        if(v===undefined)return;
         set({[k]: v} as Partial<CourseDataStoreState>);
         const state = get();
         const data: Record<string, unknown> = {};

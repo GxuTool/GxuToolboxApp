@@ -155,7 +155,7 @@ export function TimeSchedule<T = any>(props: TimeScheduleProps<T>) {
                       ))}
             </View>
             {/*课表*/}
-            {weekdayList.map((weekday, index) => {
+            {(weekdayList??[]).map((weekday, index) => {
                 // 判断是否为当天
                 const currentDay = startDay.clone().add({
                     week: currentWeek - 1,
@@ -195,7 +195,7 @@ export function TimeSchedule<T = any>(props: TimeScheduleProps<T>) {
                                 })()}
                             </Text>
                         </View>
-                        {props.scheduleItems.map((td, tdIndex) => {
+                        {(props.scheduleItems??[]).map((td, tdIndex) => {
                             const day = td.needShift === false ? currentDay : effectiveDay;
                             const visibleItems = td.data.filter(item => td.isItemShow(item, day, currentWeek));
                             // 按时段重叠分组
