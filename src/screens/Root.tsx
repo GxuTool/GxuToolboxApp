@@ -1,32 +1,35 @@
 import {ImageBackground, StatusBar, StyleSheet, useColorScheme, View, ViewProps} from "react-native";
 import {DarkTheme, DefaultTheme, NavigationContainer} from "@react-navigation/native";
 import {RootStack} from "@/route/RootStack.tsx";
-import React, {useCallback, useContext, useEffect, useMemo, useState} from "react";
-import {UpdateCard} from "@/components/UpdateCard.tsx";
-import {CourseScheduleContext, generateCourseScheduleStyle, useCourseScheduleData} from "@/js/jw/course.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
-import {useTheme} from "@rneui/themed";
+import React, {useEffect} from "react";
+import {useCourse} from "@/hooks/useCourse.ts";
+import {createTheme, useTheme} from "@rneui/themed";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {UnToastContextProvider} from "@/components/un-ui/UnToast.tsx";
+import {MapPickerHost} from "@/features/map/components/MapPickerHost.tsx";
+import {cowsay} from "@/js/cowsay.ts";
+import {generateUiTheme} from "@/shared/theme.ts";
 
 export function Root(props: ViewProps) {
-    const {userConfig} = useContext(UserConfigContext);
-    const {theme} = useTheme();
+    const {store: ucStore, init: ucInit} = useUserConfig();
+    const {theme, updateTheme} = useTheme();
+    const {init: courseInit} = useCourse();
+    const userConfig = ucStore();
     const colorScheme = useColorScheme();
-    const {courseScheduleData, updateCourseScheduleData} = useCourseScheduleData();
-    const memoizedUpdateFunction = useCallback(updateCourseScheduleData, []);
-    const memoizedStyle = useMemo(
-        () => generateCourseScheduleStyle(userConfig.theme.course, theme),
-        [courseScheduleData, theme, userConfig],
-    );
 
-    // 使用 useMemo 包装 Context value 以避免不必要的重渲染
-    const contextValue = useMemo(
-        () => ({
-            courseScheduleData,
-            courseScheduleStyle: memoizedStyle,
-            updateCourseScheduleData: memoizedUpdateFunction,
-        }),
-        [courseScheduleData, memoizedStyle, memoizedUpdateFunction],
-    );
+    useEffect(() => {
+        courseInit();
+        ucInit();
+        cowsay({
+            text: "恭喜你，成功启动了开发服",
+            f: "dragon",
+        });
+    }, []);
+
+    useEffect(() => {
+        const newUiTheme = createTheme(generateUiTheme(userConfig, colorScheme));
+        updateTheme(newUiTheme);
+    }, [ucStore(s => s.theme), colorScheme]);
 
     const style = StyleSheet.create({
         backgroundStyle: {
@@ -51,19 +54,20 @@ export function Root(props: ViewProps) {
         },
     };
     return (
-        <CourseScheduleContext.Provider value={contextValue}>
+        <UnToastContextProvider>
             <View {...props} style={[style.backgroundStyle, props.style]}>
                 <ImageBackground
                     style={style.bg}
-                    source={{uri: userConfig.theme.bgUrl}}
-                    loadingIndicatorSource={{uri: userConfig.theme.bgUrl}}
+                    source={{uri: ucStore(s => s.theme.bgUrl)}}
+                    loadingIndicatorSource={{uri: ucStore(s => s.theme.bgUrl)}}
                     resizeMode="cover">
                     <StatusBar barStyle={colorScheme === "light" ? "dark-content" : "light-content"} />
                     <NavigationContainer theme={navigationTheme}>
                         <RootStack />
                     </NavigationContainer>
+                    <MapPickerHost />
                 </ImageBackground>
             </View>
-        </CourseScheduleContext.Provider>
+        </UnToastContextProvider>
     );
 }

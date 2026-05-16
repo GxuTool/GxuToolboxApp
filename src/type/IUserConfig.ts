@@ -2,7 +2,7 @@ import {PressableAndroidRippleConfig} from "react-native";
 import {SchoolTerms, SchoolTermValue, SchoolYearValue} from "@/type/global.ts";
 import {Course} from "@/type/infoQuery/course/course.ts";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
-import {DefaultUserTheme} from "@/js/theme.ts";
+import {DefaultUserTheme} from "@/shared/theme.ts";
 import moment from "moment";
 import {IUserActivity} from "@/type/app/activity.ts";
 
@@ -52,19 +52,6 @@ export interface IUserTheme {
     /** 背景透明度 */
     bgOpacity: number;
     ripple: PressableAndroidRippleConfig;
-    /** 课程表主题相关属性 */
-    course: {
-        /** 课表时间段高度（两节课） */
-        timeSpanHeight: number;
-        /** 课表表头日期部分高度 */
-        weekdayHeight: number;
-        /** 课表课程元素间距 */
-        courseItemMargin: number;
-        /** 课表课程元素边框宽度 */
-        courseItemBorderWidth: number;
-        /** 课程元素颜色Map */
-        courseColor: Record<string, string>;
-    };
 }
 
 export const defaultUserConfig: IUserConfig = {
@@ -133,6 +120,7 @@ export const defaultUserConfig: IUserConfig = {
             sxbj: {label: "", show: false},
             totalResult: {label: "", show: false},
             xkbz: {label: "", show: false},
+            xkrs: {label: "选课人数", show: true},
             xnm: {label: "", show: false},
             xqdm: {label: "", show: false},
             xqh1: {label: "", show: false},
@@ -153,7 +141,7 @@ export const defaultUserConfig: IUserConfig = {
             zyfxmc: {label: "", show: false},
             zyhxkcbj: {label: "", show: false},
             zzmm: {label: "", show: false},
-            zzrl: {label: "", show: false},
+            zzrl: {label: "座位数", show: true},
         },
         examDetail: {
             kcmc: {label: "课程名称", show: true},

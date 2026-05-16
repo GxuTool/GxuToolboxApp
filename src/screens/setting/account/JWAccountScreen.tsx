@@ -1,95 +1,269 @@
-import {StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, Pressable, StyleSheet, ToastAndroid, View} from "react-native";
 import {Button, Input, Text} from "@rneui/themed";
-import {useEffect, useState} from "react";
-import {jwxt} from "@/js/jw/jwxt.ts";
-import {userMgr} from "@/js/mgr/user.ts";
+import {useMemo, useState} from "react";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {beQuery} from "@/js/be/log.ts";
 import {useWebView} from "@/hooks/app.ts";
+import {useJwAccount} from "@/core/auth/Jw/hooks/useJwAccount.ts";
+import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
+import {AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
 
-async function getToken(username: string, password: string) {
-    await userMgr.jw.storeAccount(username, password);
-    ToastAndroid.show("开始尝试登录", ToastAndroid.SHORT);
-    const data = await jwxt.getPublicKey();
-    if (data.exponent) {
-        // 尝试登录
-        await jwxt.login(username, password, data.modulus, data.exponent);
-        // 检验Token
-        if (await jwxt.testToken(false)) {
-            ToastAndroid.show("获取成功，尝试获取用户基础信息", ToastAndroid.SHORT);
-            if ((await jwxt.getInfo()) !== undefined) {
-                ToastAndroid.show("获取基础信息成功", ToastAndroid.SHORT);
-                const res = await beQuery.postLog(username);
-                console.log("记录", res.data);
-            } else {
-                ToastAndroid.show("获取基础信息失败", ToastAndroid.SHORT);
-            }
-        } else {
-            ToastAndroid.show("获取失败，请检查帐密是否正确或者检查是否连接校园网", ToastAndroid.SHORT);
-        }
+function statusMeta(state: AuthState) {
+    switch (state.status) {
+        case AuthStateMap.NoAccount:
+            return {label: "未配置账号", color: "#9CA3AF", bg: "#111827"};
+        case AuthStateMap.HasAccountNotAuthenticated:
+            return {label: "已保存账号（未登录/已失效）", color: "#F59E0B", bg: "#111827"};
+        case AuthStateMap.Authenticated:
+            return {label: "已登录", color: "#10B981", bg: "#111827"};
+        default:
+            return {label: "未知状态", color: "#EF4444", bg: "#111827"};
     }
 }
 
 export function JWAccountScreen() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPwd, setShowPwd] = useState(false);
     const {openInJw} = useWebView();
+    const {username, setUsername, password, setPassword, hydrating, saveAccount} = useJwAccount();
+    const {authState, loading, result, clearResult, login} = useJwAuth();
 
-    async function init() {
-        const account = await userMgr.jw.getAccount();
-        if (!account) return;
-        setUsername(account.username);
-        setPassword(account.password);
+    const [showPwd, setShowPwd] = useState(false);
+
+    const meta = useMemo(() => statusMeta(authState), [authState]);
+
+    const busy = hydrating || loading;
+
+    async function handleLogin() {
+        clearResult();
+        await saveAccount(username, password);
+        const r = await login(username, password);
+        if (r.ok) return;
+        ToastAndroid.show("登录失败", ToastAndroid.SHORT);
     }
 
-    //从存储中读取数据
-    useEffect(() => {
-        init();
-    }, []);
     return (
         <View style={style.container}>
-            <Text h2 style={style.title}>
-                设置教务帐密
-            </Text>
-            <Text style={style.note}>仅用于工具从教务系统获取信息，凌晨请连接校园网</Text>
-            <Input
-                value={username}
-                onChangeText={v => setUsername(v)}
-                label="账号/学号"
-                placeholder="工具绑定的教务系统账号"
-                style={style.input}
-            />
-            <Input
-                value={password}
-                onChangeText={v => setPassword(v)}
-                label="密码"
-                placeholder="对应账号的密码"
-                secureTextEntry={!showPwd}
-                rightIcon={
-                    <Icon
-                        type="fontawesome"
-                        name={showPwd ? "eye-slash" : "eye"}
-                        size={20}
-                        style={style.showPwdIcon}
-                        onPress={() => setShowPwd(!showPwd)}
-                    />
-                }
-                style={style.input}
-            />
-            <Button onPress={() => getToken(username, password)}>登录</Button>
-            <Button
-                containerStyle={{marginTop: 10}}
-                onPress={() => {
-                    openInJw("/xtgl/login_slogin.html");
-                }}>
-                打开教务登录页
-            </Button>
-            <Text style={style.note}>提示获取成功后，回到课表页进行测试，若无法正常获取课表，可能为密码错误</Text>
+            <View style={styles.card}>
+                <View style={styles.cardTopRow}>
+                    <View style={styles.statusDotWrap}>
+                        <View style={[styles.statusDot, {backgroundColor: meta.color}]} />
+                    </View>
+                    <View style={styles.statusTextWrap}>
+                        <Text style={styles.statusLabel}>当前状态</Text>
+                        <Text style={[styles.statusValue, {color: meta.color}]}>{meta.label}</Text>
+                    </View>
+
+                    {busy && (
+                        <View style={styles.spinnerWrap}>
+                            <ActivityIndicator size="small" />
+                        </View>
+                    )}
+                </View>
+
+                {result.kind !== "idle" && (
+                    <View
+                        style={[styles.banner, result.kind === "success" ? styles.bannerSuccess : styles.bannerError]}>
+                        <Text style={styles.bannerTitle}>{result.title}</Text>
+                        {!!result.message && <Text style={styles.bannerMsg}>{result.message}</Text>}
+                    </View>
+                )}
+
+                <Input
+                    value={username}
+                    onChangeText={v => setUsername(v)}
+                    label="学号"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    disabled={busy}
+                    inputStyle={styles.inputText}
+                    labelStyle={styles.inputLabel}
+                    containerStyle={styles.inputContainer}
+                    leftIcon={<Icon type="fontawesome" name="user" size={16} style={styles.leftIcon} />}
+                />
+
+                <Input
+                    value={password}
+                    onChangeText={v => setPassword(v)}
+                    label="密码"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    secureTextEntry={!showPwd}
+                    disabled={busy}
+                    inputStyle={styles.inputText}
+                    labelStyle={styles.inputLabel}
+                    containerStyle={styles.inputContainer}
+                    leftIcon={<Icon name="lock" size={16} style={styles.leftIcon} />}
+                    rightIcon={
+                        <Pressable onPress={() => setShowPwd(s => !s)} disabled={busy}>
+                            <Icon
+                                type="fontawesome"
+                                name={showPwd ? "eye-slash" : "eye"}
+                                size={18}
+                                style={styles.rightIcon}
+                            />
+                        </Pressable>
+                    }
+                />
+
+                <View style={styles.actions}>
+                    <Button onPress={handleLogin} disabled={busy} loading={busy}>
+                        登录
+                    </Button>
+
+                    <Button type="outline" disabled={busy} onPress={() => openInJw("/xtgl/login_slogin.html")}>
+                        打开教务登录页
+                    </Button>
+                </View>
+                <Text style={style.note}>仅供工具从教务系统获取信息{"\n"}23:00 至次日 7:30 请连接校园网</Text>
+            </View>
         </View>
     );
 }
 
+const styles = StyleSheet.create({
+    page: {
+        flex: 1,
+        backgroundColor: "#0B1220",
+    },
+    container: {
+        flex: 1,
+        paddingHorizontal: 16,
+        paddingTop: 18,
+    },
+    header: {
+        marginBottom: 14,
+    },
+    title: {
+        textAlign: "left",
+        color: "#E5E7EB",
+    },
+    subtitle: {
+        marginTop: 8,
+        color: "#9CA3AF",
+        fontSize: 13,
+        lineHeight: 18,
+    },
+
+    card: {
+        borderRadius: 16,
+        padding: 14,
+    },
+
+    cardTopRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255,255,255,0.06)",
+        marginBottom: 10,
+    },
+    statusDotWrap: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: "rgba(255,255,255,0.06)",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    statusDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+    },
+    statusTextWrap: {
+        flex: 1,
+    },
+    statusLabel: {
+        color: "#9CA3AF",
+        fontSize: 12,
+    },
+    statusValue: {
+        marginTop: 2,
+        fontSize: 14,
+        fontWeight: "700",
+    },
+    spinnerWrap: {
+        width: 22,
+        alignItems: "flex-end",
+    },
+
+    banner: {
+        borderRadius: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        marginBottom: 8,
+        borderWidth: 1,
+    },
+    bannerSuccess: {
+        backgroundColor: "rgba(16,185,129,0.12)",
+        borderColor: "rgba(16,185,129,0.35)",
+    },
+    bannerError: {
+        backgroundColor: "rgba(239,68,68,0.12)",
+        borderColor: "rgba(239,68,68,0.35)",
+    },
+    bannerTitle: {
+        fontSize: 13,
+        fontWeight: "800",
+    },
+    bannerMsg: {
+        marginTop: 4,
+        color: "#D1D5DB",
+        fontSize: 12,
+        lineHeight: 16,
+    },
+
+    inputContainer: {
+        paddingHorizontal: 0,
+        marginTop: 6,
+    },
+    inputLabel: {
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    inputText: {
+        height: 60,
+        fontSize: 18,
+    },
+    leftIcon: {
+        paddingHorizontal: 6,
+        color: "#9CA3AF",
+    },
+    rightIcon: {
+        paddingHorizontal: 6,
+        color: "#9CA3AF",
+    },
+
+    actions: {
+        marginTop: 8,
+        gap: 10,
+    },
+    primaryBtn: {
+        borderRadius: 12,
+        height: 46,
+        backgroundColor: "#2563EB",
+    },
+    primaryBtnTitle: {
+        fontWeight: "800",
+        fontSize: 14,
+    },
+    secondaryBtn: {
+        borderRadius: 12,
+        height: 44,
+        borderColor: "rgba(255,255,255,0.16)",
+    },
+    secondaryBtnTitle: {
+        color: "#E5E7EB",
+        fontWeight: "700",
+        fontSize: 13,
+    },
+
+    helperText: {
+        marginTop: 12,
+        color: "#9CA3AF",
+        fontSize: 12,
+        lineHeight: 16,
+    },
+});
 const style = StyleSheet.create({
     container: {
         padding: "5%",

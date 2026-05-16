@@ -1,12 +1,12 @@
 import {Pressable, PressableAndroidRippleConfig, ScrollView, StyleSheet, View} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import React, {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
-import {Flex} from "@/components/un-ui";
+import React from "react";
+import {Flex, UnCard} from "@/components/un-ui";
 import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 interface settingSection {
     title: string;
@@ -33,41 +33,61 @@ export function ToolboxIndex() {
     const navigation = useNavigation();
     const {theme} = useTheme();
     const {openInWeb} = useWebView();
-    const {userConfig} = useContext(UserConfigContext);
+    const {store} = useUserConfig();
+    const bgOpacity = store(s => s.theme.bgOpacity);
+    const ripple = store(s => s.theme.ripple);
 
     const toolList = [
         {
             title: "信息查询",
             data: [
                 {
-                    label: "课表查询",
+                    label: "课表",
                     icon: <Icon name="calendar-month" size={iconSize} />,
                     type: "navigation",
                     navigation: "courseScheduleQuery",
                 },
                 {
-                    label: "班级课表查询",
+                    label: "班级课表",
                     icon: <Icon name="calendar-month-outline" size={iconSize} />,
                     type: "navigation",
                     navigation: "classCourseSchedule",
                 },
                 {
-                    label: "考试信息查询",
+                    label: "考试考场",
                     icon: <Icon name="information-box-outline" size={iconSize} />,
                     type: "navigation",
                     navigation: "examInfo",
                 },
                 {
-                    label: "考试成绩查询",
+                    label: "考试成绩",
                     icon: <Icon name="chart-box" size={iconSize} />,
                     type: "navigation",
                     navigation: "examScore",
                 },
                 {
-                    label: "考勤信息查询",
+                    label: "考勤信息",
                     icon: <Icon name="clock" size={iconSize} />,
                     type: "navigation",
                     navigation: "AttendanceInfoQueryScreen",
+                },
+                {
+                    label: "选课课程列表",
+                    icon: <Icon name="list-box" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "courseSelectionList",
+                },
+                {
+                    label: "校选课查漏",
+                    icon: <Icon name="archive-check-outline" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "ElectiveStrategy",
+                },
+                {
+                    label: "教师信息查询",
+                    icon: <Icon type="Ionicons" name="user" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "TeacherQueryInfoScreen",
                 },
                 // {
                 //     label: "自主选课",
@@ -80,13 +100,13 @@ export function ToolboxIndex() {
             title: "实践课",
             data: [
                 {
-                    label: "物理实验课查询",
+                    label: "物理实验课",
                     icon: <Icon name="flask" size={iconSize} />,
                     type: "navigation",
                     navigation: "phyExpScreen",
                 },
                 {
-                    label: "金工实训查询",
+                    label: "金工实训",
                     icon: <Icon name="tools" size={iconSize} />,
                     type: "navigation",
                     navigation: "engTrainingScheduleScreen",
@@ -97,16 +117,22 @@ export function ToolboxIndex() {
             title: "通知",
             data: [
                 {
-                    label: "调课信息查询",
+                    label: "调课信息",
                     icon: <Icon name="clock-star-four-points-outline" size={iconSize} />,
                     type: "navigation",
                     navigation: "reschedulingNews",
                 },
                 {
-                    label: "调休信息查询",
+                    label: "调休信息",
                     icon: <Icon name="calendar-clock" size={iconSize} />,
                     type: "navigation",
                     navigation: "timeShiftScreen",
+                },
+                {
+                    label: "法定节假日",
+                    icon: <Icon name="bed" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "HolidayScreen",
                 },
             ],
         },
@@ -131,11 +157,23 @@ export function ToolboxIndex() {
                     navigation: "PositionListScreen",
                 },
                 {
-                    label: "小部件预览",
-                    icon: <Icon name="widgets" size={iconSize} />,
+                    label: "测试页",
+                    icon: <Icon name="map" size={iconSize} />,
                     type: "navigation",
-                    navigation: "WidgetPreviewScreen",
+                    navigation: "TestPage",
                 },
+                {
+                    label: "全校实时课表",
+                    icon: <Icon name="map" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "FullCourseScreen",
+                },
+                // {
+                //     label: "小部件预览",
+                //     icon: <Icon name="widgets" size={iconSize} />,
+                //     type: "navigation",
+                //     navigation: "WidgetPreviewScreen",
+                // },
                 {
                     label: "校园网充值",
                     icon: <Icon name="wifi" size={iconSize} />,
@@ -146,14 +184,18 @@ export function ToolboxIndex() {
                         });
                     },
                 },
+                {
+                    label:"教学楼平面图",
+                    icon:<Icon name="city-variant" size={iconSize}/>,
+                    type:"navigation",
+                    navigation:"TeachBuildingListScreen",
+                },
             ],
+
         },
     ] as settingSection[];
     const data = {
         style: {
-            cardBg: Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
-                0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
-            ).rgbaString,
             settingItemRipple: {
                 color: theme.colors.grey4,
             } as PressableAndroidRippleConfig,
@@ -169,7 +211,9 @@ export function ToolboxIndex() {
             paddingTop: "2%",
             paddingBottom: "5%",
             borderRadius: 16,
-            backgroundColor: data.style.cardBg,
+            backgroundColor: Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
+                0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * bgOpacity) / 100,
+            ).rgbaString,
             marginBottom: 10,
         },
         toolListContainer: {
@@ -204,14 +248,18 @@ export function ToolboxIndex() {
     return (
         <ScrollView contentContainerStyle={style.settingContainer}>
             {toolList.map(section => (
-                <View style={style.settingSectionContainer} key={`tool-${section.title}`}>
-                    <Text h4>{section.title}</Text>
+                <UnCard
+                    color={theme.colors.grey5}
+                    titleColor={theme.colors.black}
+                    style={style.settingSectionContainer}
+                    title={section.title}
+                    key={`tool-${section.title}`}>
                     <Flex style={style.toolListContainer}>
                         {section.data.map(tool => (
                             <Pressable
                                 key={`tool-${section.title}-${tool.label}`}
                                 style={style.settingItem}
-                                android_ripple={userConfig.theme.ripple}
+                                android_ripple={ripple}
                                 onPress={() => itemClick(tool)}>
                                 <Flex direction="column" inline>
                                     <View style={style.toolIcon}>{tool.icon}</View>
@@ -220,7 +268,7 @@ export function ToolboxIndex() {
                             </Pressable>
                         ))}
                     </Flex>
-                </View>
+                </UnCard>
             ))}
         </ScrollView>
     );

@@ -1,11 +1,10 @@
 import React, {useEffect, useMemo} from "react";
 import {ThemeProvider} from "@rneui/themed";
-import {theme} from "@/js/theme.ts";
+import {theme} from "@/shared/theme.ts";
 import {Root} from "./src/screens/Root.tsx";
 import {useColorScheme} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";
-import {jwxt} from "@/js/jw/jwxt.ts";
-import {AppProvider} from "@/components/AppProvider.tsx";
+import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 
 function App(): React.JSX.Element {
     const colorScheme = useColorScheme();
@@ -18,7 +17,11 @@ function App(): React.JSX.Element {
     );
 
     async function init() {
-        await jwxt.testToken();
+        try {
+            await JwMachine.refreshToken();
+        } catch (e) {
+            console.warn(e);
+        }
     }
 
     // 应用初始化
@@ -28,11 +31,9 @@ function App(): React.JSX.Element {
 
     return (
         <ThemeProvider theme={currentTheme}>
-            <AppProvider>
-                <SafeAreaProvider>
-                    <Root />
-                </SafeAreaProvider>
-            </AppProvider>
+            <SafeAreaProvider>
+                <Root />
+            </SafeAreaProvider>
         </ThemeProvider>
     );
 }

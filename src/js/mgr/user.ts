@@ -1,5 +1,6 @@
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
+import {Account} from "@/core/auth/auth.type.ts";
 
 export const userMgr = {
     // 教务系统相关
@@ -15,7 +16,7 @@ export const userMgr = {
         },
         getAccount: async () => {
             try {
-                return await store.load<{username: string; password: string}>({
+                return await store.load<Account>({
                     key: "userAccount",
                 });
             } catch (e) {
@@ -37,7 +38,7 @@ export const userMgr = {
         },
         getAccount: async () => {
             try {
-                return await store.load<{username: string; password: string}>({
+                return await store.load<Account>({
                     key: "userAuthAccount",
                 });
             } catch (e) {

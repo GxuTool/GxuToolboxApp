@@ -5,21 +5,22 @@ import moment from "moment/moment";
 import {ColorPicker} from "@/components/un-ui/ColorPicker.tsx";
 import {launchImageLibrary} from "react-native-image-picker";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
-import {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx";
 import {ToastAndroid} from "react-native";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 
 export function SettingIndex() {
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {store: ucStore} = useUserConfig();
+    const {store} = useCourse();
 
     function selectBg() {
         launchImageLibrary({
             mediaType: "photo",
         }).then(res => {
             if (!res.didCancel && res.assets && res.assets.length > 0) {
-                userConfig.theme.bgUrl = res.assets[0].uri ?? "";
-                updateUserConfig(userConfig);
+                const s = ucStore.getState();
+                ucStore.getState().update("theme", { ...s.theme, bgUrl: res.assets[0].uri ?? "" });
                 ToastAndroid.show("设置成功", ToastAndroid.SHORT);
             }
         });
@@ -29,6 +30,11 @@ export function SettingIndex() {
         {
             title: "账号",
             data: [
+                {
+                    label: "查看个人信息",
+                    type: "navigation",
+                    value: "personalInfo",
+                },
                 {
                     label: "教务账号设置",
                     type: "navigation",
@@ -59,10 +65,10 @@ export function SettingIndex() {
                     type: "any",
                     value: (
                         <ColorPicker
-                            color={userConfig.theme.primaryColor}
+                            color={ucStore(s => s.theme.primaryColor)}
                             onColorChange={v => {
-                                userConfig.theme.primaryColor = v;
-                                updateUserConfig(userConfig);
+                                const s = ucStore.getState();
+                                ucStore.getState().update("theme", { ...s.theme, primaryColor: v });
                             }}
                         />
                     ),
@@ -74,8 +80,7 @@ export function SettingIndex() {
                         <Flex gap={10} inline>
                             <Button
                                 onPress={() => {
-                                    userConfig.theme.course.courseColor = {};
-                                    updateUserConfig(userConfig);
+                                    store.getState().update("theme", { ...store.getState().theme, courseColor: {} });
                                     ToastAndroid.show("清空成功", ToastAndroid.SHORT);
                                 }}
                                 size="sm">
@@ -91,8 +96,8 @@ export function SettingIndex() {
                         <Flex gap={10} inline>
                             <Button
                                 onPress={() => {
-                                    userConfig.theme.bgUrl = "";
-                                    updateUserConfig(userConfig);
+                                    const s = ucStore.getState();
+                                    ucStore.getState().update("theme", { ...s.theme, bgUrl: "" });
                                     ToastAndroid.show("清空成功", ToastAndroid.SHORT);
                                 }}
                                 size="sm">
@@ -112,10 +117,10 @@ export function SettingIndex() {
                             step={1}
                             minimumValue={0}
                             maximumValue={130}
-                            value={userConfig.theme.bgOpacity}
+                            value={ucStore(s => s.theme.bgOpacity)}
                             onValueChange={v => {
-                                userConfig.theme.bgOpacity = v;
-                                updateUserConfig(userConfig);
+                                const s = ucStore.getState();
+                                ucStore.getState().update("theme", { ...s.theme, bgOpacity: v });
                             }}
                         />
                     ),
@@ -151,7 +156,7 @@ export function SettingIndex() {
                 {
                     label: "软件信息",
                     type: "text",
-                    value: `CopyRight © ${moment().year()} \n寰辰<UNDERLR@foxmail.com>`,
+                    value: `CopyRight © 2025-${moment().year()} \n寰辰 <UNDERLR@foxmail.com>\n 蹑景 <nieying58@gmail.com>`,
                 },
             ],
         },

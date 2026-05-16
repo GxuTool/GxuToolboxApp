@@ -1,12 +1,11 @@
 import {Linking, Pressable, SectionList, SectionListProps, StyleSheet, ToastAndroid, View} from "react-native";
 import Clipboard from "@react-native-clipboard/clipboard";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {useNavigation} from "@react-navigation/native";
 import {Text, useTheme} from "@rneui/themed";
-import {useContext} from "react";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 export interface UnListSection {
     title: string;
@@ -23,36 +22,38 @@ interface UnListItem {
 interface Props {}
 
 export function UnSectionList(props: Props & SectionListProps<UnListItem, UnListSection>) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {store} = useUserConfig();
     const navigation = useNavigation();
     const {theme} = useTheme();
+    const bgOpacity = store(s => s.theme.bgOpacity);
+    const ripple = store(s => s.theme.ripple);
 
     const bgColor = Color(theme.mode === "light" ? theme.colors.background : theme.colors.grey5).setAlpha(
-        0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * userConfig.theme.bgOpacity) / 100,
+        0.1 + ((theme.mode === "light" ? 0.7 : 0.1) * bgOpacity) / 100,
     ).rgbaString;
-    const borderRadius = 16;
-    const span = 5;
+    const borderRadius = 8;
+    const span = 8;
     const style = StyleSheet.create({
         settingSectionContainer: {
             paddingBottom: "5%",
             marginBottom: 10,
         },
         settingSectionHeader: {
-            marginTop: span,
             backgroundColor: bgColor,
-            paddingHorizontal: "3%",
+            paddingHorizontal: borderRadius,
             borderTopLeftRadius: borderRadius,
             borderTopRightRadius: borderRadius,
-            paddingTop: "2%",
+            paddingTop: borderRadius,
+            paddingBottom: 4,
         },
         settingSectionFooter: {
             marginBottom: span,
             backgroundColor: bgColor,
             height: borderRadius,
-            paddingHorizontal: "3%",
+            paddingHorizontal: borderRadius,
             borderBottomLeftRadius: borderRadius,
             borderBottomRightRadius: borderRadius,
-            paddingTop: "2%",
+            paddingTop: borderRadius,
         },
         settingItemContainer: {
             backgroundColor: bgColor,
@@ -67,6 +68,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
         linkText: {
             borderBottomWidth: 1,
             borderBottomColor: theme.colors.black,
+            textAlign: "center",
         },
         labelText: {
             fontSize: 16,
@@ -97,7 +99,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                     <Pressable
                         onPress={() => navigation.navigate(item.value)}
                         style={itemStyle}
-                        android_ripple={userConfig.theme.ripple}>
+                        android_ripple={ripple}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Icon name="chevron-right" size={16} />
                     </Pressable>
@@ -106,7 +108,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                 return (
                     <Flex style={itemStyle} justify="space-between">
                         <Text style={style.labelText}>{item.label}</Text>
-                        <Text>{item.value}</Text>
+                        <Text style={{textAlign: "right"}}>{item.value}</Text>
                     </Flex>
                 );
             case "link":
@@ -114,10 +116,10 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
                     <Pressable
                         onPress={() => openUrl(item.url)}
                         style={itemStyle}
-                        android_ripple={userConfig.theme.ripple}>
+                        android_ripple={ripple}>
                         <Text style={style.labelText}>{item.label}</Text>
                         <Text style={style.linkText}>
-                            <Icon name="link" size={16} />
+                            <Icon name="link" size={10} />
                             {item.value ?? item.url}
                         </Text>
                     </Pressable>
@@ -148,6 +150,7 @@ export function UnSectionList(props: Props & SectionListProps<UnListItem, UnList
     };
     return (
         <SectionList<UnListItem, UnListSection>
+            getItemCount={() => 5}
             renderItem={({item, index, section}) => (
                 <View style={style.settingItemContainer}>{renderItem(item, index !== section.data.length - 1)}</View>
             )}

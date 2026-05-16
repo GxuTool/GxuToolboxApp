@@ -1,14 +1,13 @@
-import {ScrollView, StyleSheet} from "react-native";
+import {ScrollView} from "react-native";
 import React, {useEffect, useState} from "react";
-import {Button, Text, useTheme} from "@rneui/themed";
-import {Row, Rows, Table} from "react-native-reanimated-table";
-import {Color} from "@/js/color.ts";
+import {Button, Text} from "@rneui/themed";
 import "moment/locale/zh-cn";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {courseApi} from "@/js/jw/course.ts";
 import moment from "moment/moment";
 import {useWebView} from "@/hooks/app.ts";
+import {UnTable, UnTableCols} from "@/components/un-ui";
 
 type EngTrainingExp = {
     date: string;
@@ -20,28 +19,29 @@ type EngTrainingExp = {
 };
 
 export function EngTrainingScheduleScreen() {
-    const {theme} = useTheme();
-    const [tableData, setTableData] = useState({
-        header: ["上课时间", "实验名称"],
-        width: [130, 250],
-        body: [] as (string | Element)[][],
-    });
+    const [tableData, setTableData] = useState<EngTrainingExp[]>([]);
 
-    function formatData(list: EngTrainingExp[]) {
-        setTableData({
-            ...tableData,
-            body: list.map(item => [
+    const cols: UnTableCols<EngTrainingExp> = [
+        {
+            title: "上课时间",
+            width: 130,
+            dataIndex: "date",
+            render: v => (
                 <Text
                     style={{
                         textAlign: "center",
-                        opacity: moment(item.date, "M月DD").isBefore(moment(), "d") ? 0.5 : 1,
+                        opacity: moment(v, "M月DD").isBefore(moment(), "d") ? 0.5 : 1,
                     }}>
-                    {moment(item.date, "M月DD").format("YYYY年MM月DD日")}
-                </Text>,
-                item.name,
-            ]),
-        });
-    }
+                    {moment(v, "M月DD").format("YYYY年MM月DD日")}
+                </Text>
+            ),
+        },
+        {
+            title: "实验名称",
+            width: 250,
+            dataIndex: "name",
+        },
+    ];
 
     async function init() {
         // 从内存中加载物理实验缓存
@@ -49,8 +49,8 @@ export function EngTrainingScheduleScreen() {
             console.warn(e);
             return [];
         });
-        if (engTrainingExpList) formatData(engTrainingExpList);
-        getData();
+        if (engTrainingExpList) setTableData(engTrainingExpList);
+        await getData();
     }
 
     const {openInWeb} = useWebView();
@@ -85,31 +85,12 @@ export function EngTrainingScheduleScreen() {
             key: "engTrainingExpList",
             data: expList,
         });
-        formatData(expList);
+        setTableData(expList);
     }
 
     useEffect(() => {
         init();
     }, []);
-
-    const style = StyleSheet.create({
-        tableText: {
-            color: theme.colors.black,
-            textAlign: "center",
-            margin: 5,
-        },
-        tableBorder: {
-            borderWidth: 2,
-            borderColor: Color.mix(theme.colors.primary, theme.colors.grey4, 0.4).rgbaString,
-        },
-        tableHeader: {
-            backgroundColor: Color.mix(
-                Color(theme.colors.primary),
-                Color(theme.colors.background),
-                theme.mode === "dark" ? 0.7 : 0.2,
-            ).setAlpha(theme.mode === "dark" ? 0.3 : 0.6).rgbaString,
-        },
-    });
 
     return (
         <ScrollView contentContainerStyle={{padding: "5%"}}>
@@ -117,23 +98,9 @@ export function EngTrainingScheduleScreen() {
                 <Button containerStyle={{width: "100%"}} onPress={openWeb}>
                     在工程训练中心查看
                 </Button>
-                {tableData.body.length > 0 ? (
+                {tableData.length > 0 ? (
                     <ScrollView horizontal>
-                        <Table borderStyle={style.tableBorder}>
-                            <Row
-                                data={tableData.header}
-                                widthArr={tableData.width}
-                                textStyle={style.tableText}
-                                style={style.tableHeader}
-                                height={50}
-                            />
-                            <Rows
-                                heightArr={new Array(tableData.body.length).fill(50)}
-                                data={tableData.body}
-                                widthArr={tableData.width}
-                                textStyle={style.tableText}
-                            />
-                        </Table>
+                        <UnTable<EngTrainingExp> data={tableData} cols={cols} />
                     </ScrollView>
                 ) : (
                     <Text>当前学期没有金工实训课，无法查询过往学期的课程列表</Text>

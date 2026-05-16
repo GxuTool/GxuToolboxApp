@@ -1,8 +1,8 @@
-import {http, urlWithParams} from "@/js/http.ts";
+import {http, urlWithParams} from "@/core/http.ts";
 import {SchoolValue} from "@/type/global.ts";
 import moment from "moment/moment";
 import {UserInfo} from "@/type/infoQuery/base.ts";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import {GetClassListRes, GetSubjectListRes} from "@/type/api/base.ts";
 
 export const defaultYear = moment().isBefore(moment("8", "M"), "M") ? moment().year() - 1 : moment().year();

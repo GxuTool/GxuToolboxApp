@@ -1,9 +1,11 @@
 import {SchoolTerms, SchoolTermValue, SchoolYears} from "@/type/global.ts";
 import {ExamInfoQueryRes, ExamScoreQueryRes, UsualScoreQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
 import {jwxt} from "@/js/jw/jwxt.ts";
-import {http, objectToFormUrlEncoded} from "@/js/http.ts";
+import {http, objectToFormUrlEncoded} from "@/core/http.ts";
 import {ToastAndroid} from "react-native";
 import {defaultYear} from "@/js/jw/infoQuery.ts";
+import {usualScoreParser} from "@/js/jw/usualScoreParser.ts";
+import {washExamScore} from "@/api/schema/examScoreSchema.ts";
 
 export const examApi = {
     getExamInfo: async (year: number, term: SchoolTermValue, page: number = 1): Promise<ExamInfoQueryRes | null> => {
@@ -29,14 +31,18 @@ export const examApi = {
             return null;
         }
     },
-    getExamScore: async (year: number, term: SchoolTermValue, page: number = 1, limit: number = 15): Promise<ExamScoreQueryRes | null> => {
-        const yearIndex = SchoolYears.findIndex(v => +v[0] === year);
+    getExamScore: async (
+        year: number | "" = "",
+        term: SchoolTermValue | "" = "",
+        page: number = 1,
+        limit: number = 15,
+    ): Promise<ExamScoreQueryRes | null> => {
         if (!(await jwxt.testToken())) {
             return null;
         }
         const reqBody = objectToFormUrlEncoded({
-            xnm: SchoolYears[yearIndex ?? SchoolYears.findIndex(v => +v[0] === defaultYear)][0],
-            xqm: term ?? SchoolTerms[0][0],
+            xnm: year === "" ? "" : SchoolYears.find(v => +v[0] === year)?.[0] ?? defaultYear,
+            xqm: term === "" ? "" : term ?? SchoolTerms[0][0],
             queryModel: {
                 showCount: limit,
                 currentPage: page > 0 ? page : 1,
@@ -44,7 +50,7 @@ export const examApi = {
                 sortOrder: "desc",
             },
         });
-        const res = await http.post("/cjcx/cjcx_cxXsgrcj.html?doType=query", reqBody);
+        const res = await http.post("/cjcx/cjcx_cxXsgrcj.html?doType=query&gnmkdm=N305005", reqBody);
         if (typeof res.data === "object") {
             return res.data;
         } else {
@@ -65,10 +71,10 @@ export const examApi = {
                 xqm: term ?? SchoolTerms[0][0],
                 jxb_id: id,
             });
-            const res = await http.post("/cjcx/cjcx_cxXsXmcjList.html?doType=query", reqBody);
-            if (typeof res.data === "object") {
-                console.log(reqBody);
-                resolve(res.data);
+            const res = await http.post("/cjcx/cjcx_cxCjxqGjh.html?gnmkdm=N305005", reqBody);
+            if (res) {
+                const i = usualScoreParser(res.data);
+                resolve(i);
             } else {
                 ToastAndroid.show("获取平时成绩信息失败", ToastAndroid.SHORT);
                 reject(res);

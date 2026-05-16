@@ -24,7 +24,7 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
      * @param week 目标周
      */
     getAttendanceRecord(course: CourseClass, week: number): AST.AttendanceData | undefined {
-        const weekSpans = course.zcd.split(",");
+        const weekSpans = course._ori.zcd.split(",");
         let inTargetWeek = false;
         // 判断目标周是否有这节课
         weekSpans.forEach(weekSpan => {
@@ -41,14 +41,14 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
             }
         });
         if (!inTargetWeek) return; // 不在当周
-        const day = moment(this.calenderData.firstWeekBegin).add({
+        const day = moment(this._ori.calenderData.firstWeekBegin).add({
             w: week - 1,
-            day: +course.xqj - 1,
+            day: +course._ori.xqj - 1,
         });
         const [startTime, endTime] = course.getAttendanceTimeSpan(day);
-        return this.recordList.find(
+        return this._ori.recordList.find(
             record =>
-                moment(record.day).isSame(startTime, "D") && course.jcs.split("-").join(",") === record.periodSplit,
+                moment(record.day).isSame(startTime, "D") && course._ori.jcs.split("-").join(",") === record.periodSplit,
         );
     }
 
@@ -57,7 +57,7 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
      * @param date 目标日期，字符串格式“YYYY-MM-DD”
      */
     getAttendanceRecordByDate(date: moment.MomentInput): AST.AttendanceData[] {
-        return this.recordList.filter(item => moment(item.day).isSame(date, "day"));
+        return this._ori.recordList.filter(item => moment(item.day).isSame(date, "day"));
     }
 
     /**
@@ -65,7 +65,7 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
      */
     get getCurrentWeek(): number {
         return (
-            moment().startOf("isoWeek").diff(moment(this.calenderData.firstWeekBegin).startOf("isoWeek"), "weeks") + 1
+            moment().startOf("isoWeek").diff(moment(this._ori.calenderData.firstWeekBegin).startOf("isoWeek"), "weeks") + 1
         );
     }
 
@@ -81,9 +81,9 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
         // 获取指定课程在指定周次的考勤记录
         const record = this.getAttendanceRecord(course, week);
         // 计算课程具体日期：从学期第一周开始日期加上周数和星期几的偏移量
-        const day = moment(this.calenderData.firstWeekBegin).add({
+        const day = moment(this._ori.calenderData.firstWeekBegin).add({
             w: week - 1,
-            day: +course.xqj - 1,
+            day: +course._ori.xqj - 1,
         });
 
         if (!record) return day.isBefore(moment()) ? AST.AttendanceState.NoNeed : AST.AttendanceState.NotStarted;

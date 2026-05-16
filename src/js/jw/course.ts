@@ -1,19 +1,19 @@
-import {BaseColor, Color} from "@/js/color.ts";
+import {BaseColor, Color} from "@/shared/color.ts";
 import {createContext, useCallback, useEffect, useState} from "react";
 import {StyleSheet, ToastAndroid} from "react-native";
-import {store} from "@/js/store.ts";
-import {defaultUserConfig, IUserConfig} from "@/type/IUserConfig.ts";
+import {store} from "@/core/store.ts";
 import {SchoolTerms, SchoolTermValue, SchoolValue, SchoolYears, SchoolYearValue} from "@/type/global.ts";
 import {
     ClassScheduleQueryRes,
     CourseScheduleQueryRes,
+    CourseSelectionListRes,
     GetCourseScheduleListRes,
     PhyExpQueryRes,
 } from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {jwxt} from "@/js/jw/jwxt.ts";
-import {http, objectToFormUrlEncoded} from "@/js/http.ts";
+import {http, objectToFormUrlEncoded} from "@/core/http.ts";
 import {defaultYear} from "@/js/jw/infoQuery.ts";
-import {Course, PhyExp, PracticalCourse} from "@/type/infoQuery/course/course.ts";
+import {Course, CourseListTypeId, PhyExp, PracticalCourse} from "@/type/infoQuery/course/course.ts";
 import {authApi} from "@/js/auth/auth.ts";
 import axios from "axios";
 import {EngTrainingScheduleRes} from "@/type/api/infoQuery/EngTraining.ts";
@@ -67,7 +67,17 @@ export const CourseScheduleData = {
 export type CourseScheduleDataType = typeof CourseScheduleData;
 export type CourseScheduleStyleType = ReturnType<typeof generateCourseScheduleStyle>;
 
-export function generateCourseScheduleStyle(config: IUserConfig["theme"]["course"], theme: any) {
+export interface CourseThemeConfig {
+    timeSpanHeight: number;
+    weekdayHeight: number;
+    courseItemMargin: number;
+    courseItemBorderWidth: number;
+    courseColor: Record<string, string>;
+    palette?: import("@/features/courseSchedule/utils/colorPalette.ts").PaletteName;
+    customColors?: Record<string, string>;
+}
+
+export function generateCourseScheduleStyle(config: CourseThemeConfig, theme: any) {
     return StyleSheet.create({
         timeSpanHighLight: {
             position: "absolute",
@@ -98,7 +108,7 @@ export function generateCourseScheduleStyle(config: IUserConfig["theme"]["course
             height: config.weekdayHeight,
         },
         weekdayText: {
-            fontSize: 14,
+            fontSize: 12,
             textAlign: "center",
             color: theme.colors.grey2,
         },
@@ -107,7 +117,7 @@ export function generateCourseScheduleStyle(config: IUserConfig["theme"]["course
         },
         timeSpanText: {
             textAlign: "center",
-            fontSize: 12,
+            fontSize: 10,
             color: theme.colors.grey2,
         },
         courseItem: {
@@ -132,13 +142,13 @@ export function generateCourseScheduleStyle(config: IUserConfig["theme"]["course
 export function useCourseScheduleData() {
     const [courseScheduleData, setCourseScheduleData] = useState<typeof CourseScheduleData>(CourseScheduleData);
     const updateCourseScheduleData = useCallback(
-        (data: Partial<typeof CourseScheduleData>) => {
+        async (data: Partial<typeof CourseScheduleData>) => {
             const newData = {
                 ...courseScheduleData,
                 ...data,
             };
             setCourseScheduleData(newData);
-            store.save({key: "courseScheduleSetting", data: newData});
+            await store.save({key: "courseScheduleSetting", data: newData});
         },
         [courseScheduleData],
     );
@@ -153,9 +163,9 @@ export function useCourseScheduleData() {
                 }));
             })
             .catch(err => {
-                console.error("加载课程表设置失败:", err);
+                console.log("加载课程表设置失败:", err);
             });
-    }, []); // 移除依赖，只在组件挂载时执行一次
+    }, []);
 
     return {courseScheduleData, updateCourseScheduleData};
 }
@@ -167,15 +177,8 @@ export const CourseScheduleContext = createContext<{
 } | null>(null);
 
 async function randomCourseColor(courseList: (Course | PracticalCourse)[]) {
-    const userConfig: IUserConfig = await store.load({key: "userConfig"}).catch(e => {
-        console.warn(e);
-        return defaultUserConfig;
-    });
-    if (!userConfig.theme.course.courseColor) {
-        userConfig.theme.course.courseColor = {};
-    }
-    //使得相同课程的颜色相同
-    const courseColor = userConfig.theme.course.courseColor;
+    const courseData = await store.load({key: "courseScheduleStore"}).catch(() => null);
+    const courseColor: Record<string, string> = courseData?.theme?.courseColor ?? {};
     let hasChange = false;
     courseList.forEach(course => {
         if (!courseColor[course.kcmc]) {
@@ -188,8 +191,8 @@ async function randomCourseColor(courseList: (Course | PracticalCourse)[]) {
     });
     if (hasChange) {
         await store.save({
-            key: "userConfig",
-            data: userConfig,
+            key: "courseScheduleStore",
+            data: { ...courseData, theme: { ...courseData?.theme, courseColor } },
         });
     }
 }
@@ -291,6 +294,26 @@ export const courseApi = {
             return null;
         }
     },
+    getClassCourseScheduleNew: async (
+        year: SchoolYearValue,
+        term: SchoolTermValue,
+        bh_id: number,
+    ): Promise<ClassScheduleQueryRes | null> => {
+        const reqBody = objectToFormUrlEncoded({
+            xnm: year,
+            xqm: term,
+            bh_id: bh_id,
+        });
+        const res = await http.post<ClassScheduleQueryRes>("/kbdy/bjkbdy_cxBjKb.html", reqBody);
+        if (typeof res.data === "object") {
+            await randomCourseColor(res.data.kbList);
+            await randomCourseColor(res.data.sjkList);
+            return res.data;
+        } else {
+            ToastAndroid.show("获取课表信息失败", ToastAndroid.SHORT);
+            return null;
+        }
+    },
 
     /**
      * 获取物理实验课列表
@@ -314,15 +337,44 @@ export const courseApi = {
         return data;
     },
 
+    // 选课相关
+    courseSelection: {
+        getList: async (
+            year: SchoolYearValue,
+            term: SchoolTermValue,
+            type: CourseListTypeId,
+            page: number = 1,
+            pageSize: number = 20,
+            keyword?: string,
+        ) => {
+            const reqBody = objectToFormUrlEncoded({
+                xkxnm: year,
+                xkxqm: term,
+                kklxdm: type,
+                kspage: page,
+                jspage: pageSize,
+                xkkz_id: "47F02D572DC2768EE063020410AC6B75", // TODO换成自动获取方式
+                filter_list: [keyword],
+            });
+            const res = await http.post<CourseSelectionListRes>("/xsxk/zzxkyzb_cxZzxkYzbPartDisplay.html", reqBody);
+            if (typeof res.data === "object") {
+                return res.data;
+            } else {
+                ToastAndroid.show("获取选课列表信息失败", ToastAndroid.SHORT);
+                return null;
+            }
+        },
+    },
+
     // 工程训练中心课表相关（金工实训），Engineering training
     engTraining: {
         /**
          * 登录工程训练中心-学生服务
          */
         getPersonalExpList: async (): Promise<EngTrainingScheduleRes> => {
-            const {
-                data: {token},
-            } = await authApi.loginEngTraining();
+            const authRes = await authApi.loginEngTraining();
+            if (!authRes || !authRes.data) return;
+            const token = authRes.data.token;
             const res = await axios.get<EngTrainingScheduleRes>(
                 "http://xlzxms.gxu.edu.cn/api/course-newedition-server/course/course/arrange/stuPersonalArrangeTable",
                 {

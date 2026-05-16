@@ -2,7 +2,7 @@ import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {Dialog, Image, Input, Text, useTheme} from "@rneui/themed";
 import {useEffect, useState} from "react";
 import {ActivityIndicator, Pressable, StyleSheet, ToastAndroid, View} from "react-native";
-import {http} from "@/js/http.ts";
+import {http} from "@/core/http.ts";
 import {userMgr} from "@/js/mgr/user.ts";
 import {authApi} from "@/js/auth/auth.ts";
 

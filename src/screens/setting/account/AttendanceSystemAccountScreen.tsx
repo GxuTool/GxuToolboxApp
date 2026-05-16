@@ -1,145 +1,328 @@
-import {ActivityIndicator, Pressable, ScrollView, StyleSheet, ToastAndroid} from "react-native";
+import {ActivityIndicator, Pressable, StyleSheet, View} from "react-native";
 import {Button, Image, Input, Text} from "@rneui/themed";
-import React, {useEffect, useState} from "react";
-import {Icon} from "@/components/un-ui";
-import {authApi} from "@/js/auth/auth.ts";
-import {http} from "@/js/http.ts";
-import {userMgr} from "@/js/mgr/user.ts";
+import React, {useEffect, useMemo, useState} from "react";
+import {Icon} from "@/components/un-ui/Icon.tsx";
+import {attendanceAuthApi} from "@/core/auth/attendance/attendanceAuthApi.ts";
+import {attendanceMachine} from "@/core/auth/attendance/attendanceMachine.ts";
+import {Account, AuthStateMap} from "@/core/auth/auth.type.ts";
+import {AuthState} from "@/core/auth/createAuthCore.ts";
 import {useWebView} from "@/hooks/app.ts";
 
+function statusMeta(state: AuthState<Account>) {
+    switch (state.status) {
+        case AuthStateMap.NoAccount:
+            return {label: "未配置账号", color: "#9CA3AF"};
+        case AuthStateMap.HasAccountNotAuthenticated:
+            return {label: "已保存账号（未登录/已失效）", color: "#F59E0B"};
+        case AuthStateMap.Authenticated:
+            return {label: "已登录", color: "#10B981"};
+        default:
+            return {label: "未知状态", color: "#EF4444"};
+    }
+}
+
 export function AttendanceSystemAccountScreen() {
+    const {openInWeb} = useWebView();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [captchaCode, setCaptchaCode] = useState("");
-    const [captchaCodeUri, setCaptchaCodeUri] = useState("");
+    const [captchaUri, setCaptchaUri] = useState("");
     const [showPwd, setShowPwd] = useState(false);
-    const {openInWeb} = useWebView();
+    const [loading, setLoading] = useState(false);
+    const [hydrating, setHydrating] = useState(true);
+    const [captchaLoading, setCaptchaLoading] = useState(false);
+    const [authState, setAuthState] = useState<AuthState<Account>>(attendanceMachine.getState());
+    const [result, setResult] = useState<{kind: "idle" | "success" | "error"; title: string; message?: string}>({
+        kind: "idle",
+        title: "",
+    });
 
-    async function refreshCaptchaCode() {
-        const res = await http.get("https://yktuipweb.gxu.edu.cn/api/account/getVerify?num=666", {
-            responseType: "arraybuffer",
-        });
-        const base64 = btoa(new Uint8Array(res.data).reduce((data, byte) => data + String.fromCharCode(byte), ""));
-        const dataUri = `data:image/jpeg;base64,${base64}`;
-        setCaptchaCodeUri(dataUri);
-        return dataUri;
-    }
+    const meta = useMemo(() => statusMeta(authState), [authState]);
+    const busy = hydrating || loading;
 
-    async function login(username: string, password: string, captchaCode: string) {
-        await userMgr.attendanceSystem.storeAccount(username, password);
-        ToastAndroid.show("开始尝试登录考勤系统", ToastAndroid.SHORT);
-        // 尝试登录
-        const res = await authApi.loginAttendanceSystem(username, password, captchaCode);
-        if (res.code === 600) {
-            ToastAndroid.show("登录成功", ToastAndroid.SHORT);
-        } else {
-            ToastAndroid.show("登录失败，" + res.msg, ToastAndroid.SHORT);
+    async function refreshCaptcha() {
+        setCaptchaLoading(true);
+        setCaptchaCode("");
+        try {
+            const res = await attendanceAuthApi.getCaptchaImage(code => setCaptchaCode(code));
+            setCaptchaUri(res.uri);
+        } finally {
+            setCaptchaLoading(false);
         }
-        await refreshCaptchaCode();
     }
 
-    async function init() {
-        await refreshCaptchaCode();
-        const account = await userMgr.attendanceSystem.getAccount();
-        if (!account) return;
-        setUsername(account.username);
-        setPassword(account.password);
-    }
-
-    //从存储中读取数据
     useEffect(() => {
-        init();
+        (async () => {
+            try {
+                const account = await attendanceMachine.loadAccount();
+                if (account) {
+                    setUsername(account.username);
+                    setPassword(account.password);
+                }
+                await refreshCaptcha();
+            } finally {
+                setHydrating(false);
+            }
+        })();
     }, []);
+
+    async function handleLogin() {
+        const u = username.trim();
+        const p = password.trim();
+        const c = captchaCode.trim();
+        if (!u || !p) {
+            setResult({kind: "error", title: "输入无效", message: "账号或密码为空"});
+            return;
+        }
+        if (!c || c.length !== 4) {
+            setResult({kind: "error", title: "输入无效", message: "请输入4位验证码"});
+            return;
+        }
+
+        setLoading(true);
+        setResult({kind: "idle", title: ""});
+
+        try {
+            await attendanceMachine.saveAccount({username: u, password: p});
+            const res = await attendanceAuthApi.login(u, p, c);
+
+            if (res.code === 600) {
+                setAuthState({status: AuthStateMap.Authenticated, account: {username: u, password: p}});
+                setResult({kind: "success", title: "登录成功"});
+            } else {
+                setAuthState({status: AuthStateMap.HasAccountNotAuthenticated, account: {username: u, password: p}});
+                setResult({kind: "error", title: "登录失败", message: res.msg || "请检查帐密或验证码"});
+            }
+        } catch (e: any) {
+            setResult({kind: "error", title: "发生异常", message: e?.message ? String(e.message) : "未知错误"});
+        } finally {
+            setLoading(false);
+            await refreshCaptcha();
+        }
+    }
+
     return (
-        <ScrollView contentContainerStyle={style.container}>
-            <Text h2 style={style.title}>
-                设置考勤系统帐密
-            </Text>
-            <Text style={style.note}>仅用于工具通过考勤系统系统获取考勤信息，凌晨请连接校园网</Text>
-            <Input
-                value={username}
-                onChangeText={v => setUsername(v)}
-                label="账号/学号"
-                placeholder="工具绑定的考勤系统账号"
-                style={style.input}
-            />
-            <Input
-                value={password}
-                onChangeText={v => setPassword(v)}
-                label="密码"
-                placeholder="对应账号的密码，默认为身份证后6位"
-                secureTextEntry={!showPwd}
-                rightIcon={
-                    <Icon
-                        type="fontawesome"
-                        name={showPwd ? "eye-slash" : "eye"}
-                        size={20}
-                        style={style.showPwdIcon}
-                        onPress={() => setShowPwd(!showPwd)}
-                    />
-                }
-                style={style.input}
-            />
-            <Input
-                value={captchaCode}
-                onChangeText={v => setCaptchaCode(v)}
-                label="验证码"
-                placeholder="右侧验证码，看不清点击刷新"
-                rightIcon={
-                    <Pressable onPress={refreshCaptchaCode}>
-                        <Image
-                            style={style.image}
-                            source={{uri: captchaCodeUri}}
-                            PlaceholderContent={<ActivityIndicator />}
-                        />
-                    </Pressable>
-                }
-                style={style.input}
-            />
-            <Button onPress={() => login(username, password, captchaCode)}>登录考勤系统</Button>
-            <Button
-                containerStyle={{marginTop: 10}}
-                onPress={() =>
-                    openInWeb("考勤系统登录", {
-                        uri: "https://yktuipweb.gxu.edu.cn/#/StudentHome",
-                    })
-                }>
-                在浏览器打开考勤系统
-            </Button>
-            {/*<Button*/}
-            {/*    containerStyle={{marginTop: 10}}*/}
-            {/*    onPress={() => {*/}
-            {/*        openInJw("/xtgl/login_slogin.html")*/}
-            {/*    }}>*/}
-            {/*    打开教务登录页*/}
-            {/*</Button>*/}
-            <Text style={style.note}>验证码需要手动输入，默认记忆帐密，登录成功后，可以在工具里使用快速登录的功能</Text>
-        </ScrollView>
+        <View style={styles.container}>
+            <View style={styles.card}>
+                {/* ── 状态指示器 ── */}
+                <View style={styles.cardTopRow}>
+                    <View style={styles.statusDotWrap}>
+                        <View style={[styles.statusDot, {backgroundColor: meta.color}]} />
+                    </View>
+                    <View style={styles.statusTextWrap}>
+                        <Text style={styles.statusLabel}>当前状态</Text>
+                        <Text style={[styles.statusValue, {color: meta.color}]}>{meta.label}</Text>
+                    </View>
+                    {busy && (
+                        <View style={styles.spinnerWrap}>
+                            <ActivityIndicator size="small" />
+                        </View>
+                    )}
+                </View>
+
+                {/* ── 结果反馈 ── */}
+                {result.kind !== "idle" && (
+                    <View
+                        style={[styles.banner, result.kind === "success" ? styles.bannerSuccess : styles.bannerError]}>
+                        <Text style={styles.bannerTitle}>{result.title}</Text>
+                        {!!result.message && <Text style={styles.bannerMsg}>{result.message}</Text>}
+                    </View>
+                )}
+
+                {/* ── 学号 ── */}
+                <Input
+                    value={username}
+                    onChangeText={v => setUsername(v)}
+                    label="学号"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    disabled={busy}
+                    inputStyle={styles.inputText}
+                    labelStyle={styles.inputLabel}
+                    containerStyle={styles.inputContainer}
+                    leftIcon={<Icon type="fontawesome" name="user" size={16} style={styles.leftIcon} />}
+                />
+
+                {/* ── 密码 ── */}
+                <Input
+                    value={password}
+                    onChangeText={v => setPassword(v)}
+                    label="密码"
+                    placeholder="默认为身份证后6位"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    secureTextEntry={!showPwd}
+                    disabled={busy}
+                    inputStyle={styles.inputText}
+                    labelStyle={styles.inputLabel}
+                    containerStyle={styles.inputContainer}
+                    leftIcon={<Icon name="lock" size={16} style={styles.leftIcon} />}
+                    rightIcon={
+                        <Pressable onPress={() => setShowPwd(s => !s)} disabled={busy}>
+                            <Icon
+                                type="fontawesome"
+                                name={showPwd ? "eye-slash" : "eye"}
+                                size={18}
+                                style={styles.rightIcon}
+                            />
+                        </Pressable>
+                    }
+                />
+
+                {/* ── 验证码 ── */}
+                <Input
+                    value={captchaCode}
+                    onChangeText={v => setCaptchaCode(v)}
+                    label="验证码"
+                    placeholder="自动OCR识别"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    maxLength={4}
+                    disabled={busy}
+                    inputStyle={styles.inputText}
+                    labelStyle={styles.inputLabel}
+                    containerStyle={styles.inputContainer}
+                    leftIcon={<Icon name="shield-check-outline" size={16} style={styles.leftIcon} />}
+                    rightIcon={
+                        <Pressable onPress={refreshCaptcha} disabled={busy || captchaLoading}>
+                            {captchaUri ? (
+                                <Image
+                                    style={styles.captchaImage}
+                                    source={{uri: captchaUri}}
+                                    PlaceholderContent={<ActivityIndicator />}
+                                />
+                            ) : (
+                                <ActivityIndicator size="small" />
+                            )}
+                        </Pressable>
+                    }
+                />
+
+                {/* ── 按钮区 ── */}
+                <View style={styles.actions}>
+                    <Button onPress={handleLogin} disabled={busy} loading={loading}>
+                        登录
+                    </Button>
+                    <Button
+                        type="outline"
+                        onPress={() => openInWeb("考勤系统", {uri: "https://yktuipweb.gxu.edu.cn/#/StudentHome"})}
+                        disabled={busy}>
+                        在浏览器打开考勤系统（全天需要校园网）
+                    </Button>
+                </View>
+
+                <Text style={styles.note}>
+                    仅用于工具获取考勤信息{"\n"}验证码已接入云端 OCR 服务自动识别{"\n"}识别失败时可手动修改
+                </Text>
+            </View>
+        </View>
     );
 }
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         padding: "5%",
     },
-    title: {
-        textAlign: "center",
+    card: {
+        borderRadius: 16,
+        padding: 14,
+    },
+    cardTopRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255,255,255,0.06)",
+        marginBottom: 10,
+    },
+    statusDotWrap: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: "rgba(255,255,255,0.06)",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    statusDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+    },
+    statusTextWrap: {
+        flex: 1,
+    },
+    statusLabel: {
+        color: "#9CA3AF",
+        fontSize: 12,
+    },
+    statusValue: {
+        marginTop: 2,
+        fontSize: 14,
+        fontWeight: "700",
+    },
+    spinnerWrap: {
+        width: 22,
+        alignItems: "flex-end",
+    },
+    banner: {
+        borderRadius: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        marginBottom: 8,
+        borderWidth: 1,
+    },
+    bannerSuccess: {
+        backgroundColor: "rgba(16,185,129,0.12)",
+        borderColor: "rgba(16,185,129,0.35)",
+    },
+    bannerError: {
+        backgroundColor: "rgba(239,68,68,0.12)",
+        borderColor: "rgba(239,68,68,0.35)",
+    },
+    bannerTitle: {
+        fontSize: 13,
+        fontWeight: "800",
+    },
+    bannerMsg: {
+        marginTop: 4,
+        color: "#D1D5DB",
+        fontSize: 12,
+        lineHeight: 16,
+    },
+    inputContainer: {
+        paddingHorizontal: 0,
+        marginTop: 6,
+    },
+    inputLabel: {
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    inputText: {
+        height: 60,
+        fontSize: 18,
+    },
+    leftIcon: {
+        paddingHorizontal: 6,
+        color: "#9CA3AF",
+    },
+    rightIcon: {
+        paddingHorizontal: 6,
+        color: "#9CA3AF",
+    },
+    captchaImage: {
+        width: 95,
+        height: 25,
+        borderRadius: 4,
+    },
+    actions: {
+        marginTop: 8,
+        gap: 10,
     },
     note: {
         marginVertical: 20,
         textAlign: "center",
         color: "gray",
         fontSize: 14,
-    },
-    showPwdIcon: {
-        paddingHorizontal: 5,
-        cursor: "pointer",
-    },
-    input: {
-        height: 40,
-    },
-    image: {
-        width: 95,
-        height: 25,
     },
 });

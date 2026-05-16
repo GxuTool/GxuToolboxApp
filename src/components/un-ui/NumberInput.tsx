@@ -1,10 +1,10 @@
 import {Pressable, StyleSheet, TextInput, View} from "react-native";
 import Flex from "./Flex.tsx";
 import {Icon} from "./Icon.tsx";
-import {Color} from "@/js/color.ts";
-import {useContext, useRef} from "react";
+import {Color} from "@/shared/color.ts";
+import {useRef} from "react";
 import {useTheme} from "@rneui/themed";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 export interface NumberInputProps {
     value: number;
@@ -20,11 +20,10 @@ export interface NumberInputProps {
 
 export function NumberInput(props: NumberInputProps) {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {store} = useUserConfig();
+    const ripple = store(s => s.theme.ripple);
     const style = StyleSheet.create({
         container: {
-            borderColor: theme.colors.grey4,
-            borderWidth: 1,
             borderRadius: 5,
             height: props.size ?? 30,
             backgroundColor: Color(theme.colors.black).setAlpha(0.1).rgbaString,
@@ -71,7 +70,7 @@ export function NumberInput(props: NumberInputProps) {
     return (
         <Flex style={style.container} inline>
             <Pressable
-                android_ripple={userConfig.theme.ripple}
+                android_ripple={ripple}
                 onPressIn={e => e.stopPropagation()}
                 onPress={minus}
                 disabled={props.value <= (props.min ?? Number.MIN_SAFE_INTEGER)}>
@@ -91,6 +90,9 @@ export function NumberInput(props: NumberInputProps) {
                 <TextInput
                     blurOnSubmit={true}
                     onSubmitEditing={v => {
+                        if (v.nativeEvent.text === "") {
+                            props.onSubmit?.(props.min ?? 0);
+                        }
                         const num = parseFloat(v.nativeEvent.text);
                         if (!isNaN(num)) {
                             props.onSubmit?.(num);
@@ -102,6 +104,9 @@ export function NumberInput(props: NumberInputProps) {
                     autoFocus={props.autoFocus}
                     onBlur={props.onBlur}
                     onChangeText={v => {
+                        if (v === "") {
+                            props.onChange?.(props.min ?? 0);
+                        }
                         const num = parseFloat(v.replace(/[^0-9-.]/g, ""));
                         props.onChange?.(num);
                     }}
@@ -109,7 +114,7 @@ export function NumberInput(props: NumberInputProps) {
                 />
             </View>
             <Pressable
-                android_ripple={userConfig.theme.ripple}
+                android_ripple={ripple}
                 onPress={plus}
                 disabled={props.value >= (props.max ?? Number.MAX_SAFE_INTEGER)}>
                 <Flex style={style.rightIcon} inline justify="center">

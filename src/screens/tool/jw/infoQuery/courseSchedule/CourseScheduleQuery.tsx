@@ -1,72 +1,55 @@
-import {Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
-import {Color} from "@/js/color.ts";
-import React, {useContext, useEffect, useState} from "react";
+import {BottomSheet, Card, Divider, Text, useTheme} from "@rneui/themed";
+import React, {useMemo, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
-import {CourseScheduleView} from "@/components/tool/infoQuery/courseSchedule/CourseScheduleView.tsx";
-import {PracticalCourseList} from "@/components/tool/infoQuery/courseSchedule/PracticalCourseList.tsx";
-import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
+import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {usePagerView} from "react-native-pager-view";
-import {courseApi} from "@/js/jw/course.ts";
-import {Row, Rows, Table} from "react-native-reanimated-table";
-import {Course} from "@/type/infoQuery/course/course.ts";
 import Clipboard from "@react-native-clipboard/clipboard";
-import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
-import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {UnTable, UnTableCols} from "@/components/un-ui";
+import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
+import {CourseClass} from "@/class/jw/course.ts";
+import {Color} from "@/shared/color.ts";
+import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
+import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
+import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
+import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
+import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
-    const {openInJw} = useWebView();
-    const [year, setYear] = useState(+userConfig.jw.year);
-    const [term, setTerm] = useState<SchoolTermValue>(userConfig.jw.term);
+    const {store} = useUserConfig();
+
+    const [year, setYear] = useState(+store(s => s.jw.year));
+    const [term, setTerm] = useState<SchoolTermValue>(store(s => s.jw.term));
     const pageView = usePagerView({pagesAmount: 20});
-    const [courseScheduleList, setCourseScheduleList] = useState<Course[]>();
-    const [courseScheduleApiRes, setCourseScheduleApiRes] = useState<CourseScheduleQueryRes>();
+
+    const {items:courseItems=[],loading}=useCourse(year,term);
+    const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
+
+    // 不绑定全局的startDay，根据year和term动态计算，以免造成混乱
+    const startDay = useStartDay(year, term);
+
+    const tableData=useMemo(
+        ()=>courseItems.filter((item,idx,arr)=>arr.findIndex(i=>i.title===item.title)===idx),
+        [courseItems],
+    );
     const style = StyleSheet.create({
         container: {
-            padding: "5%",
+            padding: "3%",
+        },
+        coursePadding:{
+            marginHorizontal:-12,
         },
         tableText: {
             color: theme.colors.black,
             margin: 5,
             textAlign: "center",
         },
-        tableBorder: {
-            borderWidth: 2,
-            borderColor: Color.mix(theme.colors.primary, theme.colors.grey4, 0.4).rgbaString,
-        },
-        tableHeader: {
-            backgroundColor: Color.mix(
-                Color(theme.colors.primary),
-                Color(theme.colors.background),
-                theme.mode === "dark" ? 0.7 : 0.2,
-            ).setAlpha(theme.mode === "dark" ? 0.3 : 0.6).rgbaString,
-        },
-        tableHeaderText: {},
     });
-
-    async function query() {
-        const res = await courseApi.getCourseSchedule(year, term);
-        if (res?.kbList || res?.sjkList) {
-            setCourseScheduleApiRes(res);
-            const courseList: Course[] = [];
-            res.kbList.forEach(course => {
-                if (courseList.findIndex(item => item.kcmc === course.kcmc) < 0) {
-                    courseList.push(course);
-                }
-            });
-            console.log(courseList);
-            setCourseScheduleList(courseList);
-        }
-    }
-
-    useEffect(() => {
-        query();
-    }, [year, term]);
 
     async function qqLink(qq: string) {
         const url = `mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${qq}&card_type=group&source=qrcode`;
@@ -77,36 +60,56 @@ export function CourseScheduleQuery() {
         });
     }
 
-    const tableWidthArr = [150, 70, 100, 150];
+    const cols: UnTableCols<ScheduleTableItem> = [
+        {
+            title: "课程名",
+            width: 150,
+            dataIndex: "title",
+        },
+        {
+            title: "教师",
+            width: 70,
+            dataIndex: "teacher",
+        },
+        {
+            title: "上课地点",
+            width: 100,
+            dataIndex: "location",
+        },
+        {
+            title: "qq群",
+            width: 150,
+            dataIndex: "qq",
+            render: qq =>
+                qq?.trim() ? (
+                    <Pressable android_ripple={store(s => s.theme.ripple)} onPress={() => qqLink(qq)}>
+                        <Text style={style.tableText}>{qq}</Text>
+                    </Pressable>
+                ) : (
+                    "-"
+                ),
+        },
+    ];
+
+    const [itemDetailShow, setItemDetailShow] = useState(false);
+    const [itemDetail, setItemDetail] = useState<CourseClass>();
+
     return (
         <ScrollView>
             <View style={style.container}>
-                <Flex gap={10} direction="column" align="flex-start">
-                    <Text h4>查询参数</Text>
-                    <Flex gap={10}>
-                        <Text>学期</Text>
-                        <View style={{flex: 1}}>
-                            <UnTermSelector
-                                year={year}
-                                term={term}
-                                onChange={(year, term) => {
-                                    setYear(+year);
-                                    setTerm(term);
-                                }}
-                            />
-                        </View>
-                    </Flex>
-                    <Flex gap={10}>
-                        <Button containerStyle={{flex: 1}} onPress={query}>
-                            查询
-                        </Button>
-                        <Button onPress={() => openInJw("/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default")}>
-                            前往教务查询
-                        </Button>
-                    </Flex>
-                </Flex>
+                <View style={{flex: 1, padding: "-1%"}}>
+                    <ChooseTerm
+                        onTermSelect={(Year, Term) => {
+                            setYear(+Year);
+                            setTerm(+Term);
+                        }}
+                        includeWholeLife={false}
+                        includeWholeYear={false}
+                    />
+                </View>
+                {loading&&<ActivityIndicator size="large" />}
                 <Divider />
-                <Text h4>课表预览</Text>
+                <Text h4>预览</Text>
                 <Flex style={{padding: 10}} align="flex-start" direction="column" gap={10}>
                     <Text>课表周数</Text>
                     <UnSlider
@@ -118,52 +121,34 @@ export function CourseScheduleQuery() {
                         onValueChange={v => pageView.setPage(v - 1)}
                     />
                 </Flex>
-                <CourseScheduleView
-                    startDay={userConfig.jw.startDay}
-                    pageView={pageView}
-                    courseSchedule={courseScheduleApiRes}
-                />
-                {courseScheduleApiRes?.sjkList && (
+                <View style={style.coursePadding}>
+                    <TimeScheduleView startDay={startDay} pageView={pageView} scheduleItems={courseItems} />
+                </View>
+                {practiceItems && (
                     <>
                         <Card.Divider />
-                        <PracticalCourseList courseList={courseScheduleApiRes.sjkList} />
+                        <PracticalCourseList courseList={practiceItems} />
                     </>
                 )}
                 <Divider />
                 <Text h4>课程列表</Text>
                 <ScrollView horizontal style={{marginTop: 10}}>
-                    <Table borderStyle={style.tableBorder}>
-                        <Row
-                            style={style.tableHeader}
-                            height={40}
-                            widthArr={tableWidthArr}
-                            textStyle={style.tableText}
-                            data={["课程名", "教师", "上课地点", "qq群"]}
-                        />
-                        <Rows
-                            widthArr={tableWidthArr}
-                            textStyle={style.tableText}
-                            heightArr={new Array(courseScheduleList?.length).fill(40)}
-                            data={
-                                courseScheduleList?.map<any[]>(course => [
-                                    course.kcmc,
-                                    course.xm,
-                                    course.cdmc,
-                                    course.qqqh.trim() ? (
-                                        <Pressable
-                                            android_ripple={userConfig.theme.ripple}
-                                            onPress={() => qqLink(course.qqqh)}>
-                                            <Text style={style.tableText}>{course.qqqh}</Text>
-                                        </Pressable>
-                                    ) : (
-                                        "-"
-                                    ),
-                                ]) ?? []
-                            }
-                        />
-                    </Table>
+                    <UnTable<ScheduleTableItem> data={tableData} cols={cols} />
                 </ScrollView>
             </View>
+            <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
+                <View
+                    style={{
+                        backgroundColor: theme.colors.background,
+                        borderTopLeftRadius: 8,
+                        borderTopRightRadius: 8,
+                        borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
+                        borderWidth: 1,
+                        padding: "2.5%",
+                    }}>
+                    <CourseDetail course={itemDetail} />
+                </View>
+            </BottomSheet>
         </ScrollView>
     );
 }

@@ -1,24 +1,25 @@
 import {KeyboardAvoidingView, ScrollView, StyleSheet, TextInput, View} from "react-native";
 import {Button, Divider, Text, useTheme} from "@rneui/themed";
-import {useContext, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Course} from "@/type/infoQuery/course/course.ts";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {UnPicker} from "@/components/un-ui/UnPicker.tsx";
 import {Picker} from "@react-native-picker/picker";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {Row, Rows, Table} from "react-native-reanimated-table";
-import {Color} from "@/js/color.ts";
-import {defaultUserConfig} from "@/type/IUserConfig.ts";
+import {Color} from "@/shared/color.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 type CourseKeysType = keyof Omit<Course, "queryModel" | "userModel">;
 
 export function CourseItemDetailSettingScreen() {
-    const {userConfig, updateUserConfig} = useContext(UserConfigContext);
+    const {store: ucStore} = useUserConfig();
     const {theme} = useTheme();
     const [courseList, setCourseList] = useState<Course[]>([]);
     const [activeCourseIndex, setActiveCourseIndex] = useState(0);
     const activeCourse = courseList[activeCourseIndex];
+
+    const courseDetail = ucStore(s => s.preference.courseDetail);
 
     const style = StyleSheet.create({
         input: {
@@ -37,22 +38,36 @@ export function CourseItemDetailSettingScreen() {
     });
 
     function editLabel(prop: CourseKeysType, label: string) {
-        userConfig.preference.courseDetail[prop].label = label;
+        const s = ucStore.getState();
+        ucStore.getState().update("preference", {
+            ...s.preference,
+            courseDetail: {
+                ...s.preference.courseDetail,
+                [prop]: { ...s.preference.courseDetail[prop], label },
+            },
+        });
     }
 
     function toggleShow(prop: CourseKeysType) {
-        userConfig.preference.courseDetail[prop].show = !userConfig.preference.courseDetail[prop].show;
-        save();
+        const s = ucStore.getState();
+        const newShow = !s.preference.courseDetail[prop].show;
+        ucStore.getState().update("preference", {
+            ...s.preference,
+            courseDetail: {
+                ...s.preference.courseDetail,
+                [prop]: { ...s.preference.courseDetail[prop], show: newShow },
+            },
+        });
     }
 
     function save() {
-        updateUserConfig(userConfig);
+        // save is now a no-op since updates are done via store.update
     }
 
     const table = {
         header: ["属性", "标签", "预览", "操作"],
         flex: [1, 1, 1, 1],
-        showingProps: Object.entries(userConfig.preference.courseDetail)
+        showingProps: Object.entries(courseDetail)
             .filter(prop => prop[1].show)
             .map(prop => [
                 prop[0],
@@ -68,7 +83,7 @@ export function CourseItemDetailSettingScreen() {
                     隐藏
                 </Button>,
             ]),
-        availableProps: Object.entries(userConfig.preference.courseDetail)
+        availableProps: Object.entries(courseDetail)
             .filter(prop => !prop[1].show)
             .map(prop => [
                 prop[0],

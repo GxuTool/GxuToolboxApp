@@ -1,4 +1,10 @@
-import {Course, CourseSchedule, PhyExp, PracticalCourse} from "@/type/infoQuery/course/course.ts";
+import {
+    Course,
+    CourseSchedule,
+    CourseSelectionListItem,
+    PhyExp,
+    PracticalCourse,
+} from "@/type/infoQuery/course/course.ts";
 import {Class, Week} from "@/type/infoQuery/base.ts";
 import {PageModel, QueryResRoot} from "@/type/global.ts";
 
@@ -26,3 +32,8 @@ export interface PhyExpQueryRes {
     count: number;
     data: PhyExp[];
 }
+
+export interface CourseSelectionListRes {
+    tmpList: Array<CourseSelectionListItem>;
+    sfxsjc: string;
+};

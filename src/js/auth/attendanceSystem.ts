@@ -1,7 +1,7 @@
-import {http, urlWithParams} from "@/js/http.ts";
+import {http, urlWithParams} from "@/core/http.ts";
 import {userMgr} from "@/js/mgr/user.ts";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
-import {store} from "@/js/store.ts";
+import {store} from "@/core/store.ts";
 import moment from "moment";
 import {AttendanceCourseScheduleClass} from "@/class/auth/attendanceSystem.ts";
 import {SchoolTermValue, SchoolYearValue} from "@/type/global.ts";

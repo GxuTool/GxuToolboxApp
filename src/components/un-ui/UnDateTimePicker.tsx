@@ -1,11 +1,11 @@
 import {Pressable, StyleSheet} from "react-native";
 import {Dialog, Text, useTheme} from "@rneui/themed";
-import {Color} from "@/js/color.ts";
-import React, {useContext, useState} from "react";
+import {Color} from "@/shared/color.ts";
+import React, {useState} from "react";
 import DateTimePicker, {useDefaultStyles} from "react-native-ui-datepicker";
 import moment from "moment/moment";
 import dayjs from "dayjs";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 interface Props {
     value: number;
@@ -17,14 +17,12 @@ interface Props {
 export function UnDateTimePicker(props: Props) {
     const defaultStyles = useDefaultStyles();
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
+    const {store} = useUserConfig();
     const [dialogVisible, setDialogVisible] = useState(false);
     const [value, setValue] = useState(props.value);
     const style = StyleSheet.create({
         labelContainer: {
             backgroundColor: Color(theme.colors.black).setAlpha(0.1).rgbaString,
-            borderColor: theme.colors.grey4,
-            borderWidth: 1,
             borderRadius: 5,
             paddingHorizontal: 15,
             paddingVertical: 10,
@@ -35,7 +33,7 @@ export function UnDateTimePicker(props: Props) {
         <>
             <Pressable
                 onPress={() => setDialogVisible(true)}
-                android_ripple={userConfig.theme.ripple}
+                android_ripple={store(s => s.theme.ripple)}
                 style={style.labelContainer}>
                 <Text>{moment(value).format(props.onlyDate ? "YYYY-MM-DD" : "YYYY-MM-DD hh:mm:ss")}</Text>
             </Pressable>

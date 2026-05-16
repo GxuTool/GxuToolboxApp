@@ -32,7 +32,7 @@ export class CourseScheduleClass extends BaseClass<CourseScheduleQueryRes> imple
 
         this.kbList.forEach(course => {
             if (course.getWeeksList.includes(week)) {
-                res[parseInt(course.xqj, 10) - 1].push(course);
+                res[course.weekday].push(course);
             }
         });
         return res;
@@ -147,7 +147,7 @@ export class CourseClass extends BaseClass<Course> implements Course {
      */
     getAttendanceTimeSpan(day: moment.Moment = moment()): [moment.Moment, moment.Moment] {
         // 获取节次数组
-        const courseSpan = this.jcs.split("-").map(num => +num - 1);
+        const courseSpan = this._ori.jcs.split("-").map(num => +num - 1);
         // 获取并切割开始时间，"08:00\n08:45" -> "08:00" -> ["08", "00"] -> [8, 0]
         const startTimeSpan = CourseScheduleData.timeSpanList[courseSpan[0]]
             .split("\n")[0]
@@ -166,7 +166,7 @@ export class CourseClass extends BaseClass<Course> implements Course {
 
     get getWeeksList(): number[] {
         const res = new Set<number>();
-        this.zcd.split(",").forEach(weekSpanStr => {
+        this._ori.zcd.split(",").forEach(weekSpanStr => {
             const weekSpan = weekSpanStr
                 .replace(/[^0-9-]/g, "")
                 .split("-")
@@ -180,11 +180,25 @@ export class CourseClass extends BaseClass<Course> implements Course {
             if (!/[单双]/.test(weekSpanStr)) {
                 weekList.forEach(v => res.add(v));
             } else {
-                weekList
-                    .filter(v => v % 2 === (/单/.test(weekSpanStr) ? 1 : 0))
-                    .forEach(v => res.add(v));
+                weekList.filter(v => v % 2 === (/单/.test(weekSpanStr) ? 1 : 0)).forEach(v => res.add(v));
             }
         });
         return Array.from(res);
+    }
+    get weekday() {
+        return parseInt(this._ori.xqj, 10);
+    }
+
+    atDay(day: moment.MomentInput, startDay: moment.MomentInput) {
+        const dateMoment = moment(day);
+        const week = Math.ceil(moment.duration(dateMoment.diff(startDay)).asWeeks()) + 1;
+        const weekday = dateMoment.weekday();
+        return weekday === this.weekday && this.getWeeksList.includes(week);
+    }
+
+    atDayWithWeek(day: moment.MomentInput, week: number) {
+        const dateMoment = moment(day);
+        const weekday = dateMoment.weekday();
+        return weekday === this.weekday && this.getWeeksList.includes(week);
     }
 }

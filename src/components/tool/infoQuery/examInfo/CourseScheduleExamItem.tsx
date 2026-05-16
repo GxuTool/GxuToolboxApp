@@ -1,13 +1,14 @@
 import React, {useContext, useMemo} from "react";
 import {Pressable, StyleSheet} from "react-native";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import moment from "moment/moment";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
 
 interface Props {
     examInfo: ExamInfo;
@@ -15,7 +16,11 @@ interface Props {
 }
 
 export function CourseScheduleExamItem(props: Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {store: ucStore} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
+    const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const {examInfo} = props;
@@ -49,14 +54,14 @@ export function CourseScheduleExamItem(props: Props) {
     const itemStyle = useMemo(() => {
         return StyleSheet.create({
             course: {
-                height: span * userConfig.theme.course.timeSpanHeight - userConfig.theme.course.courseItemMargin * 2,
+                height: span * timeSpanHeight - courseItemMargin * 2,
                 position: "absolute",
                 backgroundColor: Color(color).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString,
                 borderColor: Color.mix(color, theme.colors.grey4, 0.7).rgbaString,
                 top:
-                    userConfig.theme.course.weekdayHeight +
-                    y * userConfig.theme.course.timeSpanHeight +
-                    userConfig.theme.course.courseItemMargin,
+                    weekdayHeight +
+                    y * timeSpanHeight +
+                    courseItemMargin,
             },
             text: {
                 textAlign: "center",
@@ -64,9 +69,9 @@ export function CourseScheduleExamItem(props: Props) {
             },
         });
     }, [
-        userConfig.theme.course.courseItemMargin,
-        userConfig.theme.course.timeSpanHeight,
-        userConfig.theme.course.weekdayHeight,
+        courseItemMargin,
+        timeSpanHeight,
+        weekdayHeight,
         span,
         theme.colors.grey4,
         theme.mode,
@@ -79,7 +84,7 @@ export function CourseScheduleExamItem(props: Props) {
             onPress={e => {
                 props.onPress?.(examInfo);
             }}
-            android_ripple={userConfig.theme.ripple}
+            android_ripple={ucStore(s => s.theme.ripple)}
             style={[itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
                 <Text style={itemStyle.text}>考试</Text>

@@ -2,7 +2,7 @@ import {Text, useTheme} from "@rneui/themed";
 import {Linking, StyleSheet, ToastAndroid, TouchableOpacity, View} from "react-native";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import {IPos} from "@/type/pos.ts";
 import {Pos} from "@/js/pos.ts";
 

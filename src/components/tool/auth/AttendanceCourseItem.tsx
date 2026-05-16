@@ -1,13 +1,15 @@
 import React, {useContext, useMemo} from "react";
 import {Pressable, StyleSheet, ViewStyle} from "react-native";
-import {Color} from "@/js/color.ts";
+import {Color} from "@/shared/color.ts";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {CourseScheduleContext} from "@/js/jw/course.ts";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {AttendanceCourseClass, AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {useCourse} from "@/hooks/useCourse.ts";
+import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
 
 interface Props {
     style?: ViewStyle;
@@ -17,7 +19,11 @@ interface Props {
 }
 
 export function AttendanceCourseItem(props: Props) {
-    const {userConfig} = useContext(UserConfigContext);
+    const {store: ucStore} = useUserConfig();
+    const {store} = useCourse();
+    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
+    const weekdayHeight = store(s => s.theme.weekdayHeight);
+    const courseItemMargin = store(s => s.theme.courseItemMargin);
     const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
     const {theme} = useTheme();
     const ColorMap = {
@@ -28,24 +34,24 @@ export function AttendanceCourseItem(props: Props) {
         [AST.AttendanceState.NoNeed]: theme.colors.primary,
     };
     const {course} = props;
-    const span = course.periodArry!.reduceRight((pv, cv) => pv - cv) + 1;
-    const y = course.periodArry![0];
+    const span = course._ori.periodArry!.reduceRight((pv, cv) => pv - cv) + 1;
+    const y = course._ori.periodArry![0];
     const attendanceState = props.attendanceData?.getAttendanceStateByDate(
-        props.course.weekDay!,
-        props.course.periodArry![0],
+        props.course._ori.weekDay!,
+        props.course._ori.periodArry![0],
     );
     const color = ColorMap[attendanceState!];
     const itemStyle = useMemo(() => {
         return StyleSheet.create({
             course: {
-                height: span * userConfig.theme.course.timeSpanHeight - userConfig.theme.course.courseItemMargin * 2,
+                height: span * timeSpanHeight - courseItemMargin * 2,
                 position: "absolute",
                 backgroundColor: Color(color ?? theme.colors.primary).setAlpha(theme.mode === "light" ? 0.3 : 0.1)
                     .rgbaString,
                 top:
-                    userConfig.theme.course.weekdayHeight +
-                    y * userConfig.theme.course.timeSpanHeight +
-                    userConfig.theme.course.courseItemMargin,
+                    weekdayHeight +
+                    y * timeSpanHeight +
+                    courseItemMargin,
             },
             text: {
                 textAlign: "center",
@@ -53,9 +59,9 @@ export function AttendanceCourseItem(props: Props) {
             },
         });
     }, [
-        userConfig.theme.course.courseItemMargin,
-        userConfig.theme.course.timeSpanHeight,
-        userConfig.theme.course.weekdayHeight,
+        courseItemMargin,
+        timeSpanHeight,
+        weekdayHeight,
         span,
         theme.colors.grey4,
         theme.mode,
@@ -67,7 +73,7 @@ export function AttendanceCourseItem(props: Props) {
             onPress={e => {
                 props.onCoursePress?.(course);
             }}
-            android_ripple={userConfig.theme.ripple}
+            android_ripple={ucStore(s => s.theme.ripple)}
             style={[props.style, itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
                 {courseScheduleData.courseInfoVisible.name && (
@@ -76,38 +82,22 @@ export function AttendanceCourseItem(props: Props) {
                             defaultColor={itemStyle.text.color}
                             state={attendanceState ?? AST.AttendanceState.NotStarted}
                         />
-                        {course.subjectName}
+                        {course._ori.subjectName}
                     </Text>
                 )}
                 {courseScheduleData.courseInfoVisible.position && (
                     <Text style={itemStyle.text}>
                         <Icon name="map-marker" style={itemStyle.text} />
-                        {"\n" + course.roomName!.replace("-", "\n")}
+                        {"\n" + course._ori.roomName!.replace("-", "\n")}
                     </Text>
                 )}
                 {courseScheduleData.courseInfoVisible.teacher && (
                     <Text style={itemStyle.text} ellipsizeMode="tail" numberOfLines={5}>
                         <Icon name="account" style={itemStyle.text} />
-                        {"\n" + course.teacherName}
+                        {"\n" + course._ori.teacherName}
                     </Text>
                 )}
             </Flex>
         </Pressable>
     );
-}
-
-export interface AttendanceStateIconProps {
-    state: AST.AttendanceState;
-    defaultColor: string;
-}
-export function AttendanceStateIcon(props: AttendanceStateIconProps) {
-    const {theme} = useTheme();
-    const iconMap: Record<AST.AttendanceState, React.ReactElement> = {
-        [AST.AttendanceState.Normal]: <Icon name="check-circle" color={theme.colors.success} />,
-        [AST.AttendanceState.Late]: <Icon name="clock" color={theme.colors.warning} />,
-        [AST.AttendanceState.Absent]: <Icon name="close-circle" color={theme.colors.error} />,
-        [AST.AttendanceState.NotStarted]: <Icon name="circle-outline" color={props.defaultColor} />,
-        [AST.AttendanceState.NoNeed]: <Icon name="minus-circle" color={props.defaultColor} />,
-    };
-    return iconMap[props.state];
 }

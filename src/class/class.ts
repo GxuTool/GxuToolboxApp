@@ -1,10 +1,9 @@
-/** 基础类，继承数据所有属性，`_ori` 属性为原始数据 */
+/** 基础类，原始数据存储在 `_ori` 属性中 */
 export class BaseClass<T>{
     /** 原始数据 */
     readonly _ori: T;
 
     constructor(ori: T) {
-        Object.assign(this, ori);
         this._ori = ori;
     }
 }

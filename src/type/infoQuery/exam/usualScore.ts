@@ -1,4 +1,4 @@
-import {ExamScore} from "@/type/infoQuery/exam/examScore.ts";
+import {OldExamScore} from "@/type/infoQuery/exam/oldExamScore.ts";
 
 export interface UsualScore {
     //日期
@@ -96,7 +96,7 @@ export interface QueryModel {
     pageNo: number;
     pageSize: number;
     showCount: number;
-    sorts: ExamScore[];
+    sorts: OldExamScore[];
     totalCount: number;
     totalPage: number;
     totalResult: number;

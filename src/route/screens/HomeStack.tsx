@@ -1,30 +1,17 @@
-import React, {useContext} from "react";
+import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {Color} from "@/js/color.ts";
-import {Button, useTheme} from "@rneui/themed";
-import {UserConfigContext} from "@/components/AppProvider.tsx";
+import {Color} from "@/shared/color.ts";
+import {useTheme} from "@rneui/themed";
 import {HomeScreen} from "@/screens/HomeScreen.tsx";
 import {ScheduleEdit} from "@/screens/home/schedule/ScheduleEdit.tsx";
-import {useWebView} from "@/hooks/app.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 const Stack = createNativeStackNavigator();
 
 export function HomeStack() {
     const {theme} = useTheme();
-    const {userConfig} = useContext(UserConfigContext);
-    const {openInJw} = useWebView();
-    const headerRightEle = () => {
-        return (
-            <Button
-                type="clear"
-                containerStyle={{marginRight: 10}}
-                onPress={() => {
-                    openInJw("/xtgl/index_initMenu.html");
-                }}>
-                打开教务
-            </Button>
-        );
-    };
+    const {store} = useUserConfig();
+    const bgOpacity = store(s => s.theme.bgOpacity);
     return (
         <Stack.Navigator
             initialRouteName="HomeScreen"
@@ -32,22 +19,21 @@ export function HomeStack() {
                 headerShadowVisible: false,
                 headerStyle: {
                     backgroundColor: Color(theme.colors.background).setAlpha(
-                        ((theme.mode === "dark" ? 0.7 : 0.9) * userConfig.theme.bgOpacity) / 100,
+                        ((theme.mode === "dark" ? 0.7 : 0.9) * bgOpacity) / 100,
                     ).rgbaString,
                 },
                 contentStyle: {
                     backgroundColor: Color(theme.colors.background).setAlpha(
-                        ((theme.mode === "dark" ? 0.5 : 0.6) * userConfig.theme.bgOpacity) / 100,
+                        ((theme.mode === "dark" ? 0.5 : 0.6) * bgOpacity) / 100,
                     ).rgbaString,
                 },
                 animation: "fade",
                 animationDuration: 100,
-                headerRight: headerRightEle,
             }}>
             <Stack.Screen
                 name="HomeScreen"
                 options={{
-                    title: "首页",
+                    headerShown: false,
                 }}
                 component={HomeScreen}
             />
@@ -58,7 +44,7 @@ export function HomeStack() {
                     title: "日程编辑",
                     headerStyle: {
                         backgroundColor: Color(theme.colors.background).setAlpha(
-                            ((theme.mode === "dark" ? 0.5 : 0.4) * userConfig.theme.bgOpacity) / 100,
+                            ((theme.mode === "dark" ? 0.5 : 0.4) * bgOpacity) / 100,
                         ).rgbaString,
                     },
                     contentStyle: {

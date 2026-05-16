@@ -1,7 +1,8 @@
-import {GestureResponderEvent, PanResponder, PanResponderGestureState, ScrollView, View} from "react-native";
-import {ScheduleCard} from "@/components/app/ScheduleCard.tsx";
+import {GestureResponderEvent, PanResponder, PanResponderGestureState, ScrollView} from "react-native";
+import {ScheduleCard} from "@/features/courseSchedule/components/ScheduleCard.tsx";
 import React, {useRef, useState} from "react";
 import {UpdateCard} from "@/components/UpdateCard.tsx";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 export function HomeScreen() {
     // 滚动相关状态和引用
@@ -65,7 +66,7 @@ export function HomeScreen() {
     });
 
     return (
-        <View {...panResponder.panHandlers}>
+        <SafeAreaView {...panResponder.panHandlers}>
             <ScrollView
                 ref={scrollViewRef}
                 // 基础滚动配置
@@ -80,11 +81,12 @@ export function HomeScreen() {
                 // 样式配置
                 contentContainerStyle={{
                     paddingVertical: 0,
+                    gap: 8,
                 }}>
                 <UpdateCard />
                 {/*<ComingExamCard />*/}
                 <ScheduleCard />
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 }
