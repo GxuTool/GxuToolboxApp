@@ -1,6 +1,6 @@
-import React from "react";
+import React, {useCallback, useState} from "react";
 import {ActivityIndicator, ScrollView, StyleSheet, View} from "react-native";
-import {Button, Card, Divider, Text, useTheme} from "@rneui/themed";
+import {BottomSheet, Button, Card, Divider, Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Schools} from "@/type/global.ts";
 import {usePagerView} from "react-native-pager-view";
@@ -15,10 +15,20 @@ import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeS
 import {useFilter} from "@/features/classCourseSchedule/hooks/useFilter.ts";
 import {useClassScheduleData} from "@/features/classCourseSchedule/hooks/useClassScheduleData.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
+import moment from "moment/moment";
+import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
+import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
+import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
+import {Course} from "@/type/infoQuery/course/course.ts";
+import {Color} from "@/shared/color.ts";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 
 export function ClassCourseSchedule() {
     const {openInJw} = useWebView();
     const {theme} = useTheme();
+    const {store} = useUserConfig();
+    const devMode = store(s => s.devMode);
 
     const {
         school,
@@ -39,6 +49,14 @@ export function ClassCourseSchedule() {
         useClassScheduleData();
 
     const startDay = useStartDay(+year, term);
+
+    const [itemDetailShow, setItemDetailShow] = useState(false);
+    const [itemDetail, setItemDetail] = useState<ScheduleTableItem>();
+
+    const onItemPress = useCallback((item: ScheduleTableItem) => {
+        setItemDetail(item);
+        setItemDetailShow(true);
+    }, []);
 
     return (
         <ScrollView>
@@ -141,7 +159,20 @@ export function ClassCourseSchedule() {
                                 onValueChange={v => pageView.setPage(v - 1)}
                             />
                         </Flex>
-                        <TimeScheduleView startDay={startDay} pageView={pageView} scheduleItems={theorySchedule} />
+                        <TimeScheduleView
+                            startDay={startDay}
+                            pageView={pageView}
+                            scheduleItems={[
+                                {
+                                    data: theorySchedule,
+                                    isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) =>
+                                        item.week === week && item.day === day.isoWeekday(),
+                                    itemRender: (item, _day, _week) => (
+                                        <NewCourseItem item={item} onPress={onItemPress} />
+                                    ),
+                                } as TimeScheduleItemData,
+                            ]}
+                        />
                         {practicalSchedule && (
                             <>
                                 <Card.Divider />
@@ -150,20 +181,27 @@ export function ClassCourseSchedule() {
                         )}
                     </>
                 )}
+                {devMode && (
+                    <Flex gap={8} direction="column">
+                        <ScheduleDataDebugCard label="查看班级列表" data={list} />
+                        <ScheduleDataDebugCard label="查看班级理论课表" data={theorySchedule} />
+                        <ScheduleDataDebugCard label="查看班级实践课表" data={practicalSchedule} />
+                    </Flex>
+                )}
             </View>
-            {/*<BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>*/}
-            {/*    <View*/}
-            {/*        style={{*/}
-            {/*            backgroundColor: theme.colors.background,*/}
-            {/*            borderTopLeftRadius: 8,*/}
-            {/*            borderTopRightRadius: 8,*/}
-            {/*            borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,*/}
-            {/*            borderWidth: 1,*/}
-            {/*            padding: "2.5%",*/}
-            {/*        }}>*/}
-            {/*        <CourseDetail course={itemDetail} />*/}
-            {/*    </View>*/}
-            {/*</BottomSheet>*/}
+            <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
+                <View
+                    style={{
+                        backgroundColor: theme.colors.background,
+                        borderTopLeftRadius: 8,
+                        borderTopRightRadius: 8,
+                        borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
+                        borderWidth: 1,
+                        padding: "2.5%",
+                    }}>
+                    {itemDetail?.raw && <CourseDetail course={itemDetail.raw as Course} />}
+                </View>
+            </BottomSheet>
         </ScrollView>
     );
 }
@@ -172,3 +210,29 @@ const style = StyleSheet.create({
     container: {padding: "5%"},
     label: {textAlign: "right"},
 });
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
+    );
+}

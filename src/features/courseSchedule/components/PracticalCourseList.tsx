@@ -5,7 +5,7 @@ import {Icon} from "@/components/un-ui/Icon.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {useEffect, useState} from "react";
 import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 type PracticeItem = ICourse["practiceList"][number];
 
@@ -45,7 +45,7 @@ const staticData = {
 export function PracticalCourseList(props: Props) {
     const {theme} = useTheme();
     const [courseList, setCourseList] = useState<ICourse["practiceList"]>([]);
-    const {courseScheduleStyle} = useCourse();
+    const {courseScheduleStyle} = useCourseData();
     useEffect(() => {
         randomCourseColor(props.courseList as ICourse["practiceList"]);
         setCourseList(props.courseList as ICourse["practiceList"]);

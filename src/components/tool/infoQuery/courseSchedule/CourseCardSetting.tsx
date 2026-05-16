@@ -1,16 +1,16 @@
-import React, {useContext} from "react";
-import {Pressable, StyleProp, View, ViewStyle} from "react-native";
+import React from "react";
+import {StyleProp, View, ViewStyle} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
+import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {SchoolTermValue, SchoolYearValue} from "@/type/global.ts";
 import {usePagerView} from "react-native-pager-view";
 import {UnDateTimePicker} from "@/components/un-ui/UnDateTimePicker.tsx";
 import moment from "moment/moment";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {ColorPalettes, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {Color} from "@/shared/color.ts";
@@ -29,22 +29,19 @@ export function CourseCardSetting(props: Props) {
     const {theme} = useTheme();
 
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
-    const {courseScheduleData, updateCourseScheduleData} = useContext(CourseScheduleContext)!;
+    const courseInfoVisible = store(s => s.courseInfoVisible);
 
-    const infoVisibleOptions: Record<keyof typeof courseScheduleData.courseInfoVisible, string> = {
+    const infoVisibleOptions: Record<string, string> = {
         name: "课程名称",
         position: "上课地点",
         teacher: "教师名称",
     };
-    const changeCourseInfoVisible = (key: keyof typeof courseScheduleData.courseInfoVisible, v: boolean) => {
-        const newCourseInfoVisible = {...courseScheduleData.courseInfoVisible};
+    const changeCourseInfoVisible = (key: string, v: boolean) => {
+        const newCourseInfoVisible = {...courseInfoVisible};
         newCourseInfoVisible[key] = v;
-        updateCourseScheduleData({
-            ...courseScheduleData,
-            courseInfoVisible: newCourseInfoVisible,
-        });
+        store.getState().update("courseInfoVisible", newCourseInfoVisible);
     };
 
     const onYearChange = (v: number) => {
@@ -67,11 +64,11 @@ export function CourseCardSetting(props: Props) {
             <Text style={{fontSize: 13, color: theme.colors.grey3, marginBottom: 4}}>显示内容</Text>
             <View style={{flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 16}}>
                 {(Object.keys(infoVisibleOptions) as (keyof typeof infoVisibleOptions)[]).map(key => {
-                    const active = courseScheduleData.courseInfoVisible[key];
+                    const active = courseInfoVisible[key];
                     return (
-                        <Pressable
+                        <UnPressable
                             key={key}
-                            onPress={() => changeCourseInfoVisible(key, !active)}
+                            onPress={function() { return changeCourseInfoVisible(key, !active); }}
                             style={{
                                 paddingVertical: 6,
                                 paddingHorizontal: 14,
@@ -89,7 +86,7 @@ export function CourseCardSetting(props: Props) {
                                 }}>
                                 {infoVisibleOptions[key]}
                             </Text>
-                        </Pressable>
+                        </UnPressable>
                     );
                 })}
             </View>
@@ -138,7 +135,7 @@ export function CourseCardSetting(props: Props) {
                             value={moment(ucStore(s => s.jw.startDay)).valueOf()}
                             onChange={v => {
                                 const startDay = moment(v).format("YYYY-MM-DD");
-                                updateCourseScheduleData({...courseScheduleData, startDay});
+                                store.getState().update("startDay", startDay);
                                 const s = ucStore.getState();
                                 ucStore.getState().update("jw", { ...s.jw, startDay });
                             }}
@@ -177,9 +174,9 @@ export function CourseCardSetting(props: Props) {
                         vivid: "鲜明",
                     };
                     return (
-                        <Pressable
+                        <UnPressable
                             key={name}
-                            onPress={() => {
+                            onPress={function() {
                                 store.getState().update("theme", { ...store.getState().theme, palette: name });
                             }}
                             style={{
@@ -214,7 +211,7 @@ export function CourseCardSetting(props: Props) {
                                     />
                                 ))}
                             </View>
-                        </Pressable>
+                        </UnPressable>
                     );
                 })}
             </View>

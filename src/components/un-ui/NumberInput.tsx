@@ -1,10 +1,10 @@
-import {Pressable, StyleSheet, TextInput, View} from "react-native";
+import {StyleSheet, TextInput, View} from "react-native";
 import Flex from "./Flex.tsx";
 import {Icon} from "./Icon.tsx";
 import {Color} from "@/shared/color.ts";
 import {useRef} from "react";
 import {useTheme} from "@rneui/themed";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
+import {UnPressable} from "@/components/un-ui";
 
 export interface NumberInputProps {
     value: number;
@@ -20,8 +20,6 @@ export interface NumberInputProps {
 
 export function NumberInput(props: NumberInputProps) {
     const {theme} = useTheme();
-    const {store} = useUserConfig();
-    const ripple = store(s => s.theme.ripple);
     const style = StyleSheet.create({
         container: {
             borderRadius: 5,
@@ -69,8 +67,8 @@ export function NumberInput(props: NumberInputProps) {
 
     return (
         <Flex style={style.container} inline>
-            <Pressable
-                android_ripple={ripple}
+            <UnPressable
+
                 onPressIn={e => e.stopPropagation()}
                 onPress={minus}
                 disabled={props.value <= (props.min ?? Number.MIN_SAFE_INTEGER)}>
@@ -85,7 +83,7 @@ export function NumberInput(props: NumberInputProps) {
                         }
                     />
                 </Flex>
-            </Pressable>
+            </UnPressable>
             <View>
                 <TextInput
                     blurOnSubmit={true}
@@ -113,8 +111,8 @@ export function NumberInput(props: NumberInputProps) {
                     style={style.input}
                 />
             </View>
-            <Pressable
-                android_ripple={ripple}
+            <UnPressable
+
                 onPress={plus}
                 disabled={props.value >= (props.max ?? Number.MAX_SAFE_INTEGER)}>
                 <Flex style={style.rightIcon} inline justify="center">
@@ -128,7 +126,7 @@ export function NumberInput(props: NumberInputProps) {
                         }
                     />
                 </Flex>
-            </Pressable>
+            </UnPressable>
         </Flex>
     );
 }

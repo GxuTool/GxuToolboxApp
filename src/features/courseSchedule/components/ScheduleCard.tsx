@@ -1,5 +1,5 @@
 import {BottomSheet, Divider, Text, useTheme} from "@rneui/themed";
-import {Pressable, StyleSheet, View} from "react-native";
+import {StyleSheet, View} from "react-native";
 import React, {useCallback, useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -11,7 +11,7 @@ import {CourseCardSetting} from "@/components/tool/infoQuery/courseSchedule/Cour
 import {useNavigation} from "@react-navigation/native";
 import {ScheduleShareSheet} from "@/components/tool/infoQuery/courseSchedule/ScheduleShareSheet.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {UnText} from "@/components/un-ui";
+import {UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
@@ -21,6 +21,7 @@ import {useNextCourse} from "@/features/courseSchedule/hooks/detail/useNextCours
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
+import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {useHoliday} from "@/features/courseSchedule/hooks/detail/useHoliday.ts";
 import {defaultItems} from "@/features/courseSchedule/utils/defaultItems.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
@@ -30,6 +31,11 @@ import {useAttendanceAuth} from "@/core/auth/attendance/hooks/useAttendanceAuth.
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
+import {Course} from "@/type/infoQuery/course/course.ts";
+import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseItem.tsx";
+import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
+import {ConflictCourseList} from "@/features/courseSchedule/components/ConflictCourseList.tsx";
+import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 
 // 菜单的类型
 type SheetState =
@@ -37,7 +43,8 @@ type SheetState =
     | {type: "menu"}
     | {type: "setting"}
     | {type: "share"}
-    | {type: "itemDetail"; item: ScheduleTableItem};
+    | {type: "itemDetail"; item: ScheduleTableItem; day: moment.Moment}
+    | {type: "courseConflict"; courses: Course[]; day: moment.Moment};
 
 /**
  * 课表
@@ -45,10 +52,15 @@ type SheetState =
  */
 export function ScheduleCard() {
     const {store: ucStore} = useUserConfig();
+    const devMode = ucStore(s => s.devMode);
     const navigation = useNavigation();
     const {theme} = useTheme();
     const pagerView = usePagerView({pagesAmount: 20});
     const {...rest} = pagerView;
+
+    const {store: conflictStore} = useConflictCourseStore();
+
+    const {init: initPhyExp, patchItem, patchCourse} = usePhyExp();
 
     const {authState: JWauthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
@@ -56,7 +68,6 @@ export function ScheduleCard() {
 
     const [year, setYear] = useState(+ucStore(s => s.jw.year));
     const [term, setTerm] = useState<SchoolTermValue>(ucStore(s => s.jw.term));
-    const ripple = ucStore(s => s.theme.ripple);
     const startDay = useStartDay(year, term);
 
     const {items: courseItems = [], refresh: refreshCourse} = useCourse(year, term);
@@ -67,9 +78,13 @@ export function ScheduleCard() {
 
     useEffect(() => {
         initExam(year, term, startDay);
+        initPhyExp();
     }, [year, term]);
 
-    let defaultItem: ScheduleTableItem[] = JWauthState.status !== "no_account" ? [] : defaultItems;
+    const defaultItem: ScheduleTableItem[] = useMemo(
+        () => (JWauthState.status !== "no_account" ? [] : defaultItems),
+        [JWauthState.status],
+    );
 
     const rawItems: ScheduleTableItem[] = useMemo(
         () => [...courseItems, ...examItems, ...holidayItems, ...defaultItem],
@@ -77,26 +92,66 @@ export function ScheduleCard() {
     );
     const nextCourse = useNextCourse(rawItems, startDay);
 
+    const [sheet, setSheet] = useState<SheetState>({type: "closed"});
+
+    const onItemPress = useCallback(
+        (item: ScheduleTableItem, day: moment.Moment) => setSheet({type: "itemDetail", item, day}),
+        [],
+    );
+
     const scheduleItems: TimeScheduleItemData[] = useMemo(
         () =>
             [
-                {data: courseItems, itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />},
-                {data: examItems, itemRender: (item, _day, _week, onPress) => <NewExamItem item={item} onPress={onPress} />},
-                {data: holidayItems, itemRender: (item) => <HolidayItem item={item} />},
-                {data: defaultItem, itemRender: (item, _day, _week, onPress) => <NewCourseItem item={item} onPress={onPress} />},
+                {
+                    data: courseItems,
+                    itemRender: (item, day) => (
+                        <NewCourseItem item={patchItem(item, day)} onPress={() => onItemPress(item, day)} />
+                    ),
+                    isItemStack: (a, b) => a.begin <= b.end && b.begin <= a.end,
+                    stackRender: (items, day, _week, timeRange) => {
+                        const courses = items.map(i => patchCourse(i.raw as Course, day)).filter(Boolean);
+                        if (courses.length === 0) return null;
+                        const kchs = courses.map(c => c.kch).sort();
+                        const storedActive = conflictStore.getState().getActive(kchs);
+                        const activeCourse = storedActive ?? courses[0]?.kch;
+                        return (
+                            <StackCourseItem
+                                course={courses}
+                                activeCourse={activeCourse}
+                                timeRange={timeRange}
+                                onPress={c => setSheet({type: "courseConflict", courses: c, day})}
+                            />
+                        );
+                    },
+                } as TimeScheduleItemData<ScheduleTableItem<Course>>,
+                {
+                    data: examItems,
+                    itemRender: (item, day) => <NewExamItem item={item} onPress={() => onItemPress(item, day)} />,
+                } as TimeScheduleItemData<ScheduleTableItem<ExamInfo>>,
+                {
+                    data: holidayItems,
+                    needShift: false,
+                    itemRender: (item, day) => <HolidayItem item={item} onPress={() => onItemPress(item, day)} />,
+                },
+                {
+                    data: defaultItem,
+                    itemRender: (item, day) => <NewCourseItem item={item} onPress={() => onItemPress(item, day)} />,
+                },
             ]
                 .filter(td => td.data.length > 0)
                 .map(td => ({
                     ...td,
-                    isItemShow: (item: any, day: moment.Moment, week: number) =>
-                        item.week === week && item.day === day.isoWeekday(),
+                    isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) => {
+                        return item.week === week && item.day === day.isoWeekday();
+                    },
                 })),
-        [courseItems, examItems, holidayItems, defaultItem],
+        [courseItems, examItems, holidayItems, defaultItem, onItemPress],
     );
+    useEffect(() => {
+        console.log("refreshed");
+    }, [scheduleItems]);
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
-
-    const [sheet, setSheet] = useState<SheetState>({type: "closed"});
 
     const [refreshing, setRefreshing] = useState(false);
 
@@ -149,19 +204,15 @@ export function ScheduleCard() {
         [theme],
     );
 
-    const onItemPress = useCallback(
-        (item: ScheduleTableItem) => setSheet({type: "itemDetail", item}),
-        [], // setSheet 是稳定引用
-    );
-
     return (
         <View>
             <Flex justify="space-between" style={style.cardTitle}>
                 <Flex direction="row" align="center" gap={8}>
                     <Text h4>日程表</Text>
-                    <Pressable
-                        android_ripple={ucStore(s => s.theme.ripple)}
-                        onPress={() => setSheet({type: "menu"})}
+                    <UnPressable
+                        onPress={function () {
+                            return setSheet({type: "menu"});
+                        }}
                         style={{flexDirection: "row", alignItems: "center", gap: 8}}>
                         {[JWauthState, unifiedAuthState, attendanceAuthState].map(i =>
                             i?.status !== "authenticated" ? (
@@ -170,24 +221,30 @@ export function ScheduleCard() {
                                 <Icon name="account-network-outline" size={24} color={theme.colors.success} />
                             ),
                         )}
-                    </Pressable>
+                    </UnPressable>
                 </Flex>
                 <Flex gap={15} justify="flex-end">
-                    <Pressable onPress={handleRefresh} disabled={refreshing}>
+                    <UnPressable onPress={handleRefresh} disabled={refreshing}>
                         <Icon
                             name={refreshing ? "loading" : "refresh"}
                             size={24}
                             style={refreshing ? {opacity: 0.5} : undefined}
                         />
-                    </Pressable>
+                    </UnPressable>
                     {rest.activePage + 1 !== realCurrentWeek && (
-                        <Pressable android_ripple={ripple} onPress={() => rest.setPage(realCurrentWeek - 1)}>
+                        <UnPressable
+                            onPress={function () {
+                                return rest.setPage(realCurrentWeek - 1);
+                            }}>
                             <Icon name="history" size={24} />
-                        </Pressable>
+                        </UnPressable>
                     )}
-                    <Pressable android_ripple={ripple} onPress={() => setSheet({type: "menu"})}>
+                    <UnPressable
+                        onPress={function () {
+                            return setSheet({type: "menu"});
+                        }}>
                         <Icon name="menu" size={24} />
-                    </Pressable>
+                    </UnPressable>
                 </Flex>
             </Flex>
             <Divider />
@@ -210,10 +267,15 @@ export function ScheduleCard() {
                 startDay={startDay}
                 pageView={pagerView}
                 scheduleItems={scheduleItems}
-                onItemPress={onItemPress}
             />
             <Divider />
             <PracticalCourseList courseList={practiceItems} />
+            {devMode && (
+                <Flex gap={8} style={{paddingHorizontal: 12}} direction="column">
+                    <ScheduleDataDebugCard label="查看课程数据" data={rawItems} />
+                    <ScheduleDataDebugCard label="查看实践课数据" data={practiceItems} />
+                </Flex>
+            )}
             <BottomSheet isVisible={sheet.type !== "closed"} onBackdropPress={() => setSheet({type: "closed"})}>
                 <View style={style.bottomSheetContainer}>
                     {sheet.type === "menu" && (
@@ -224,8 +286,8 @@ export function ScheduleCard() {
                                 attendanceAuth={attendanceAuthState}
                                 menuItemStyle={style.menuItem}
                             />
-                            <Pressable
-                                onPress={() => {
+                            <UnPressable
+                                onPress={function () {
                                     setSheet({type: "closed"});
                                     navigation.navigate("ScheduleEdit");
                                 }}>
@@ -233,19 +295,25 @@ export function ScheduleCard() {
                                     <Icon name="table-edit" size={22} />
                                     <UnText>事件编辑</UnText>
                                 </View>
-                            </Pressable>
-                            <Pressable onPress={() => setSheet({type: "share"})}>
+                            </UnPressable>
+                            <UnPressable
+                                onPress={function () {
+                                    return setSheet({type: "share"});
+                                }}>
                                 <View style={style.menuItem}>
                                     <Icon type="antdesign" name="share-alt" size={22} />
                                     <UnText>分享课表</UnText>
                                 </View>
-                            </Pressable>
-                            <Pressable onPress={() => setSheet({type: "setting"})}>
+                            </UnPressable>
+                            <UnPressable
+                                onPress={function () {
+                                    return setSheet({type: "setting"});
+                                }}>
                                 <View style={style.menuItem}>
                                     <Icon name="cog" size={22} />
                                     <UnText>课表设置</UnText>
                                 </View>
-                            </Pressable>
+                            </UnPressable>
                         </>
                     )}
                     {sheet.type === "setting" && (
@@ -257,12 +325,73 @@ export function ScheduleCard() {
                             onTermChange={setTerm}
                         />
                     )}
-                    {sheet.type === "itemDetail" && sheet.item?.raw && <CourseDetail course={sheet.item.raw} />}
+                    {sheet.type === "itemDetail" && sheet.item?.raw && (
+                        <CourseDetail course={patchCourse(sheet.item.raw, sheet.day) as Course} />
+                    )}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
                     )}
+                    {sheet.type === "courseConflict" &&
+                        (() => {
+                            const kchs = sheet.courses.map(x => x.kch).sort();
+                            const storedActive = conflictStore.getState().getActive(kchs);
+                            const activeKch = storedActive ?? sheet.courses[0]?.kch;
+                            return (
+                                <ConflictCourseList
+                                    courses={sheet.courses}
+                                    activeKch={activeKch}
+                                    onSelect={course => {
+                                        conflictStore.getState().setActive(kchs, course.kch);
+                                        setSheet({type: "closed"});
+                                    }}
+                                    onPressActive={course => {
+                                        setSheet({
+                                            type: "itemDetail",
+                                            day: sheet.day,
+                                            item: {
+                                                id: course.kch,
+                                                week: 0,
+                                                day: 1 as ScheduleTableItem["day"],
+                                                begin: 1 as ScheduleTableItem["begin"],
+                                                end: 1 as ScheduleTableItem["begin"],
+                                                title: course.kcmc,
+                                                location: course.cdmc,
+                                                teacher: course.xm,
+                                                raw: course,
+                                            },
+                                        });
+                                    }}
+                                />
+                            );
+                        })()}
                 </View>
             </BottomSheet>
         </View>
+    );
+}
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
     );
 }

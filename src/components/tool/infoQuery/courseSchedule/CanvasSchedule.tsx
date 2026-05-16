@@ -1,16 +1,16 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Dimensions, StyleSheet, View} from "react-native";
 import Canvas, {CanvasRenderingContext2D} from "react-native-canvas";
 import {Color} from "@/shared/color.ts";
 import {useTheme} from "@rneui/themed";
-import {CourseScheduleContext, CourseScheduleData} from "@/js/jw/course.ts";
+import {CourseScheduleData} from "@/js/jw/course.ts";
 import moment from "moment/moment";
 import {CourseScheduleClass, CourseClass} from "@/class/jw/course.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {store} from "@/core/store.ts";
-import {http} from "@/core/http.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
+import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 
 type Props = {
     week: number;
@@ -20,11 +20,13 @@ type Props = {
 export function CanvasSchedule(props: Props) {
     const {theme} = useTheme();
     const {store: ucStore} = useUserConfig();
-    const {store} = useCourse();
+    const {store, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
-    const {courseScheduleData, courseScheduleStyle} = useContext(CourseScheduleContext)!;
+    const timeSpanList = store(s => s.timeSpanList);
+    const {store: shiftStore, init: initShift} = useShift();
+    const timeShift = shiftStore(s => s.shiftRules);
+
     const [courseSchedule, setCourseSchedule] = useState<CourseScheduleClass>();
-    const [timeShift, setTimeShift] = useState<[string, string][]>([]);
 
     const {width: screenWidth} = Dimensions.get("window");
     const startDay = moment(ucStore(s => s.jw.startDay));
@@ -66,17 +68,9 @@ export function CanvasSchedule(props: Props) {
         }
     }
 
-    /**
-     * 调课信息
-     */
-    async function getTimeShift() {
-        const {data} = await http.get("https://file.unde.site/GxuToolApp/data.json");
-        if (data) setTimeShift(data.timeShift);
-    }
-
     useEffect(() => {
         getCoursesData();
-        getTimeShift();
+        initShift();
     }, [timeSpanHeight]);
 
     /**
@@ -135,7 +129,7 @@ export function CanvasSchedule(props: Props) {
      */
     function drawTimeSpansRects(ctx: CanvasRenderingContext2D) {
         if (spanHeight > 40) {
-            courseScheduleData.timeSpanList.forEach((timeSpan, index) => {
+            timeSpanList.forEach((timeSpan, index) => {
                 const spanList = timeSpan.split("\n");
                 const timeSpanY = spanHeight * (index + 1) + (spanHeight - stringLineHeight * 3) / 2 + 3 * (index + 1);
                 ctx.fillText(String(index + 1), spanWidth / 2, timeSpanY, 150);
@@ -145,20 +139,20 @@ export function CanvasSchedule(props: Props) {
             });
         } else {
             const shortTimeSpanList: [string, string, string][] = Array(
-                Math.ceil(courseScheduleData.timeSpanList.length / 2),
+                Math.ceil(timeSpanList.length / 2),
             )
                 .fill(0)
                 .map((_, index) =>
-                    courseScheduleData.timeSpanList[index * 2 + 1] !== undefined
+                    timeSpanList[index * 2 + 1] !== undefined
                         ? [
                               `${index * 2 + 1} - ${index * 2 + 2}`,
-                              courseScheduleData.timeSpanList[index * 2].split("\n")[0],
-                              courseScheduleData.timeSpanList[index * 2 + 1].split("\n")[1],
+                              timeSpanList[index * 2].split("\n")[0],
+                              timeSpanList[index * 2 + 1].split("\n")[1],
                           ]
                         : [
                               `${index * 2 + 1}`,
-                              courseScheduleData.timeSpanList[index * 2].split("\n")[0],
-                              courseScheduleData.timeSpanList[index * 2].split("\n")[1],
+                              timeSpanList[index * 2].split("\n")[0],
+                              timeSpanList[index * 2].split("\n")[1],
                           ],
                 );
             shortTimeSpanList.forEach((timeSpan, index) => {

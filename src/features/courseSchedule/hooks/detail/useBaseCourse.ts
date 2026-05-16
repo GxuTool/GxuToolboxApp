@@ -38,7 +38,6 @@ export const useBaseCourse = () => {
             if (shouldCache) {
                 store.save({key: "originalCourseList", data: raw});
             }
-
             const current = useBaseCourseStore.getState().courseList;
             if (JSON.stringify(current) === JSON.stringify(newModel)) return;
             useBaseCourseStore.setState({

@@ -1,20 +1,16 @@
 import {ScrollView} from "react-native";
-import React, {useEffect, useState} from "react";
-import {http} from "@/core/http.ts";
+import React, {useEffect} from "react";
 import moment from "moment/moment";
 import "moment/locale/zh-cn";
 import {UnTable, UnTableCols} from "@/components/un-ui";
+import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
 
 export function TimeShiftScreen() {
-    const [timeShiftData, setTimeShiftData] = useState<[string, string][]>([]);
-
-    async function init() {
-        const {data} = await http.get("https://file.unde.site/GxuToolApp/data.json");
-        setTimeShiftData(data.timeShift);
-    }
+    const {store: shiftStore, init: initShift} = useShift();
+    const timeShiftData = shiftStore(s => s.shiftRules);
 
     useEffect(() => {
-        init();
+        initShift();
     }, []);
 
     const cols: UnTableCols<[string, string]> = [

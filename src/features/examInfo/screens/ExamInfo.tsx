@@ -11,6 +11,7 @@ import {getExamInfo} from "@/features/examInfo/api";
 import {ExamInfoCard} from "@/features/examInfo/components/ExamInfoCard.tsx";
 import {ExamInfoApiResponse} from "@/features/examInfo/type/exam.types.ts";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
+import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 
 const initRes: ExamInfoApiResponse = {
     currentPage: 1,
@@ -22,6 +23,7 @@ const initRes: ExamInfoApiResponse = {
 export function ExamInfo() {
     const {theme} = useTheme();
     const {store: ucStore} = useUserConfig();
+    const devMode = ucStore(s => s.devMode);
     const [apiRes, setApiRes] = useState<ExamInfoApiResponse>(initRes as ExamInfoApiResponse);
     const [year, setYear] = useState(+ucStore(s => s.jw.year));
     const [term, setTerm] = useState<SchoolTermValue>(ucStore(s => s.jw.term));
@@ -140,6 +142,37 @@ export function ExamInfo() {
                     )}
                 </Flex>
             </View>
+            {devMode && (
+                <Flex gap={8} direction="column" style={{padding: "5%"}}>
+                    <ScheduleDataDebugCard label="查看考试考场数据" data={apiRes} />
+                </Flex>
+            )}
         </ScrollView>
+    );
+}
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
     );
 }

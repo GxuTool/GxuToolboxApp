@@ -1,13 +1,13 @@
 import {ActivityIndicator, SectionList, StyleSheet, View} from "react-native";
-import {useContext, useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {Schools, SchoolTermValue} from "@/type/global.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useClassScheduleData} from "@/features/classCourseSchedule/hooks/useClassScheduleData.ts";
-import {Button, Divider, Text} from "@rneui/themed";
+import {Button, Divider, Text,useTheme} from "@rneui/themed";
 import {IClassList} from "@/features/classCourseSchedule/type/schema/classList.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import moment from "moment";
-import {CourseScheduleContext} from "@/js/jw/course.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 
 type ClassItem = IClassList[number];
 type SchoolType = (typeof Schools)[number];
@@ -83,9 +83,10 @@ function MajorSection({
 }
 
 function SchoolHeader({school}: {school: SchoolType}) {
+    const {theme}=useTheme();
     return (
-        <View style={styles.sectionHeader}>
-            <Text style={styles.schoolName}>{school[1]}</Text>
+        <View style={[styles.sectionHeader,{backgroundColor:theme.colors.background,borderBottomColor:theme.colors.greyOutline}]}>
+            <Text style={[styles.schoolName,{color:theme.colors.black}]}>{school[1]}</Text>
         </View>
     );
 }
@@ -144,7 +145,8 @@ function SchoolContent({
 
 type Section = {school: SchoolType; data: [SchoolType]};
 
-export const FullCourseScreen = () => {
+export const FullCourseScreen = () =>{
+    const {theme}=useTheme();
     const {store} = useUserConfig();
     const [year] = useState(+store(s => s.jw.year));
     const [term] = useState<SchoolTermValue>(store(s => s.jw.term));
@@ -154,11 +156,12 @@ export const FullCourseScreen = () => {
     const week = moment().diff(startDay, "week") + 1;
     const day = moment().isoWeekday();
 
-    const {courseScheduleData} = useContext(CourseScheduleContext)!;
+    const {store: courseStore} = useCourseData();
+    const timeSpanList = courseStore(s => s.timeSpanList);
 
     function getCurrentTimeSpan() {
         let res = -1;
-        courseScheduleData.timeSpanList.forEach((timeSpan, index, list) => {
+        timeSpanList.forEach((timeSpan, index, list) => {
             const start = index > 0 ? list[index - 1].split("\n")[1] : "00:00";
             const end = timeSpan.split("\n")[1];
             const startTime = moment(start, "hh:mm");
@@ -180,18 +183,18 @@ export const FullCourseScreen = () => {
     );
 
     return (
-        <View style={{flex: 1}}>
+        <View style={{flex: 1, backgroundColor: theme.colors.background}}>
             <View style={styles.timeHeader}>
                 <Text style={styles.timeWeek}>
-                    第 <Text style={styles.timeNum}>{week}</Text> 周
+                    第 <Text style={[styles.timeNum,{color:theme.colors.black}]}>{week}</Text> 周
                 </Text>
                 <Text style={styles.timeDot}>·</Text>
                 <Text style={styles.timeWeekday}>
-                    星期<Text style={styles.timeNum}>{DAY_CN[day]}</Text>
+                    星期<Text style={[styles.timeNum,{color:theme.colors.black}]}>{DAY_CN[day]}</Text>
                 </Text>
                 <Text style={styles.timeDot}>·</Text>
                 <Text style={styles.timeWeekday}>
-                    第<Text style={styles.timeNum}>{classIndex}</Text>节课
+                    第<Text style={[styles.timeNum,{color:theme.colors.black}]}>{classIndex}</Text>节课
                 </Text>
             </View>
             <SectionList

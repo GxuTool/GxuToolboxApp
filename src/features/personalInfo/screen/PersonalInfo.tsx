@@ -70,7 +70,7 @@ export const PersonalInfo = () => {
         );
     }
 
-    if (!info.length) {
+    if (!info?.length) {
         return (
             <View style={styles.container}>
                 <View style={[styles.noresContainer]}>

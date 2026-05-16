@@ -1,5 +1,6 @@
 import Flex from "@/components/un-ui/Flex";
-import {Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {UnPressable} from "@/components/un-ui";
+import {ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
 import {BottomSheet, Divider, Input, Text, useTheme} from "@rneui/themed";
 import {UnTermSelector} from "@/components/un-ui/UnTermSelector.tsx";
 import React, {useEffect, useState} from "react";
@@ -192,12 +193,12 @@ export function ScheduleEdit() {
                 <Flex justify="space-between">
                     <Text h4>日程列表</Text>
                     <Flex gap={5} justify="flex-end">
-                        <Pressable onPress={addActivity} android_ripple={store(s => s.theme.ripple)} style={{padding: 5}}>
+                        <UnPressable onPress={addActivity} style={{padding: 5}}>
                             <Icon name="plus" size={24} />
-                        </Pressable>
-                        <Pressable onPress={save} android_ripple={store(s => s.theme.ripple)} style={{padding: 5}}>
+                        </UnPressable>
+                        <UnPressable onPress={save} style={{padding: 5}}>
                             <Icon name="content-save" size={24} color={theme.colors.primary} />
-                        </Pressable>
+                        </UnPressable>
                     </Flex>
                 </Flex>
                 <Flex justify="center" direction="column" gap={10}>
@@ -242,18 +243,16 @@ export function ScheduleEdit() {
                                     </Text>
                                 </Flex>
                                 <Flex gap={5} justify="flex-end">
-                                    <Pressable
+                                    <UnPressable
                                         onPress={() => editActivity(activity, index)}
-                                        android_ripple={store(s => s.theme.ripple)}
                                         style={{padding: 5}}>
                                         <Icon name="edit" size={22} />
-                                    </Pressable>
-                                    <Pressable
+                                    </UnPressable>
+                                    <UnPressable
                                         onPress={() => deleteActivity(index)}
-                                        android_ripple={store(s => s.theme.ripple)}
                                         style={{padding: 5}}>
                                         <Icon name="delete" color={theme.colors.error} size={22} />
-                                    </Pressable>
+                                    </UnPressable>
                                 </Flex>
                             </Flex>
                         ))

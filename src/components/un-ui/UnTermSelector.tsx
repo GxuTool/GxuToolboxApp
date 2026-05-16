@@ -1,7 +1,6 @@
 import {SchoolTerms, SchoolTermValue, SchoolYears, SchoolYearValue} from "@/type/global.ts";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {Pressable, ScrollView, StyleSheet, View} from "react-native";
-import {Flex, Icon, UnText, UnTooltip, vh, vw} from "@/components/un-ui/index.ts";
+import {ScrollView, StyleSheet, View} from "react-native";
+import {Flex, Icon, UnPressable, UnText, UnTooltip, vh, vw} from "@/components/un-ui/index.ts";
 import {Divider, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
 import {useEffect, useState} from "react";
@@ -16,8 +15,6 @@ export interface UnTermSelectorProps {
 }
 
 export function UnTermSelector(props: UnTermSelectorProps) {
-    const {store} = useUserConfig();
-    const ripple = store(s => s.theme.ripple);
     const {theme} = useTheme();
 
     const [selectedYear, setSelectedYear] = useState<SchoolYearValue>(props.year);
@@ -53,8 +50,8 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                 <View style={{paddingHorizontal: 16}}>
                     {!props.disableSelectAll && (
                         <>
-                            <Pressable
-                                android_ripple={ripple}
+                            <UnPressable
+
                                 onPress={() => {
                                     setSelectedAll(true);
                                     setSelectedTerm(undefined);
@@ -62,32 +59,31 @@ export function UnTermSelector(props: UnTermSelectorProps) {
                                 }}
                                 style={selectedAll ? style.selectedOption : style.option}>
                                 <UnText>全部学期</UnText>
-                            </Pressable>
+                            </UnPressable>
                             <Divider />
                         </>
                     )}
                     <Flex align="flex-start" gap={4}>
                         <ScrollView style={{width: vw(55) - 24}} contentContainerStyle={{gap: 4}}>
                             {SchoolYears.map(year => (
-                                <Pressable
+                                <UnPressable
                                     onPress={() => setSelectedYear(+year[0])}
                                     key={year[1]}
-                                    style={+year[0] === +selectedYear ? style.selectedOption : style.option}
-                                    android_ripple={ripple}>
+                                    style={+year[0] === +selectedYear ? style.selectedOption : style.option}>
                                     <UnText>{year[1]}学年</UnText>
-                                </Pressable>
+                                </UnPressable>
                             ))}
                         </ScrollView>
                         <Divider orientation="vertical" />
                         <ScrollView style={{width: vw(40)}} contentContainerStyle={{gap: 4}}>
                             {SchoolTerms.filter((_, i) => (props.thirdTerm && i == 2) || i !== 2).map(term => (
-                                <Pressable
+                                <UnPressable
                                     onPress={() => setSelectedTerm(term[0])}
                                     key={term[1]}
-                                    android_ripple={ripple}
+    
                                     style={term[0] === selectedTerm ? style.selectedOption : style.option}>
                                     <UnText>{term[1]}</UnText>
-                                </Pressable>
+                                </UnPressable>
                             ))}
                         </ScrollView>
                     </Flex>

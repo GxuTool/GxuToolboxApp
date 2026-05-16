@@ -1,48 +1,57 @@
-import {ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, Linking, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {Icon, UnJsonEditor, UnPressable, UnTable, UnTableCols, UnText} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {BottomSheet, Card, Divider, Text, useTheme} from "@rneui/themed";
-import React, {useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {usePagerView} from "react-native-pager-view";
 import Clipboard from "@react-native-clipboard/clipboard";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
-import {UnTable, UnTableCols} from "@/components/un-ui";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
-import {CourseClass} from "@/class/jw/course.ts";
 import {Color} from "@/shared/color.ts";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
+import {Course} from "@/type/infoQuery/course/course.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
+import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
+import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
+import moment from "moment/moment";
 
 export function CourseScheduleQuery() {
     const {theme} = useTheme();
     const {store} = useUserConfig();
+    const devMode = store(s => s.devMode);
 
     const [year, setYear] = useState(+store(s => s.jw.year));
     const [term, setTerm] = useState<SchoolTermValue>(store(s => s.jw.term));
     const pageView = usePagerView({pagesAmount: 20});
 
-    const {items:courseItems=[],loading}=useCourse(year,term);
+    const {items: courseItems = [], loading} = useCourse(year, term);
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
+    const {init: initPhyExp, patchItem} = usePhyExp();
 
     // 不绑定全局的startDay，根据year和term动态计算，以免造成混乱
     const startDay = useStartDay(year, term);
 
-    const tableData=useMemo(
-        ()=>courseItems.filter((item,idx,arr)=>arr.findIndex(i=>i.title===item.title)===idx),
+    useEffect(() => {
+        initPhyExp();
+    }, [year, term]);
+
+    const tableData = useMemo(
+        () => courseItems.filter((item, idx, arr) => arr.findIndex(i => i.title === item.title) === idx),
         [courseItems],
     );
     const style = StyleSheet.create({
         container: {
             padding: "3%",
         },
-        coursePadding:{
-            marginHorizontal:-12,
+        coursePadding: {
+            marginHorizontal: -12,
         },
         tableText: {
             color: theme.colors.black,
@@ -82,9 +91,9 @@ export function CourseScheduleQuery() {
             dataIndex: "qq",
             render: qq =>
                 qq?.trim() ? (
-                    <Pressable android_ripple={store(s => s.theme.ripple)} onPress={() => qqLink(qq)}>
+                    <UnPressable onPress={function() { return qqLink(qq); }}>
                         <Text style={style.tableText}>{qq}</Text>
-                    </Pressable>
+                    </UnPressable>
                 ) : (
                     "-"
                 ),
@@ -92,7 +101,12 @@ export function CourseScheduleQuery() {
     ];
 
     const [itemDetailShow, setItemDetailShow] = useState(false);
-    const [itemDetail, setItemDetail] = useState<CourseClass>();
+    const [itemDetail, setItemDetail] = useState<ScheduleTableItem>();
+
+    const onItemPress = useCallback((item: ScheduleTableItem) => {
+        setItemDetail(item);
+        setItemDetailShow(true);
+    }, []);
 
     return (
         <ScrollView>
@@ -107,7 +121,7 @@ export function CourseScheduleQuery() {
                         includeWholeYear={false}
                     />
                 </View>
-                {loading&&<ActivityIndicator size="large" />}
+                {loading && <ActivityIndicator size="large" />}
                 <Divider />
                 <Text h4>预览</Text>
                 <Flex style={{padding: 10}} align="flex-start" direction="column" gap={10}>
@@ -122,13 +136,33 @@ export function CourseScheduleQuery() {
                     />
                 </Flex>
                 <View style={style.coursePadding}>
-                    <TimeScheduleView startDay={startDay} pageView={pageView} scheduleItems={courseItems} />
+                    <TimeScheduleView
+                        startDay={startDay}
+                        pageView={pageView}
+                        scheduleItems={[
+                            {
+                                data: courseItems,
+                                isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) => {
+                                    return item.week === week && item.day === day.isoWeekday();
+                                },
+                                itemRender: (item, day, _week) => (
+                                    <NewCourseItem item={patchItem(item, day)} onPress={onItemPress} />
+                                ),
+                            },
+                        ]}
+                    />
                 </View>
                 {practiceItems && (
                     <>
                         <Card.Divider />
                         <PracticalCourseList courseList={practiceItems} />
                     </>
+                )}
+                {devMode && (
+                    <Flex gap={8} direction="column">
+                        <ScheduleDataDebugCard label="查看课程数据" data={courseItems} />
+                        <ScheduleDataDebugCard label="查看实践课数据" data={practiceItems} />
+                    </Flex>
                 )}
                 <Divider />
                 <Text h4>课程列表</Text>
@@ -146,9 +180,35 @@ export function CourseScheduleQuery() {
                         borderWidth: 1,
                         padding: "2.5%",
                     }}>
-                    <CourseDetail course={itemDetail} />
+                    {itemDetail?.raw && <CourseDetail course={itemDetail.raw as Course} />}
                 </View>
             </BottomSheet>
         </ScrollView>
+    );
+}
+
+function ScheduleDataDebugCard({label, data}: {label: string; data: any}) {
+    const {theme} = useTheme();
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            backgroundColor: Color(theme.colors.error).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
+        },
+    });
+    return (
+        <Flex>
+            <UnPressable onPress={() => setModalOpen(true)}>
+                <Flex style={styles.card} justify="flex-start" gap={4}>
+                    <Icon name="console" size={16} inline />
+                    <UnText weight="bold" size={16}>
+                        {label}
+                    </UnText>
+                </Flex>
+            </UnPressable>
+            <UnJsonEditor.Modal readOnly visible={modalOpen} onClose={() => setModalOpen(false)} value={data} />
+        </Flex>
     );
 }

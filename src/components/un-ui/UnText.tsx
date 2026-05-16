@@ -5,21 +5,30 @@ import {TextStyle} from "react-native";
 interface Props {
     size?: TextStyle["fontSize"];
     color?: TextStyle["color"];
+    weight?: TextStyle["fontWeight"];
+    align?: TextStyle["textAlign"];
+    lineHeight?: TextStyle["lineHeight"];
+    bold?: boolean;
 }
 
 export type UnTextProps = Props & TextProps;
 
 export function UnText(props: UnTextProps) {
     const {theme} = useTheme();
+    const {size, color, weight, align, lineHeight, bold, style, ...rest} = props;
+
     return (
         <Text
-            {...props}
+            {...rest}
             style={[
                 {
-                    fontSize: props.size,
-                    color: props.color ?? theme.colors.black,
+                    fontSize: size,
+                    color: color ?? theme.colors.black,
+                    fontWeight: bold ? "bold" : weight,
+                    textAlign: align,
+                    lineHeight,
                 },
-                props.style,
+                style,
             ]}
         />
     );

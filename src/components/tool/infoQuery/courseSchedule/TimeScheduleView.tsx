@@ -1,9 +1,9 @@
-import React, {useMemo} from "react";
+import React, {memo, useMemo} from "react";
 import {StyleSheet, View} from "react-native";
 import {TimeSchedule, TimeScheduleProps} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
 import {usePagerView} from "react-native-pager-view";
 import moment from "moment/moment";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {buildColorMap, PaletteName} from "@/features/courseSchedule/utils/colorPalette.ts";
 import {ColorMapContext} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 
@@ -11,18 +11,15 @@ export interface TimeScheduleViewProps extends TimeScheduleProps {
     pageView: ReturnType<typeof usePagerView>;
 }
 
-export function TimeScheduleView(props: TimeScheduleViewProps) {
-    const {store} = useCourse();
+export const TimeScheduleView = memo(function TimeScheduleView(props: TimeScheduleViewProps) {
+    const {store} = useCourseData();
     const {AnimatedPagerView, ref, ...rest} = props.pageView;
     const startDay = props.startDay ?? moment();
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 
     const paletteName = (store(s => s.theme.palette) as PaletteName) || "macaron";
     const customColors = store(s => s.theme.customColors) || {};
-    const flatItems = useMemo(
-        () => (props.scheduleItems ?? []).flatMap(td => td.data),
-        [props.scheduleItems],
-    );
+    const flatItems = useMemo(() => props.scheduleItems.flatMap(td => td.data), [props.scheduleItems]);
     const colorMap = useMemo(
         () => buildColorMap(flatItems, paletteName, customColors),
         [flatItems, paletteName, customColors],
@@ -35,10 +32,7 @@ export function TimeScheduleView(props: TimeScheduleViewProps) {
             StyleSheet.create({
                 pagerView: {
                     width: "100%",
-                    height:
-                        timeSpanHeight * (timeSpanHeight <= 40 ? 14 : 13) +
-                        weekdayHeight +
-                        50,
+                    height: timeSpanHeight * (timeSpanHeight <= 40 ? 14 : 13) + weekdayHeight + 50,
                 },
             }),
         [timeSpanHeight, weekdayHeight],
@@ -66,10 +60,10 @@ export function TimeScheduleView(props: TimeScheduleViewProps) {
                                     <TimeSchedule {...props} currentWeek={index + 1} />
                                 </View>
                             )),
-                        [rest.pages.length, props.scheduleItems, props.startDay, props.onItemPress],
+                        [rest.pages.length, props.scheduleItems, props.startDay],
                     )}
                 </AnimatedPagerView>
             </View>
         </ColorMapContext.Provider>
     );
-}
+});

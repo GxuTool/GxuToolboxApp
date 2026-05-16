@@ -1,4 +1,5 @@
-import{FlatList,Pressable,StyleSheet,View} from "react-native";
+import{FlatList,StyleSheet,View} from "react-native";
+import {UnPressable} from "@/components/un-ui";
 import{Text,useTheme} from "@rneui/themed";
 import {useNavigation} from "@react-navigation/native";
 
@@ -11,12 +12,12 @@ export function FloorlistScreen({route}:any){
             <FlatList data={building.floors}
                       keyExtractor={item=>item.id}
                       renderItem={({item})=>(
-                          <Pressable style={styles.item}
-                          onPress={()=>navigation.navigate("FloorMapScreen",{floor:item})}>
+                          <UnPressable style={styles.item}
+                          onPress={function(){ return navigation.navigate("FloorMapScreen",{floor:item}); }}>
                               <Text style={[styles.itemText,{color:theme.colors.black}]}>
                                   {item.name}
                               </Text>
-                          </Pressable>
+                          </UnPressable>
                       )}
             />
         </View>
@@ -32,7 +33,7 @@ const styles=StyleSheet.create({
         padding:16,
         borderRadius:12,
         marginBottom:12,
-        backgroundColor:"#ffffff",
+        backgroundColor:"theme.colors.white",
     },
     itemText:{
         fontSize:16,

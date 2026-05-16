@@ -1,7 +1,8 @@
-import {ActivityIndicator, Pressable, StyleSheet, View} from "react-native";
+import {ActivityIndicator, StyleSheet, View} from "react-native";
 import {Button, Image, Input, Text} from "@rneui/themed";
 import React, {useEffect, useMemo, useState} from "react";
 import {Icon} from "@/components/un-ui/Icon.tsx";
+import {UnPressable} from "@/components/un-ui";
 import {attendanceAuthApi} from "@/core/auth/attendance/attendanceAuthApi.ts";
 import {attendanceMachine} from "@/core/auth/attendance/attendanceMachine.ts";
 import {Account, AuthStateMap} from "@/core/auth/auth.type.ts";
@@ -158,14 +159,14 @@ export function AttendanceSystemAccountScreen() {
                     containerStyle={styles.inputContainer}
                     leftIcon={<Icon name="lock" size={16} style={styles.leftIcon} />}
                     rightIcon={
-                        <Pressable onPress={() => setShowPwd(s => !s)} disabled={busy}>
+                        <UnPressable onPress={function() { return setShowPwd(function(s) { return !s; }); }} disabled={busy}>
                             <Icon
                                 type="fontawesome"
                                 name={showPwd ? "eye-slash" : "eye"}
                                 size={18}
                                 style={styles.rightIcon}
                             />
-                        </Pressable>
+                        </UnPressable>
                     }
                 />
 
@@ -184,7 +185,7 @@ export function AttendanceSystemAccountScreen() {
                     containerStyle={styles.inputContainer}
                     leftIcon={<Icon name="shield-check-outline" size={16} style={styles.leftIcon} />}
                     rightIcon={
-                        <Pressable onPress={refreshCaptcha} disabled={busy || captchaLoading}>
+                        <UnPressable onPress={refreshCaptcha} disabled={busy || captchaLoading}>
                             {captchaUri ? (
                                 <Image
                                     style={styles.captchaImage}
@@ -194,7 +195,7 @@ export function AttendanceSystemAccountScreen() {
                             ) : (
                                 <ActivityIndicator size="small" />
                             )}
-                        </Pressable>
+                        </UnPressable>
                     }
                 />
 

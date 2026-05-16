@@ -4,7 +4,7 @@ import {Color} from "@/shared/color.ts";
 import {Text, useTheme} from "@rneui/themed";
 import {useEffect, useMemo, useState} from "react";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {useShift} from "@/features/courseSchedule/hooks/detail/useShift.ts";
@@ -28,7 +28,7 @@ function groupByTimeOverlap<T>(
     return groups;
 }
 
-export interface TimeScheduleProps {
+export interface TimeScheduleProps<T = any> {
     /** 学期的第一天 */
     startDay?: moment.MomentInput;
     /** 课表当前周，1-20 */
@@ -40,14 +40,12 @@ export interface TimeScheduleProps {
     /** 时候高亮今日，通过第一天和周数计算后和系统时间进行比对 */
     showDayHighlight?: boolean;
 
-    scheduleItems?: TimeScheduleItemData[];
-
-    onItemPress?: (item: any) => void;
+    scheduleItems: TimeScheduleItemData<T>[];
 }
 
-export function TimeSchedule(props: TimeScheduleProps) {
+export function TimeSchedule<T = any>(props: TimeScheduleProps<T>) {
     const {store: ucStore} = useUserConfig();
-    const {store, courseScheduleStyle} = useCourse();
+    const {store, courseScheduleStyle} = useCourseData();
     const weekdayList = store(s => s.weekdayList);
     const timeSpanList = store(s => s.timeSpanList);
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
@@ -157,7 +155,7 @@ export function TimeSchedule(props: TimeScheduleProps) {
                       ))}
             </View>
             {/*课表*/}
-            {weekdayList.map((weekday, index) => {
+            {(weekdayList??[]).map((weekday, index) => {
                 // 判断是否为当天
                 const currentDay = startDay.clone().add({
                     week: currentWeek - 1,
@@ -197,12 +195,11 @@ export function TimeSchedule(props: TimeScheduleProps) {
                                 })()}
                             </Text>
                         </View>
-                        {(props.scheduleItems ?? []).map((td, tdIndex) => {
-                            const visibleItems = td.data.filter(item =>
-                                td.isItemShow(item, effectiveDay, currentWeek),
-                            );
+                        {(props.scheduleItems??[]).map((td, tdIndex) => {
+                            const day = td.needShift === false ? currentDay : effectiveDay;
+                            const visibleItems = td.data.filter(item => td.isItemShow(item, day, currentWeek));
                             // 按时段重叠分组
-                            const groups = groupByTimeOverlap(visibleItems, td.isItemStack, effectiveDay, currentWeek);
+                            const groups = groupByTimeOverlap(visibleItems, td.isItemStack, day, currentWeek);
                             return groups.map((group, gi) => {
                                 const timeRange: [number, number] = [
                                     Math.min(...group.map(g => (g as any).begin ?? 1)),
@@ -210,11 +207,11 @@ export function TimeSchedule(props: TimeScheduleProps) {
                                 ];
                                 return (
                                     <View key={`${tdIndex}-${gi}`}>
-                                        {group.length > 1 && td.stackRender
-                                            ? td.stackRender(group, effectiveDay, currentWeek, timeRange)
+                                        {group.length > 1
+                                            ? (td.stackRender?.(group, day, currentWeek, timeRange) ?? null)
                                             : group.map((item, ii) => (
                                                   <View key={ii}>
-                                                      {td.itemRender?.(item, effectiveDay, currentWeek, i => props.onItemPress?.(i))}
+                                                      {td.itemRender?.(item, day, currentWeek)}
                                                   </View>
                                               ))}
                                     </View>

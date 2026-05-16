@@ -15,6 +15,8 @@ export interface IUserConfig {
     preference: IUserPreference;
     /** 各学期日程 */
     activity: IUserActivity;
+    /** 开发者模式 */
+    devMode: boolean;
 }
 
 /** 用户教务配置 */
@@ -67,6 +69,7 @@ export const defaultUserConfig: IUserConfig = {
     activity: {
         data: [],
     },
+    devMode: false,
     preference: {
         courseDetail: {
             kcmc: {label: "课程名称", show: true},

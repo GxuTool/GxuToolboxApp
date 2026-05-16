@@ -1,13 +1,13 @@
 // useEntityColor.ts
 import {createContext, useCallback, useContext} from "react";
-import {useCourse} from "@/hooks/useCourse.ts";
+import {useCourseData} from "@/hooks/useCourseData.ts";
 import {PaletteName, resolveEventsColor} from "../utils/colorPalette.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 
 export const ColorMapContext = createContext<Map<string, string> | null>(null);
 
 export function useBlocksColor() {
-    const {store} = useCourse();
+    const {store} = useCourseData();
 
     const paletteName = store(s => s.theme.palette) || "macaron";
     const customColors = store(s => s.theme.customColors) || {};

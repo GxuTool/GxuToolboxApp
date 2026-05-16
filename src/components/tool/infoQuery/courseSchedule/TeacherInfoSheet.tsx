@@ -1,9 +1,9 @@
-import {Dimensions, Pressable, ScrollView, StyleSheet, View} from "react-native";
+import {Dimensions, ScrollView, StyleSheet, View} from "react-native";
 import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
-import {BottomSheet, Divider, Image, ListItem, TabView, useTheme} from "@rneui/themed";
+import {BottomSheet, Divider, Image, TabView, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
 import {DetailResData, SimpleTeacherInfo} from "@/type/api/teacherInfo/info.ts";
-import {Flex, UnText, vh} from "@/components/un-ui";
+import {Flex, UnPressable, UnText, vh} from "@/components/un-ui";
 import {Color} from "@/shared/color.ts";
 import {CollapsedInfo} from "@/components/tool/infoQuery/courseSchedule/CollapsedInfo.tsx";
 
@@ -21,7 +21,7 @@ export function TeacherInfoSheet(props: Props) {
 
     const style = StyleSheet.create({
         bottomSheetContainer: {
-            height: vh(60),
+            height: vh(80),
             backgroundColor: theme.colors.background,
             borderTopLeftRadius: 8,
             borderTopRightRadius: 8,
@@ -50,23 +50,25 @@ export function TeacherInfoSheet(props: Props) {
                 props.onClose?.();
             }}>
             <View style={style.bottomSheetContainer}>
-                {tabIndex !== 0 && (
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            paddingHorizontal: 12,
-                            paddingTop: 4,
-                        }}>
-                        <UnText size={18}>教师个人信息</UnText>
-                        <Pressable
-                            onPress={() => {
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        paddingHorizontal: 16,
+                        paddingVertical: 8,
+                        borderBottomColor: theme.colors.grey4,
+                        borderBottomWidth: 1,
+                    }}>
+                    <UnText size={18}>{tabIndex === 0 ? "检索到以下教师信息" : "教师个人信息"}</UnText>
+                    {tabIndex !== 0 && (
+                        <UnPressable
+                            onPress={function () {
                                 setTabIndex(0);
                             }}>
                             <UnText size={16}>返回</UnText>
-                        </Pressable>
-                    </View>
-                )}
+                        </UnPressable>
+                    )}
+                </View>
                 <TabView value={tabIndex} animationType={"timing"}>
                     <TabView.Item style={{width: "100%"}}>
                         <TeacherInfoList
@@ -99,45 +101,32 @@ type listProps = {
 
 function TeacherInfoList(props: listProps) {
     const iconUrl = "https://prof.gxu.edu.cn/images/icon-teacher.jpg";
+    const {theme} = useTheme();
 
     return (
         <View>
-            <UnText size={20} style={{paddingHorizontal: 16, paddingTop: 16}}>
-                检索到以下教师信息
-            </UnText>
             <ScrollView>
                 {props.list ? (
-                    <>
-                        {props.list.map(item => (
-                            <View>
-                                <ListItem
-                                    onPress={() => {
-                                        props.onSelect(item);
-                                    }}>
-                                    <Flex gap={16}>
-                                        <Image
-                                            source={{uri: item.pic ? item.pic : iconUrl}}
-                                            style={{width: 60, height: 60}}
-                                        />
-                                        <Divider orientation={"vertical"} />
-                                        <View style={{flexDirection: "column", gap: 6, flex: 1}}>
-                                            <UnText size={16}>{item.XM}</UnText>
-                                            <UnText size={12}>{item.dwmc}</UnText>
-                                        </View>
-                                    </Flex>
-                                </ListItem>
-                                <Divider orientation={"horizontal"} />
-                            </View>
-                        ))}
-                    </>
+                    props.list.map(item => (
+                        <UnPressable
+                            style={{padding: 8, margin: 4}}
+                            onPress={() => {
+                                props.onSelect(item);
+                            }}>
+                            <Flex gap={16} style={{paddingHorizontal: 4}}>
+                                <Image
+                                    source={{uri: item.pic ? item.pic : iconUrl}}
+                                    style={{width: 60, height: 80, borderRadius: 4}}
+                                />
+                                <View style={{flexDirection: "column", gap: 6, flex: 1}}>
+                                    <UnText size={16}>{item.XM}</UnText>
+                                    <UnText size={12}>{item.dwmc}</UnText>
+                                </View>
+                            </Flex>
+                        </UnPressable>
+                    ))
                 ) : (
-                    <>
-                        <ListItem bottomDivider={true}>
-                            <View>
-                                <UnText size={16}>暂无信息</UnText>
-                            </View>
-                        </ListItem>
-                    </>
+                    <UnText size={16}>暂无信息</UnText>
                 )}
             </ScrollView>
         </View>
@@ -174,6 +163,7 @@ function TeacherDetailInfo(props: infoProps) {
         image: {
             width: screenWidth * 0.24,
             height: screenHeight * 0.16,
+            borderRadius: 4,
         },
         eduItem: {
             backgroundColor: Color(theme.colors.primary).setAlpha(0.3).rgbaString,

@@ -1,8 +1,9 @@
 import {BottomSheet, Button, Text, useTheme} from "@rneui/themed";
 import {useEffect, useMemo, useRef, useState} from "react";
-import {Image, Pressable, StyleSheet, View} from "react-native";
+import {Image, StyleSheet, View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {Icon} from "@/components/un-ui/Icon.tsx";
+import {UnPressable} from "@/components/un-ui";
 
 export type MapPickerApp = "amap" | "baidu";
 
@@ -60,13 +61,13 @@ export function MapPickerHost() {
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: 0,
             paddingTop: 10,
-            backgroundColor: "#F3F3F3",
+            backgroundColor: theme.colors.grey5,
         },
         handleRow: {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            paddingHorizontal: 18,
+            paddingHorizontal: 17,
             paddingBottom: 8,
         },
         handleIconWrap: {
@@ -75,7 +76,7 @@ export function MapPickerHost() {
             borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: theme.colors.white,
+            backgroundColor: theme.colors.grey4,
         },
         handleSpacer: {
             width: 28,
@@ -108,11 +109,11 @@ export function MapPickerHost() {
             paddingVertical:10,
         },
         optionButtonPressed: {
-            backgroundColor: "rgba(0, 0, 0, 0.04)",
+            backgroundColor: theme.colors.white,
         },
         optionDivider: {
             height: StyleSheet.hairlineWidth,
-            backgroundColor: "rgba(0, 0, 0, 0.08)",
+            backgroundColor: theme.colors.divider,
             marginLeft: 64,
         },
         appIconOuter: {
@@ -176,9 +177,9 @@ export function MapPickerHost() {
             <View style={styles.sheetWrapper}>
                 <View style={[styles.sheetPanel, {paddingBottom: insets.bottom}]}>
                     <View style={styles.handleRow}>
-                        <Pressable style={styles.handleIconWrap} onPress={() => close(null)}>
+                        <UnPressable style={styles.handleIconWrap} onPress={function() { return close(null); }}>
                             <Icon name="chevron-down" size={18} color={theme.colors.black} />
-                        </Pressable>
+                        </UnPressable>
                         <View style={{flex: 1, paddingHorizontal: 12}}>
                             <Text style={styles.title}>{request.title}</Text>
                             {!!request.message && <Text style={styles.message}>{request.message}</Text>}
@@ -190,12 +191,12 @@ export function MapPickerHost() {
                         {request.options.map((option, index) => (
                             <View key={option.app}>
                                 {index > 0 && <View style={styles.optionDivider} />}
-                                <Pressable
-                                    onPress={() => close(option.app)}
-                                    style={({pressed}) => [styles.optionButton, pressed && styles.optionButtonPressed]}>
+                                <UnPressable
+                                    onPress={function() { return close(option.app); }}
+                                    style={function(pressed) { return [styles.optionButton, pressed && styles.optionButtonPressed]; }}>
                                     {renderMapAppIcon(option.app)}
                                     <Text style={styles.optionLabel}>{option.label}</Text>
-                                </Pressable>
+                                </UnPressable>
                             </View>
                         ))}
                     </View>

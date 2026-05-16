@@ -1,7 +1,13 @@
+import {ImageSourcePropType} from "react-native";
+
+const planviewimage=(path:string):ImageSourcePropType =>({
+        uri:`${"https://file.unde.site/GxuToolApp/resource/img/plan_view/"}/${path}`,
+});
+
 export interface TeachBuildingFloor{
     id:string;
     name:string;
-    image:any;
+    image:ImageSourcePropType;
 }
 
 export interface TeachBuilding{
@@ -18,22 +24,22 @@ export const TeachBuildingList:TeachBuilding[]=[
             {
                 id:"1",
                 name:"1层楼层图",
-                image:require("@/pictures/erjiao/2-1.jpg"),
+                image:planviewimage("2/2-1.webp"),
             },
             {
                 id:"2-4",
                 name:"2~4层楼层图",
-                image:require("@/pictures/erjiao/2-2~4.jpg"),
+                image:planviewimage("2/2-2~4.webp"),
             },
             {
                 id:"5-6",
                 name:"5~6层楼层图",
-                image:require("@/pictures/erjiao/2-5~6.jpg"),
+                image:planviewimage("2/2-5~6.webp"),
             },
             {
                 id:"7",
                 name:"7层楼层图",
-                image:require("@/pictures/erjiao/2-7.jpg"),
+                image:planviewimage("2/2-7.webp"),
             },
         ]
     },
@@ -44,17 +50,17 @@ export const TeachBuildingList:TeachBuilding[]=[
             {
                 id:"1",
                 name:"1~2层楼层图",
-                image:require("@/pictures/sanjiao/3-1~2.jpg"),
+                image:planviewimage("3/3-1~2.webp"),
             },
             {
                 id:"3-6",
                 name:"3~6层楼层图",
-                image:require("@/pictures/sanjiao/3-3~6.jpg"),
+                image:planviewimage("3/3-3~6.webp"),
             },
             {
                 id:"7",
                 name:"7层楼层图",
-                image:require("@/pictures/sanjiao/3-7.jpg"),
+                image:planviewimage("3/3-7.webp"),
             }
         ]
     },
@@ -65,37 +71,37 @@ export const TeachBuildingList:TeachBuilding[]=[
             {
                 id:"all",
                 name:"总楼层图",
-                image:require("@/pictures/liujiao/all.jpeg"),
+                image:planviewimage("6/6-all.webp"),
             },
             {
                 id:"1",
                 name:"1楼",
-                image:require("@/pictures/liujiao/1.jpeg"),
+                image:planviewimage("6/6-1.webp"),
             },
             {
                 id:"2",
                 name:"2楼",
-                image:require("@/pictures/liujiao/2.jpeg"),
+                image:planviewimage("6/6-2.webp"),
             },
             {
                 id:"3",
                 name:"3楼",
-                image:require("@/pictures/liujiao/3.jpeg"),
+                image:planviewimage("6/6-3.webp"),
             },
             {
                 id:"4",
                 name:"4楼",
-                image:require("@/pictures/liujiao/4.jpeg"),
+                image:planviewimage("6/6-4.webp"),
             },
             {
                 id:"5",
                 name:"5楼",
-                image:require("@/pictures/liujiao/5.jpeg"),
+                image:planviewimage("6/6-5.webp"),
             },
             {
                 id:"6",
                 name:"6楼",
-                image:require("@/pictures/liujiao/6.jpeg"),
+                image:planviewimage("6/6-6.webp"),
             },
         ],
     },
@@ -106,22 +112,22 @@ export const TeachBuildingList:TeachBuilding[]=[
             {
                 id:"A1",
                 name:"A区1层",
-                image:require("@/pictures/shijiao/A1.jpeg"),
+                image:planviewimage("10/10-A1.webp"),
             },
             {
                 id:"A2",
                 name:"A区2层",
-                image:require("@/pictures/shijiao/A2.jpeg"),
+                image:planviewimage("10/10-A2.webp"),
             },
             {
                 id:"B23",
                 name:"B区2~3平面图",
-                image:require("@/pictures/shijiao/10B-2_3.png"),
+                image:planviewimage("10/10B-2~3.webp"),
             },
             {
                 id:"B46",
                 name:"B区4~6平面图",
-                image:require("@/pictures/shijiao/10B-4_6.png"),
+                image:planviewimage("10/10B-4~6.webp"),
             },
         ]
     },

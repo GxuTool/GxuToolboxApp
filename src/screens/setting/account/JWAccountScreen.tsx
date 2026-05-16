@@ -1,7 +1,8 @@
-import {ActivityIndicator, Pressable, StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, StyleSheet, ToastAndroid, View} from "react-native";
 import {Button, Input, Text} from "@rneui/themed";
 import {useMemo, useState} from "react";
 import {Icon} from "@/components/un-ui/Icon.tsx";
+import {UnPressable} from "@/components/un-ui";
 import {useWebView} from "@/hooks/app.ts";
 import {useJwAccount} from "@/core/auth/Jw/hooks/useJwAccount.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
@@ -92,14 +93,14 @@ export function JWAccountScreen() {
                     containerStyle={styles.inputContainer}
                     leftIcon={<Icon name="lock" size={16} style={styles.leftIcon} />}
                     rightIcon={
-                        <Pressable onPress={() => setShowPwd(s => !s)} disabled={busy}>
+                        <UnPressable onPress={function() { return setShowPwd(function(s) { return !s; }); }} disabled={busy}>
                             <Icon
                                 type="fontawesome"
                                 name={showPwd ? "eye-slash" : "eye"}
                                 size={18}
                                 style={styles.rightIcon}
                             />
-                        </Pressable>
+                        </UnPressable>
                     }
                 />
 

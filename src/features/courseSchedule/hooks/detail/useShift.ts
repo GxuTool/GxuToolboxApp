@@ -64,7 +64,7 @@ export function applyShift(
 export const useShift = () => {
     async function init() {
         try {
-            const {data} = await http.get("https://file.unde.site/GxuToolApp/data.json");
+            const {data} = await http.get(`https://file.unde.site/GxuToolApp/data.json?_=${Date.now()}`);
             if (data?.timeShift) {
                 useShiftStore.setState({shiftRules: [...data.timeShift]});
             }

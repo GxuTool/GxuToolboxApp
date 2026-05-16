@@ -1,4 +1,4 @@
-import {UnText, vh} from "@/components/un-ui";
+import {UnText, vh, vw} from "@/components/un-ui";
 import {Dimensions, ScrollView, StyleSheet, View} from "react-native";
 import {Divider, Image, Tab, TabView, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
@@ -82,20 +82,20 @@ export function DetailInfoScreen({route}) {
                 <ScrollView style={style.tab}>
                     <UnText size={16}>
                         邮政编码：
-                        {teacherInfo?.baseInfo.yzbm ? teacherInfo?.baseInfo.yzbm : "暂无消息"}
+                        {teacherInfo?.baseInfo.yzbm ? teacherInfo?.baseInfo.yzbm : "暂无信息"}
                     </UnText>
                     <UnText size={16}>
                         Email：
-                        {teacherInfo?.baseInfo.email ? teacherInfo?.baseInfo.email : "暂无消息"}
+                        {teacherInfo?.baseInfo.email ? teacherInfo?.baseInfo.email : "暂无信息"}
                     </UnText>
                     <UnText size={16}>
                         联系电话：
-                        {teacherInfo?.baseInfo.tel ? teacherInfo?.baseInfo.tel : "暂无消息"}
+                        {teacherInfo?.baseInfo.tel ? teacherInfo?.baseInfo.tel : "暂无信息"}
                     </UnText>
-                    <UnText size={16}>QQ：{teacherInfo?.baseInfo.qq ? teacherInfo?.baseInfo.qq : "暂无消息"}</UnText>
+                    <UnText size={16}>QQ：{teacherInfo?.baseInfo.qq ? teacherInfo?.baseInfo.qq : "暂无信息"}</UnText>
                     <UnText size={16}>
                         微信：
-                        {teacherInfo?.baseInfo.weixin ? teacherInfo?.baseInfo.weixin : "暂无消息"}
+                        {teacherInfo?.baseInfo.weixin ? teacherInfo?.baseInfo.weixin : "暂无信息"}
                     </UnText>
 
                     <Divider />
@@ -225,18 +225,17 @@ type BaseItemProps = {
 export function BaseInfoItem(props: BaseItemProps) {
     const iconUrl = "https://prof.gxu.edu.cn/images/icon-teacher.jpg";
 
-    const {width: screenWidth} = Dimensions.get("window");
     const {theme} = useTheme();
     const style = StyleSheet.create({
         baseInfo: {
             flexDirection: "row",
-            width: screenWidth * 0.96,
             alignItems: "center",
+            width: vw(96),
+            paddingLeft: 10,
+            gap: 20
         },
         baseInfoItem: {
-            flexDirection: "row",
-            width: "70%",
-            marginBottom: 2,
+            marginTop: 6
         },
         eduItem: {
             backgroundColor: Color(theme.colors.primary).setAlpha(0.3).rgbaString,
@@ -251,19 +250,17 @@ export function BaseInfoItem(props: BaseItemProps) {
             <View style={style.baseInfo}>
                 <Image
                     source={{uri: props.item?.baseInfo.pic || iconUrl}}
-                    style={{width: 120, height: 180, borderRadius: 4}}
+                    style={{width: 110, height: 150, borderRadius: 4}}
                 />
 
-                <Divider orientation={"vertical"} style={{marginHorizontal: 12}} />
-
-                <ScrollView contentContainerStyle={{width: "92%"}} style={{height: 180}}>
+                <ScrollView contentContainerStyle={{width: "92%"}} style={{height: 150}}>
                     <View style={{flexDirection: "row", alignItems: "center", gap: 10}}>
-                        <UnText size={24} style={{fontWeight: "bold", color: theme.colors.primary}}>
+                        <UnText size={20} style={{fontWeight: "bold", color: theme.colors.primary}}>
                             {props.item?.baseInfo.XM}
                         </UnText>
                         <View style={{flexDirection: "row", gap: 4}}>
                             <UnText
-                                size={16}
+                                size={14}
                                 style={style.eduItem}
                                 color={Color.mix(theme.colors.primary, theme.colors.black, 0.3).rgbaString}>
                                 {props.item?.baseInfo.zhicheng ? props.item?.baseInfo.zhicheng : "无职称信息"}
@@ -271,18 +268,18 @@ export function BaseInfoItem(props: BaseItemProps) {
                         </View>
                     </View>
                     <View style={{flexDirection: "row", marginBottom: 2, gap: 4}}>
-                        <UnText size={16}>{props.item?.baseInfo.XBM === "1" ? "男" : "女"}</UnText>
-                        <UnText size={16}>{props.item?.baseInfo.zzmm ?? "暂无政治面貌信息"}</UnText>
+                        <UnText size={14}>{props.item?.baseInfo.XBM === "1" ? "男" : "女"}</UnText>
+                        <UnText size={14}>{props.item?.baseInfo.zzmm ?? "暂无政治面貌信息"}</UnText>
                     </View>
                     <View style={style.baseInfoItem}>
-                        <UnText size={16}>所在单位：</UnText>
-                        <UnText size={16}>
+                        <UnText size={14}>所在单位：</UnText>
+                        <UnText size={14}>
                             {props.item?.baseInfo.forEditDwmc ? props.item.baseInfo.forEditDwmc : "暂无信息"}
                         </UnText>
                     </View>
                     <View style={style.baseInfoItem}>
-                        <UnText size={16}>通讯地址：</UnText>
-                        <UnText size={16}>
+                        <UnText size={14}>通讯地址：</UnText>
+                        <UnText size={14}>
                             {props.item?.baseInfo.address ? props.item.baseInfo.address : "暂无信息"}
                         </UnText>
                     </View>
