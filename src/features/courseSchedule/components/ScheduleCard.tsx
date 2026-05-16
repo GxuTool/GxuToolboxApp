@@ -214,11 +214,11 @@ export function ScheduleCard() {
                             return setSheet({type: "menu"});
                         }}
                         style={{flexDirection: "row", alignItems: "center", gap: 8}}>
-                        {[JWauthState, unifiedAuthState, attendanceAuthState].map(i =>
+                        {[JWauthState, unifiedAuthState, attendanceAuthState].map((i, idx) =>
                             i?.status !== "authenticated" ? (
-                                <Icon name="account-network-off-outline" size={24} color={theme.colors.error} />
+                                <Icon key={idx} name="account-network-off-outline" size={24} color={theme.colors.error} />
                             ) : (
-                                <Icon name="account-network-outline" size={24} color={theme.colors.success} />
+                                <Icon key={idx} name="account-network-outline" size={24} color={theme.colors.success} />
                             ),
                         )}
                     </UnPressable>

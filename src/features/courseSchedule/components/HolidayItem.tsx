@@ -77,13 +77,15 @@ export const HolidayItem = memo(({item, onPress}: HolidayItemProps) => {
                     zIndex: 1,
                 },
             }),
-        [span, y, store(useShallow(s => s.theme)), baseColor, isFullDay],
+        [span, y, store(useShallow(s => s.theme)), baseColor, isFullDay, theme.mode],
     );
 
     return (
         <UnPressable
             style={styles.container}
-            onPress={function() { return onPress?.(item); }}>
+            onPress={function () {
+                return onPress?.(item);
+            }}>
             {/* Watermark Icon - Scaled up for impact */}
             <View style={styles.watermark}>
                 <Icon

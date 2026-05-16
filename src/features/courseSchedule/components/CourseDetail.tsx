@@ -118,7 +118,7 @@ export function CourseDetail(props: Props) {
     }, [name]);
     return (
         <CourseContext.Provider value={props.course}>
-            <Flex {...props} gap={16} direction="column">
+            <Flex {...props} gap={10} direction="column">
                 <CourseInfoCard />
                 <Flex justify="center">
                     <Text>点击属性，复制到剪切板</Text>
@@ -266,11 +266,13 @@ function CoursePropItem<K extends keyof Course>(props: {
     onClick?: (value: Course[K], item: Course) => void;
 }) {
     const course = useContext(CourseContext)!;
+    const {theme} = useTheme();
 
     const styles = StyleSheet.create({
         card: {
             padding: 6,
             borderRadius: 4,
+            backgroundColor: Color(theme.colors.grey5).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
         },
     });
     const value = course[props.prop];

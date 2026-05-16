@@ -72,13 +72,15 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     fontWeight: "bold",
                 },
             }),
-        [span, y, store(useShallow(s => s.theme)), baseColor],
+        [span, y, store(useShallow(s => s.theme)), baseColor, theme.mode],
     );
 
     return (
         <UnPressable
             style={styles.container}
-            onPress={function() { return onPress?.(item); }}>
+            onPress={function () {
+                return onPress?.(item);
+            }}>
             {conflictCount && conflictCount > 1 && (
                 <View style={styles.badge}>
                     <Text style={styles.badgeText}>{conflictCount}</Text>
