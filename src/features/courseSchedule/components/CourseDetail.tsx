@@ -3,13 +3,15 @@ import {Linking, StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
-import React, {createContext, useContext, useState} from "react";
+import React, {createContext, useContext, useEffect, useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/TeacherInfoSheet.tsx";
 import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {Pos} from "@/js/pos.ts";
+import {SimpleTeacherInfo} from "@/type/api/teacherInfo/info.ts";
+import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
 
 const CourseContext = createContext<Course | null>(null);
 
@@ -103,6 +105,17 @@ export function CourseDetail(props: Props) {
     const {theme} = useTheme();
     const {store} = useUserConfig();
     const devMode = store(s => s.devMode);
+
+    const [teacherInfoList, setTeacherInfoList] = useState<SimpleTeacherInfo[]>([]);
+    const name = props.course.xm;
+
+    useEffect(() => {
+        teacherInfoApi.getBaseInfo(name, 1).then(res => {
+            const {list} = res.resData;
+            const filterData = list.filter(item => item.XM.length === name.length);
+            setTeacherInfoList(filterData);
+        });
+    }, [name]);
     return (
         <CourseContext.Provider value={props.course}>
             <Flex {...props} gap={16} direction="column">
@@ -177,7 +190,12 @@ export function CourseDetail(props: Props) {
                         }}
                     />
                 </Flex>
-                <TeacherInfoSheet isVisible={visible} name={props.course.xm} onClose={() => setVisible(false)} />
+                <TeacherInfoSheet
+                    isVisible={visible}
+                    name={props.course.xm}
+                    infoList={teacherInfoList}
+                    onClose={() => setVisible(false)}
+                />
                 {devMode && <CourseDebugCard />}
             </Flex>
         </CourseContext.Provider>
