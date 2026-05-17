@@ -96,7 +96,7 @@ export function ScheduleShareSheet(props: Props) {
             <ScrollView style={styles.scrollView}>
                 <CanvasSchedule week={props.week} canvasRef={canvasRef} />
             </ScrollView>
-            <View>
+            <View style={{marginTop: 10}}>
                 <Flex justify={"center"}>
                     <Text>预览图：第{props.week}周课表</Text>
                 </Flex>

@@ -147,15 +147,15 @@ export function CanvasSchedule(props: Props) {
                 .map((_, index) =>
                     timeSpanList[index * 2 + 1] !== undefined
                         ? [
-                              `${index * 2 + 1} - ${index * 2 + 2}`,
-                              timeSpanList[index * 2].split("\n")[0],
-                              timeSpanList[index * 2 + 1].split("\n")[1],
-                          ]
+                            `${index * 2 + 1} - ${index * 2 + 2}`,
+                            timeSpanList[index * 2].split("\n")[0],
+                            timeSpanList[index * 2 + 1].split("\n")[1],
+                        ]
                         : [
-                              `${index * 2 + 1}`,
-                              timeSpanList[index * 2].split("\n")[0],
-                              timeSpanList[index * 2].split("\n")[1],
-                          ],
+                            `${index * 2 + 1}`,
+                            timeSpanList[index * 2].split("\n")[0],
+                            timeSpanList[index * 2].split("\n")[1],
+                        ],
                 );
             shortTimeSpanList.forEach((timeSpan, index) => {
                 const timeSpanY =
@@ -177,22 +177,22 @@ export function CanvasSchedule(props: Props) {
         const topCourseSpanY = spanHeight > 40 ? spanHeight + 3 : spanHeight * 2 + 3;
         courseList?.forEach((dailyCourseList, index) => {
             dailyCourseList.forEach(item => {
-                const classPeriod = item.periodCount.split("-").map(span => +span);
+                const classPeriod = item._ori.jcs.split("-").map(span => +span);
                 const radius = 5;
                 const span = classPeriod[1] - classPeriod[0] + 1;
-                const courseSpanX = spanWidth * (index + 1) + 3 * (index + 1); //矩形左上角x
+                const courseSpanX = spanWidth * index + 3 * index; //矩形左上角x
                 const courseSpanY =
                     spanHeight > 40
                         ? topCourseSpanY + spanHeight * (classPeriod[0] - 1) + 3 * (classPeriod[0] - 1) + courseItemMargin
                         : topCourseSpanY +
-                          (spanHeight * 2 + 3) * Math.floor((classPeriod[0] - 1) / 2) +
-                          courseItemMargin; //上边y
+                        (spanHeight * 2 + 3) * Math.floor((classPeriod[0] - 1) / 2) +
+                        courseItemMargin; //上边y
                 const courseSpanHeight =
                     spanHeight > 40
                         ? spanHeight * span - courseItemMargin * 2
                         : (spanHeight * 2 + 3) * (Math.floor((classPeriod[1] - 1) / 2) - Math.floor((classPeriod[0] - 1) / 2) + 1) -
-                          3 -
-                          courseItemMargin * 2;
+                        3 -
+                        courseItemMargin * 2;
                 ctx.beginPath();
                 //左上角起点
                 ctx.moveTo(courseSpanX + radius, courseSpanY);
@@ -226,7 +226,7 @@ export function CanvasSchedule(props: Props) {
                 ctx.arcTo(courseSpanX, courseSpanY, courseSpanX + radius, courseSpanY, radius);
 
                 ctx.closePath();
-                ctx.fillStyle = Color(item.backgroundColor ?? theme.colors.primary).rgbaString;
+                ctx.fillStyle = Color(item._ori.backgroundColor ?? theme.colors.primary).rgbaString;
                 ctx.globalAlpha = theme.mode === "light" ? 0.3 : 0.1;
                 ctx.fill();
 
@@ -246,28 +246,26 @@ export function CanvasSchedule(props: Props) {
                 }
 
                 function handleInfo(course: CourseClass): string[] {
-                    const locationList = crateSpan(course.venueName);
-                    const nameList = crateSpan(course.name);
+                    const locationList = crateSpan(course._ori.cdmc);
+                    const nameList = crateSpan(course._ori.xm);
                     return locationList.concat(nameList);
                 }
 
-                const spanList: string[] = crateSpan(item.courseName);
+                const spanList: string[] = crateSpan(item._ori.kcmc);
                 const infoSpanList: string[] = handleInfo(item);
                 const courseSpanList = spanList.concat(infoSpanList);
                 const minRows = Math.floor(
                     (courseSpanHeight - courseItemMargin * 2) / stringLineHeight,
                 );
                 ctx.globalAlpha = 1;
-                ctx.fillStyle =
-                    theme.mode === "dark"
-                        ? Color(item.backgroundColor ?? theme.colors.primary).rgbaString
-                        : courseScheduleStyle.timeSpanText.color;
+                const courseBaseColor = item._ori.backgroundColor ?? theme.colors.primary;
+                ctx.fillStyle = Color.mix(courseBaseColor, theme.colors.black, 0.5).rgbaString;
                 courseSpanList.forEach((span, spanIndex) => {
                     ctx.fillText(
                         spanIndex < minRows ? span : "",
-                        spanWidth * (index + 1) + spanWidth / 2 + 3 * (index + 1),
+                        spanWidth * index + spanWidth / 2 + 3 * index,
                         courseSpanY +
-                            stringLineHeight * (spanIndex > spanList.length - 1 ? spanIndex + 1 : spanIndex + 0.5),
+                        stringLineHeight * (spanIndex > spanList.length - 1 ? spanIndex + 1 : spanIndex + 0.5),
                         150,
                     );
                 });
