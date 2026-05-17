@@ -1,3 +1,5 @@
+import {z} from "zod";
+
 /** 递归地将类型的所有属性变为可选 */
 export type DeepPartial<T> = T extends object
     ? { [P in keyof T]?: DeepPartial<T[P]> }
@@ -185,20 +187,72 @@ export interface QueryResRoot<T> {
     totalResult: number;
 }
 
+/** 查询日期 */
+export interface QueryDate {
+    /** 中文查询日期 */
+    date: string;
+    /** 数字查询日期 */
+    dateDigit: string;
+    /** 分隔符数字查询日期 */
+    dateDigitSeparator: string;
+    /** （年月）日 */
+    day: string;
+    /** 月份 */
+    month: string;
+    /** 年份 */
+    year: string;
+}
+
+export const QueryDateSchema = z.object({
+    date: z.string(),
+    dateDigit: z.string(),
+    dateDigitSeparator: z.string(),
+    day: z.string(),
+    month: z.string(),
+    year: z.string(),
+});
+
 /** 教务分页查询时通用属性，目前仅在不带有返回根的接口存在 */
-export interface PageModel {
-    /**  */
+export interface PageModel extends QueryDate {
+    /** 总页数 */
+    pageTotal: number;
+    /** 查询模型 */
     queryModel: QueryModel,
-    /**  */
+    /** 用户模型 */
     userModel: UserModel,
-    /**  */
+    /** 列表导航 */
     listnav: string;
-    /**  */
+    /** 本地化键 */
     localeKey: string;
-    /**  */
+    /** 是否可翻页 */
     pageable: boolean;
-    /**  */
+    /** 可否范围内选择 */
     rangeable: boolean;
     /** 结果数量，意义不明，总是为 `"0"`（目前） */
     totalResult: string;
+}
+
+export const QueryDataModel = z.object({
+    pageTotal: z.number(),
+    queryModel: z.any(),
+    userModel: z.any(),
+    listnav: z.string(),
+    localeKey: z.string(),
+    pageable: z.boolean(),
+    rangeable: z.boolean(),
+    totalResult: z.string(),
+});
+
+/** 课表-班级基础信息 */
+export interface ScheduleClassInfo {
+    /** 班级名称 */
+    bjmc: string;
+    /** 机构代码 */
+    jgdm: SchoolValue;
+    /** 年级代码 */
+    njdm: string;
+    /** 选课人数 */
+    xkrs: string;
+    /** 学生学院序号 */
+    xsxyxh: number;
 }
