@@ -33,8 +33,8 @@ export class BaseClass<T> {
 // TypeScript 在泛型层面无法静态验证，但在具体子类实例化时类型合并是正确的。
 export interface BaseZodClass<S extends z.ZodType<any>, O> extends z.infer<S> {}
 export class BaseZodClass<S extends z.ZodType<any>, O> extends BaseClass<O> {
-    constructor(zodData: z.infer<S>, ori: O) {
+    constructor(schema: S, ori: O) {
         super(ori);
-        Object.assign(this, zodData);
+        Object.assign(this, schema.parse(ori));
     }
 }

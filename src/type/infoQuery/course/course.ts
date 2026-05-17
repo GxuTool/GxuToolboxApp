@@ -469,7 +469,7 @@ export const CourseClassSchema = z
         /** 学期代码 */ termCode: data.xqdm,
         /** 学期号 */ termNumber: data.xqh1,
         /** 学期号ID */ termId: data.xqh_id,
-        /** 星期几 */ weekday: data.xqj,
+        /** 星期几 */ weekday: +data.xqj,
         /** 星期几名称 */ weekdayName: data.xqjmc,
         /** 学期名 */ termName: data.xqm,
         /** 学期名称 */ termNameShort: data.xqmc,

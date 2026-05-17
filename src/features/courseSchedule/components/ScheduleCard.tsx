@@ -31,7 +31,7 @@ import {useAttendanceAuth} from "@/core/auth/attendance/hooks/useAttendanceAuth.
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
-import {Course} from "@/type/infoQuery/course/course.ts";
+import {Course, CourseParsed, CourseSchema} from "@/type/infoQuery/course/course.ts";
 import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseItem.tsx";
 import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
 import {ConflictCourseList} from "@/features/courseSchedule/components/ConflictCourseList.tsx";
@@ -44,7 +44,7 @@ type SheetState =
     | {type: "setting"}
     | {type: "share"}
     | {type: "itemDetail"; item: ScheduleTableItem; day: moment.Moment}
-    | {type: "courseConflict"; courses: Course[]; day: moment.Moment};
+    | {type: "courseConflict"; courses: CourseParsed[]; day: moment.Moment};
 
 /**
  * 课表
@@ -111,9 +111,10 @@ export function ScheduleCard() {
                     stackRender: (items, day, _week, timeRange) => {
                         const courses = items.map(i => patchCourse(i.raw as Course, day)).filter(Boolean);
                         if (courses.length === 0) return null;
-                        const kchs = courses.map(c => c.kch).sort();
+                        const parsed = courses.map(c => CourseSchema.parse(c));
+                        const kchs = parsed.map(c => c.courseCode).sort();
                         const storedActive = conflictStore.getState().getActive(kchs);
-                        const activeCourse = storedActive ?? courses[0]?.kch;
+                        const activeCourse = storedActive ?? parsed[0]?.courseCode;
                         return (
                             <StackCourseItem
                                 course={courses}
@@ -333,15 +334,15 @@ export function ScheduleCard() {
                     )}
                     {sheet.type === "courseConflict" &&
                         (() => {
-                            const kchs = sheet.courses.map(x => x.kch).sort();
+                            const kchs = sheet.courses.map(x => x.courseCode).sort();
                             const storedActive = conflictStore.getState().getActive(kchs);
-                            const activeKch = storedActive ?? sheet.courses[0]?.kch;
+                            const activeKch = storedActive ?? sheet.courses[0]?.courseCode;
                             return (
                                 <ConflictCourseList
                                     courses={sheet.courses}
                                     activeKch={activeKch}
                                     onSelect={course => {
-                                        conflictStore.getState().setActive(kchs, course.kch);
+                                        conflictStore.getState().setActive(kchs, course.courseCode);
                                         setSheet({type: "closed"});
                                     }}
                                     onPressActive={course => {
@@ -349,14 +350,14 @@ export function ScheduleCard() {
                                             type: "itemDetail",
                                             day: sheet.day,
                                             item: {
-                                                id: course.kch,
+                                                id: course.courseCode,
                                                 week: 0,
                                                 day: 1 as ScheduleTableItem["day"],
                                                 begin: 1 as ScheduleTableItem["begin"],
                                                 end: 1 as ScheduleTableItem["begin"],
-                                                title: course.kcmc,
-                                                location: course.cdmc,
-                                                teacher: course.xm,
+                                                title: course.courseName,
+                                                location: course.venueName,
+                                                teacher: course.name,
                                                 raw: course,
                                             },
                                         });

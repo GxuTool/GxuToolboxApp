@@ -177,7 +177,7 @@ export function CanvasSchedule(props: Props) {
         const topCourseSpanY = spanHeight > 40 ? spanHeight + 3 : spanHeight * 2 + 3;
         courseList?.forEach((dailyCourseList, index) => {
             dailyCourseList.forEach(item => {
-                const classPeriod = item._ori.jcs.split("-").map(span => +span);
+                const classPeriod = item.periodCount.split("-").map(span => +span);
                 const radius = 5;
                 const span = classPeriod[1] - classPeriod[0] + 1;
                 const courseSpanX = spanWidth * (index + 1) + 3 * (index + 1); //矩形左上角x
@@ -226,7 +226,7 @@ export function CanvasSchedule(props: Props) {
                 ctx.arcTo(courseSpanX, courseSpanY, courseSpanX + radius, courseSpanY, radius);
 
                 ctx.closePath();
-                ctx.fillStyle = Color(item._ori.backgroundColor ?? theme.colors.primary).rgbaString;
+                ctx.fillStyle = Color(item.backgroundColor ?? theme.colors.primary).rgbaString;
                 ctx.globalAlpha = theme.mode === "light" ? 0.3 : 0.1;
                 ctx.fill();
 
@@ -246,20 +246,22 @@ export function CanvasSchedule(props: Props) {
                 }
 
                 function handleInfo(course: CourseClass): string[] {
-                    const locationList = crateSpan(course._ori.cdmc);
-                    const nameList = crateSpan(course._ori.xm);
+                    const locationList = crateSpan(course.venueName);
+                    const nameList = crateSpan(course.name);
                     return locationList.concat(nameList);
                 }
 
-                const spanList: string[] = crateSpan(item._ori.kcmc);
+                const spanList: string[] = crateSpan(item.courseName);
                 const infoSpanList: string[] = handleInfo(item);
                 const courseSpanList = spanList.concat(infoSpanList);
                 const minRows = Math.floor(
                     (courseSpanHeight - courseItemMargin * 2) / stringLineHeight,
                 );
                 ctx.globalAlpha = 1;
-                const courseBaseColor = item._ori.backgroundColor ?? theme.colors.primary;
-                ctx.fillStyle = Color.mix(courseBaseColor, theme.colors.black, 0.5).rgbaString;
+                ctx.fillStyle =
+                    theme.mode === "dark"
+                        ? Color(item.backgroundColor ?? theme.colors.primary).rgbaString
+                        : courseScheduleStyle.timeSpanText.color;
                 courseSpanList.forEach((span, spanIndex) => {
                     ctx.fillText(
                         spanIndex < minRows ? span : "",
