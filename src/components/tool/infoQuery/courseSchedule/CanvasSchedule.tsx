@@ -20,9 +20,9 @@ type Props = {
 export function CanvasSchedule(props: Props) {
     const {theme} = useTheme();
     const {store: ucStore} = useUserConfig();
-    const {store, courseScheduleStyle} = useCourseData();
-    const timeSpanHeight = store(s => s.theme.timeSpanHeight);
-    const timeSpanList = store(s => s.timeSpanList);
+    const {store: courseDataStore, courseScheduleStyle} = useCourseData();
+    const timeSpanHeight = courseDataStore(s => s.theme.timeSpanHeight);
+    const timeSpanList = courseDataStore(s => s.timeSpanList);
     const {store: shiftStore, init: initShift} = useShift();
     const timeShift = shiftStore(s => s.shiftRules);
 
@@ -35,6 +35,7 @@ export function CanvasSchedule(props: Props) {
         container: {
             display: "flex",
             gap: 10,
+            alignItems: "center",
         },
         canvas: {
             width: screenWidth * 0.9,
@@ -59,11 +60,11 @@ export function CanvasSchedule(props: Props) {
      * 从内存获取当前周课表
      */
     async function getCoursesData() {
-        const courseData: CourseScheduleQueryRes = await store.load({key: "courseRes"}).catch(e => {
+        const courseData = await store.load<CourseScheduleQueryRes>({key: "originalCourseList"}).catch(e => {
             console.warn("内存获取课表失败", e);
-            return {};
+            return null;
         });
-        if (courseData.kbList) {
+        if (courseData?.kbList) {
             setCourseSchedule(new CourseScheduleClass(courseData));
         }
     }
@@ -256,10 +257,8 @@ export function CanvasSchedule(props: Props) {
                         stringLineHeight,
                 );
                 ctx.globalAlpha = 1;
-                ctx.fillStyle =
-                    theme.mode === "dark"
-                        ? Color(item._ori.backgroundColor ?? theme.colors.primary).rgbaString
-                        : courseScheduleStyle.timeSpanText.color;
+                const courseBaseColor = item._ori.backgroundColor ?? theme.colors.primary;
+                ctx.fillStyle = Color.mix(courseBaseColor, theme.colors.black, 0.5).rgbaString;
                 courseSpanList.forEach((span, spanIndex) => {
                     ctx.fillText(
                         spanIndex < minRows ? span : "",

@@ -19,18 +19,9 @@ export function ScheduleShareSheet(props: Props) {
     const {theme} = useTheme();
     const {width: screenWidth, height: screenHeight} = Dimensions.get("window");
     const styles = StyleSheet.create({
-        bottomSheetContainer: {
-            height: screenHeight * 0.18,
-            backgroundColor: theme.colors.background,
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-            borderColor: Color.mix(theme.colors.primary, theme.colors.background, 0.8).rgbaString,
-            borderWidth: 1,
-        },
         scrollView: {
             height: screenHeight * 0.75,
-            width: screenWidth * 0.92,
-            marginLeft: screenWidth * 0.04,
+            width: screenWidth * 0.90,
             borderTopLeftRadius: 8,
             borderTopRightRadius: 8,
             borderWidth: 2,
@@ -105,7 +96,7 @@ export function ScheduleShareSheet(props: Props) {
             <ScrollView style={styles.scrollView}>
                 <CanvasSchedule week={props.week} canvasRef={canvasRef} />
             </ScrollView>
-            <View style={styles.bottomSheetContainer}>
+            <View>
                 <Flex justify={"center"}>
                     <Text>预览图：第{props.week}周课表</Text>
                 </Flex>
