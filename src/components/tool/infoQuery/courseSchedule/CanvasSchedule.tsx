@@ -22,6 +22,7 @@ export function CanvasSchedule(props: Props) {
     const {store: ucStore} = useUserConfig();
     const {store: courseDataStore, courseScheduleStyle} = useCourseData();
     const timeSpanHeight = courseDataStore(s => s.theme.timeSpanHeight);
+    const courseItemMargin = courseDataStore(s => s.theme.courseItemMargin);
     const timeSpanList = courseDataStore(s => s.timeSpanList);
     const {store: shiftStore, init: initShift} = useShift();
     const timeShift = shiftStore(s => s.shiftRules);
@@ -173,23 +174,25 @@ export function CanvasSchedule(props: Props) {
      */
     function drawCourse(ctx: CanvasRenderingContext2D, course: CourseScheduleClass) {
         const courseList = course?.getCourseListByWeek(currentWeek); //当前周的课表
-        const topCourseSpanY = spanHeight > 40 ? spanHeight + 3 : spanHeight * 2 + 4;
+        const topCourseSpanY = spanHeight > 40 ? spanHeight + 3 : spanHeight * 2 + 3;
         courseList?.forEach((dailyCourseList, index) => {
             dailyCourseList.forEach(item => {
                 const classPeriod = item._ori.jcs.split("-").map(span => +span);
                 const radius = 5;
+                const span = classPeriod[1] - classPeriod[0] + 1;
                 const courseSpanX = spanWidth * (index + 1) + 3 * (index + 1); //矩形左上角x
                 const courseSpanY =
                     spanHeight > 40
-                        ? topCourseSpanY + spanHeight * (classPeriod[0] - 1) + 3 * (classPeriod[0] - 1)
+                        ? topCourseSpanY + spanHeight * (classPeriod[0] - 1) + 3 * (classPeriod[0] - 1) + courseItemMargin
                         : topCourseSpanY +
-                          spanHeight * 2 * Math.floor(classPeriod[0] / 2) +
-                          4 * Math.floor(classPeriod[0] / 2); //上边y
+                          (spanHeight * 2 + 3) * Math.floor((classPeriod[0] - 1) / 2) +
+                          courseItemMargin; //上边y
                 const courseSpanHeight =
                     spanHeight > 40
-                        ? spanHeight * (classPeriod[1] - classPeriod[0] + 1) + 3 * (classPeriod[1] - classPeriod[0] - 1)
-                        : spanHeight * 2 * Math.floor((classPeriod[1] - classPeriod[0] + 1) / 2) +
-                          4 * Math.floor((classPeriod[1] - classPeriod[0]) / 2);
+                        ? spanHeight * span - courseItemMargin * 2
+                        : (spanHeight * 2 + 3) * (Math.floor((classPeriod[1] - 1) / 2) - Math.floor((classPeriod[0] - 1) / 2) + 1) -
+                          3 -
+                          courseItemMargin * 2;
                 ctx.beginPath();
                 //左上角起点
                 ctx.moveTo(courseSpanX + radius, courseSpanY);
@@ -252,9 +255,7 @@ export function CanvasSchedule(props: Props) {
                 const infoSpanList: string[] = handleInfo(item);
                 const courseSpanList = spanList.concat(infoSpanList);
                 const minRows = Math.floor(
-                    (courseSpanHeight -
-                        (spanHeight > 40 ? 1.5 * stringLineHeight * 0.48 : 2 * 1.5 * stringLineHeight * 0.48)) /
-                        stringLineHeight,
+                    (courseSpanHeight - courseItemMargin * 2) / stringLineHeight,
                 );
                 ctx.globalAlpha = 1;
                 const courseBaseColor = item._ori.backgroundColor ?? theme.colors.primary;
