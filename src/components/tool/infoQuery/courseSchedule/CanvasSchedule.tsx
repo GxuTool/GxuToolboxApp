@@ -189,7 +189,7 @@ export function CanvasSchedule(props: Props) {
                         courseItemMargin; //上边y
                 const courseSpanHeight =
                     spanHeight > 40
-                        ? spanHeight * span - courseItemMargin * 2
+                        ? (spanHeight + 3) * span - 3 - courseItemMargin * 2
                         : (spanHeight * 2 + 3) * (Math.floor((classPeriod[1] - 1) / 2) - Math.floor((classPeriod[0] - 1) / 2) + 1) -
                         3 -
                         courseItemMargin * 2;
@@ -254,9 +254,14 @@ export function CanvasSchedule(props: Props) {
                 const spanList: string[] = crateSpan(item._ori.kcmc);
                 const infoSpanList: string[] = handleInfo(item);
                 const courseSpanList = spanList.concat(infoSpanList);
-                const minRows = Math.floor(
-                    (courseSpanHeight - courseItemMargin * 2) / stringLineHeight,
-                );
+                const bottomLimit = courseSpanHeight - courseItemMargin;
+                let minRows = 0;
+                for (let i = 0; i < courseSpanList.length; i++) {
+                    const offset = i > spanList.length - 1 ? i + 1 : i + 0.5;
+                    const textBottom = (offset + 1) * stringLineHeight;
+                    if (textBottom > bottomLimit) break;
+                    minRows = i + 1;
+                }
                 ctx.globalAlpha = 1;
                 const courseBaseColor = item._ori.backgroundColor ?? theme.colors.primary;
                 ctx.fillStyle = Color.mix(courseBaseColor, theme.colors.black, 0.5).rgbaString;
