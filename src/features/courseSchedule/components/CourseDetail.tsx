@@ -1,9 +1,10 @@
-import {Course, CourseParsed, CourseSchema} from "@/type/infoQuery/course/course.ts";
+import {CourseParsed} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 import {Linking, StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
 import {Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import Clipboard from "@react-native-clipboard/clipboard";
-import React, {createContext, useContext,useEffect, useMemo, useState} from "react";
+import React, {createContext, useContext, useEffect, useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TeacherInfoSheet} from "@/components/tool/infoQuery/courseSchedule/TeacherInfoSheet.tsx";
@@ -16,7 +17,7 @@ import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
 const CourseContext = createContext<CourseParsed | null>(null);
 
 interface Props extends ViewProps {
-    course: Course;
+    course: CourseClass;
 }
 
 interface Info {
@@ -105,9 +106,7 @@ export function CourseDetail(props: Props) {
     const {theme} = useTheme();
     const {store} = useUserConfig();
     const devMode = store(s => s.devMode);
-    const parsed = useMemo(() => CourseSchema.safeParse(props.course), [props.course]);
-    if (!parsed.success) return null;
-    const course = parsed.data;
+    const course = props.course.transformed;
 
     const [teacherInfoList, setTeacherInfoList] = useState<SimpleTeacherInfo[]>([]);
     const name = course.name;
@@ -289,7 +288,7 @@ function CoursePropItem<K extends keyof CourseParsed>(props: {
     const valueNode = props.valueRender ? (
         props.valueRender(value, course)
     ) : (
-        <UnText numberOfLines={4}>{value.toString() || "-"}</UnText>
+        <UnText numberOfLines={4}>{(value ?? "").toString() || "-"}</UnText>
     );
     return (
         <UnPressable
@@ -297,7 +296,7 @@ function CoursePropItem<K extends keyof CourseParsed>(props: {
             onPress={function () {
                 return props.onClick !== undefined
                     ? props.onClick(value, course)
-                    : copy(value.toString() || "-", "复制" + props.label + "成功");
+                    : copy((value ?? "").toString() || "-", "复制" + props.label + "成功");
             }}>
             <Flex direction="column" style={styles.card} gap={4} align="flex-start">
                 {labelNode}

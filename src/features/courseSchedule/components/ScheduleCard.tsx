@@ -31,7 +31,8 @@ import {useAttendanceAuth} from "@/core/auth/attendance/hooks/useAttendanceAuth.
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {NewExamItem} from "@/features/courseSchedule/components/NewExamItem.tsx";
 import {HolidayItem} from "@/features/courseSchedule/components/HolidayItem.tsx";
-import {Course, CourseParsed, CourseSchema} from "@/type/infoQuery/course/course.ts";
+import {Course} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseItem.tsx";
 import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
 import {ConflictCourseList} from "@/features/courseSchedule/components/ConflictCourseList.tsx";
@@ -44,7 +45,7 @@ type SheetState =
     | {type: "setting"}
     | {type: "share"}
     | {type: "itemDetail"; item: ScheduleTableItem; day: moment.Moment}
-    | {type: "courseConflict"; courses: CourseParsed[]; day: moment.Moment};
+    | {type: "courseConflict"; courses: CourseClass[]; day: moment.Moment};
 
 /**
  * 课表
@@ -111,15 +112,13 @@ export function ScheduleCard() {
                     stackRender: (items, day, _week, timeRange) => {
                         const courses = items.map(i => patchCourse(i.raw as Course, day)).filter(Boolean);
                         if (courses.length === 0) return null;
-                        const parsed = courses.map(c => CourseSchema.safeParse(c));
-                        const valid = parsed.filter(r => r.success).map(r => r.data);
-                        if (valid.length === 0) return null;
-                        const kchs = valid.map(c => c.courseCode).sort();
-                        const storedActive = conflictStore.getState().getActive(kchs);
-                        const activeCourse = storedActive ?? valid[0]?.courseCode;
+                        const courseClasses = courses.map(c => new CourseClass(c));
+                        const courseCodes = courseClasses.map(c => c.transformed.courseCode).sort();
+                        const storedActive = conflictStore.getState().getActive(courseCodes);
+                        const activeCourse = storedActive ?? courseClasses[0]?.transformed.courseCode;
                         return (
                             <StackCourseItem
-                                course={courses}
+                                course={courseClasses}
                                 activeCourse={activeCourse}
                                 timeRange={timeRange}
                                 onPress={c => setSheet({type: "courseConflict", courses: c, day})}
@@ -329,37 +328,37 @@ export function ScheduleCard() {
                         />
                     )}
                     {sheet.type === "itemDetail" && sheet.item?.raw && (
-                        <CourseDetail course={patchCourse(sheet.item.raw, sheet.day) as Course} />
+                        <CourseDetail course={new CourseClass(patchCourse(sheet.item.raw, sheet.day))} />
                     )}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
                     )}
                     {sheet.type === "courseConflict" &&
                         (() => {
-                            const kchs = sheet.courses.map(x => x.courseCode).sort();
-                            const storedActive = conflictStore.getState().getActive(kchs);
-                            const activeKch = storedActive ?? sheet.courses[0]?.courseCode;
+                            const courseCodes = sheet.courses.map(x => x.transformed.courseCode).sort();
+                            const storedActive = conflictStore.getState().getActive(courseCodes);
+                            const activeCourseCode = storedActive ?? sheet.courses[0]?.transformed.courseCode;
                             return (
                                 <ConflictCourseList
                                     courses={sheet.courses}
-                                    activeKch={activeKch}
+                                    activeCourseCode={activeCourseCode}
                                     onSelect={course => {
-                                        conflictStore.getState().setActive(kchs, course.courseCode);
+                                        conflictStore.getState().setActive(courseCodes, course.transformed.courseCode);
                                         setSheet({type: "closed"});
                                     }}
-                                    onPressActive={course => {
+                                    onPressActiveCourse={course => {
                                         setSheet({
                                             type: "itemDetail",
                                             day: sheet.day,
                                             item: {
-                                                id: course.courseCode,
+                                                id: course.transformed.courseCode,
                                                 week: 0,
                                                 day: 1 as ScheduleTableItem["day"],
                                                 begin: 1 as ScheduleTableItem["begin"],
                                                 end: 1 as ScheduleTableItem["begin"],
-                                                title: course.courseName,
-                                                location: course.venueName,
-                                                teacher: course.name,
+                                                title: course.transformed.courseName,
+                                                location: course.transformed.venueName,
+                                                teacher: course.transformed.name,
                                                 raw: course,
                                             },
                                         });

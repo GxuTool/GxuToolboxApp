@@ -2,16 +2,16 @@ import React from "react";
 import {UnPressable} from "@/components/un-ui";
 import {Text, useTheme} from "@rneui/themed";
 import {Color} from "@/shared/color.ts";
-import {CourseParsed} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 
 interface ConflictCourseListProps {
-    courses: CourseParsed[];
-    activeKch: CourseParsed["courseCode"];
-    onSelect: (course: CourseParsed) => void;
-    onPressActive: (course: CourseParsed) => void;
+    courses: CourseClass[];
+    activeCourseCode: string;
+    onSelect: (course: CourseClass) => void;
+    onPressActiveCourse: (course: CourseClass) => void;
 }
 
-export function ConflictCourseList({courses, activeKch, onSelect, onPressActive}: ConflictCourseListProps) {
+export function ConflictCourseList({courses, activeCourseCode, onSelect, onPressActiveCourse}: ConflictCourseListProps) {
     const {theme} = useTheme();
 
     return (
@@ -20,11 +20,12 @@ export function ConflictCourseList({courses, activeKch, onSelect, onPressActive}
                 冲突课程
             </Text>
             {courses.map(c => {
-                const isActive = c.courseCode === activeKch;
+                const t = c.transformed;
+                const isActive = t.courseCode === activeCourseCode;
                 return (
                     <UnPressable
-                        key={c.courseCode}
-                        onPress={function() { return isActive ? onPressActive(c) : onSelect(c); }}
+                        key={t.courseCode}
+                        onPress={function() { return isActive ? onPressActiveCourse(c) : onSelect(c); }}
                         style={{
                             paddingVertical: 12,
                             paddingHorizontal: 8,
@@ -36,9 +37,9 @@ export function ConflictCourseList({courses, activeKch, onSelect, onPressActive}
                             marginBottom: 4,
                             borderRadius: 4,
                         }}>
-                        <Text style={{fontWeight: isActive ? "bold" : "normal"}}>{c.courseName}</Text>
+                        <Text style={{fontWeight: isActive ? "bold" : "normal"}}>{t.courseName}</Text>
                         <Text style={{fontSize: 12, color: theme.colors.grey3}}>
-                            {[c.name, c.venueName].filter(Boolean).join(" · ")}
+                            {[t.name, t.venueName].filter(Boolean).join(" · ")}
                         </Text>
                     </UnPressable>
                 );

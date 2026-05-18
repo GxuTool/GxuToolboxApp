@@ -8,17 +8,22 @@ import {Badge, Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
-import {CourseParsed} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 import {useShallow} from "zustand/react/shallow";
 
 interface StackCourseItemProps {
-    course: CourseParsed[];
-    activeCourse: CourseParsed["courseCode"];
+    course: CourseClass[];
+    activeCourse: string;
     timeRange: [number, number];
-    onPress?: (courses: CourseParsed[]) => void;
+    onPress?: (courses: CourseClass[]) => void;
 }
 
 export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}: StackCourseItemProps) => {
+    const parsed = useMemo(() => course.map(c => c.transformed), [course]);
+    const activeParsed = useMemo(
+        () => parsed.find(c => c.courseCode === activeCourse) ?? parsed[0],
+        [parsed, activeCourse],
+    );
     const {store} = useCourseData();
     const {store: conflictStore} = useConflictCourseStore();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
@@ -26,11 +31,11 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
 
-    const courseKchs = useMemo(() => course.map(c => c.courseCode).sort(), [course]);
-    const storedActive = conflictStore(s => s.getActive(courseKchs));
+    const courseCodes = useMemo(() => parsed.map(c => c.courseCode).sort(), [parsed]);
+    const storedActive = conflictStore(s => s.getActive(courseCodes));
     const effectiveActive = storedActive ?? activeCourse;
 
-    const active = course.find(c => c.courseCode === effectiveActive) ?? course[0];
+    const active = parsed.find(c => c.courseCode === effectiveActive) ?? parsed[0];
 
     const handlePress = () => {
         onPress?.(course);
