@@ -24,7 +24,7 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
      * @param week 目标周
      */
     getAttendanceRecord(course: CourseClass, week: number): AST.AttendanceData | undefined {
-        const weekSpans = course.weekRange.split(",");
+        const weekSpans = course.transformed.weekRange.split(",");
         let inTargetWeek = false;
         // 判断目标周是否有这节课
         weekSpans.forEach(weekSpan => {
@@ -43,12 +43,12 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
         if (!inTargetWeek) return; // 不在当周
         const day = moment(this._ori.calenderData.firstWeekBegin).add({
             w: week - 1,
-            day: course.weekday - 1,
+            day: course.transformed.weekday - 1,
         });
         const [startTime, endTime] = course.getAttendanceTimeSpan(day);
         return this._ori.recordList.find(
             record =>
-                moment(record.day).isSame(startTime, "D") && course.periodCount.split("-").join(",") === record.periodSplit,
+                moment(record.day).isSame(startTime, "D") && course.transformed.periodCount.split("-").join(",") === record.periodSplit,
         );
     }
 
@@ -83,7 +83,7 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
         // 计算课程具体日期：从学期第一周开始日期加上周数和星期几的偏移量
         const day = moment(this._ori.calenderData.firstWeekBegin).add({
             w: week - 1,
-            day: course.weekday - 1,
+            day: course.transformed.weekday - 1,
         });
 
         if (!record) return day.isBefore(moment()) ? AST.AttendanceState.NoNeed : AST.AttendanceState.NotStarted;

@@ -78,7 +78,9 @@ export const nextCourses = async () => {
     const startTimes = timeSpanList.map(span => span.split("\n")[0]);
     const endTimes = timeSpanList.map(span => span.split("\n")[1]);
     list.forEach(raw => {
-        const course = CourseSchema.parse(raw);
+        const result = CourseSchema.safeParse(raw);
+        if (!result.success) return;
+        const course = result.data;
         const dayOfWeek = course.weekday;
         const startSection = parseInt(course.periodCount.split("-")[0], 10) - 1;
         const endSection = parseInt(course.periodCount.split("-")[1], 10) - 1;

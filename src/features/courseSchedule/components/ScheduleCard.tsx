@@ -111,10 +111,12 @@ export function ScheduleCard() {
                     stackRender: (items, day, _week, timeRange) => {
                         const courses = items.map(i => patchCourse(i.raw as Course, day)).filter(Boolean);
                         if (courses.length === 0) return null;
-                        const parsed = courses.map(c => CourseSchema.parse(c));
-                        const kchs = parsed.map(c => c.courseCode).sort();
+                        const parsed = courses.map(c => CourseSchema.safeParse(c));
+                        const valid = parsed.filter(r => r.success).map(r => r.data);
+                        if (valid.length === 0) return null;
+                        const kchs = valid.map(c => c.courseCode).sort();
                         const storedActive = conflictStore.getState().getActive(kchs);
-                        const activeCourse = storedActive ?? parsed[0]?.courseCode;
+                        const activeCourse = storedActive ?? valid[0]?.courseCode;
                         return (
                             <StackCourseItem
                                 course={courses}

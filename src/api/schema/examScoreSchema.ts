@@ -12,8 +12,9 @@ const examScoreSchema = z.object({
 type examScoreDTO = z.infer<typeof examScoreSchema>;
 
 export function washExamScore(res: any){
-    const v = z.array(examScoreSchema).parse(res);
-    const cleanData:ExamScore[] = v.map((r: examScoreDTO)=> {
+    const result = z.array(examScoreSchema).safeParse(res);
+    if (!result.success) return [];
+    const cleanData:ExamScore[] = result.data.map((r: examScoreDTO)=> {
         return {
             studentName: r.xm,
             courseName: r.kcmc,

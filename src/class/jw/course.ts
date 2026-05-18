@@ -1,22 +1,16 @@
-import {BaseClass, BaseZodClass} from "@/class/class.ts";
+import {BaseZodClass} from "@/class/class.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
-import {Course, CourseSchema, PracticalCourse} from "@/type/infoQuery/course/course.ts";
+import {Course, CourseScheduleSchema, CourseSchema} from "@/type/infoQuery/course/course.ts";
 import moment from "moment/moment";
 import {CourseScheduleData} from "@/js/jw/course.ts";
-import {QueryModel, UserModel} from "@/type/global.ts";
 import {AttendanceDataClass} from "@/class/auth/attendanceSystem.ts";
 
-/** 课表类，从 `CourseScheduleQueryRes` 解析 */
-export class CourseScheduleClass extends BaseClass<CourseScheduleQueryRes> implements CourseScheduleQueryRes {
-    kbList!: CourseClass[];
-    sjkList!: PracticalCourse[];
-    xsbjList!: Array<any>;
-
+/** 课表类，解析后的元数据存储在 `transformed` 中，原始数据存储在 `_ori` 中 */
+export class CourseScheduleClass extends BaseZodClass<typeof CourseScheduleSchema, CourseScheduleQueryRes> {
     attendanceData?: AttendanceDataClass;
 
     constructor(apiRes: CourseScheduleQueryRes) {
-        super(apiRes);
-        this.kbList = apiRes.kbList.map(course => new CourseClass(course));
+        super(CourseScheduleSchema, apiRes);
     }
 
     set setTermAttendanceData(data: AttendanceDataClass) {
@@ -30,9 +24,9 @@ export class CourseScheduleClass extends BaseClass<CourseScheduleQueryRes> imple
     getCourseListByWeek(week: number): CourseClass[][] {
         const res = [[], [], [], [], [], [], []] as CourseClass[][];
 
-        this.kbList.forEach(course => {
+        this.transformed.kbList.forEach(course => {
             if (course.getWeeksList.includes(week)) {
-                res[course.weekday].push(course);
+                res[course.transformed.weekday].push(course);
             }
         });
         return res;
@@ -71,7 +65,7 @@ export class CourseClass extends BaseZodClass<typeof CourseSchema, Course> {
      * @param day 当天日期的Moment对象，默认为当前时间，返回根据这个参数复制两个新的Moment对象，新Moment对象的时间为上课时间，日期不变
      */
     getAttendanceTimeSpan(day: moment.Moment = moment()): [moment.Moment, moment.Moment] {
-        const courseSpan = this.periodCount.split("-").map(num => +num - 1);
+        const courseSpan = this.transformed.periodCount.split("-").map(num => +num - 1);
         const startTimeSpan = CourseScheduleData.timeSpanList[courseSpan[0]]
             .split("\n")[0]
             .split(":")
@@ -88,7 +82,7 @@ export class CourseClass extends BaseZodClass<typeof CourseSchema, Course> {
 
     get getWeeksList(): number[] {
         const res = new Set<number>();
-        this.weekRange.split(",").forEach(weekSpanStr => {
+        this.transformed.weekRange.split(",").forEach(weekSpanStr => {
             const weekSpan = weekSpanStr
                 .replace(/[^0-9-]/g, "")
                 .split("-")
@@ -111,12 +105,12 @@ export class CourseClass extends BaseZodClass<typeof CourseSchema, Course> {
         const dateMoment = moment(day);
         const week = Math.ceil(moment.duration(dateMoment.diff(startDay)).asWeeks()) + 1;
         const weekday = dateMoment.weekday();
-        return weekday === this.weekday && this.getWeeksList.includes(week);
+        return weekday === this.transformed.weekday && this.getWeeksList.includes(week);
     }
 
     atDayWithWeek(day: moment.MomentInput, week: number) {
         const dateMoment = moment(day);
         const weekday = dateMoment.weekday();
-        return weekday === this.weekday && this.getWeeksList.includes(week);
+        return weekday === this.transformed.weekday && this.getWeeksList.includes(week);
     }
 }

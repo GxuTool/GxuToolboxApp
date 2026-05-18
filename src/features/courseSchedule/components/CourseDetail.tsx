@@ -105,10 +105,12 @@ export function CourseDetail(props: Props) {
     const {theme} = useTheme();
     const {store} = useUserConfig();
     const devMode = store(s => s.devMode);
-    const parsed = useMemo(() => CourseSchema.parse(props.course), [props.course]);
+    const parsed = useMemo(() => CourseSchema.safeParse(props.course), [props.course]);
+    if (!parsed.success) return null;
+    const course = parsed.data;
 
     const [teacherInfoList, setTeacherInfoList] = useState<SimpleTeacherInfo[]>([]);
-    const name = parsed.name;
+    const name = course.name;
 
     useEffect(() => {
         teacherInfoApi.getBaseInfo(name, 1).then(res => {
@@ -118,7 +120,7 @@ export function CourseDetail(props: Props) {
         });
     }, [name]);
     return (
-        <CourseContext.Provider value={parsed}>
+        <CourseContext.Provider value={course}>
             <Flex {...props} gap={10} direction="column">
                 <CourseInfoCard />
                 <Flex justify="center">
@@ -193,7 +195,7 @@ export function CourseDetail(props: Props) {
                 </Flex>
                 <TeacherInfoSheet
                     isVisible={visible}
-                    name={parsed.name}
+                    name={course.name}
                     infoList={teacherInfoList}
                     onClose={() => setVisible(false)}
                 />

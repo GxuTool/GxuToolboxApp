@@ -1,3 +1,4 @@
+import {CourseClass} from "@/class/jw/course.ts";
 import {z} from "zod";
 import {
     PageModel,
@@ -533,12 +534,28 @@ export const PracticalCourseSchema = z
         /** 机构排选制度 */ orgSystem: data.jgpxzd,
         /** 背景颜色 */ backgroundColor: data.backgroundColor,
         /** 意义不明 */ rsdzjs: data.rsdzjs,
-        ...QueryDateSchema.omit({date: true}).parse(data),
-        ...QueryDataModel.omit({queryModel: true, userModel: true}).parse(data),
+        ...QueryDateSchema.omit({date: true}).safeParse(data).data!,
+        ...QueryDataModel.omit({queryModel: true, userModel: true}).safeParse(data).data!,
     }));
 export type PracticalCourseParsed = z.infer<typeof PracticalCourseSchema>;
 
-/** 课表元数据，拼音键名→英文可读 */
+/** 课程标记，拼音键名→英文可读 */
+export const CourseTagSchema = z
+    .object({
+        ywxsmc: z.string(),
+        xslxbj: z.string(),
+        xsmc: z.string(),
+        xsdm: z.string(),
+    })
+    .transform(data => ({
+        /** 英文名称 */ englishName: data.ywxsmc,
+        /** 标记符号 */ marker: data.xslxbj,
+        /** 名称 */ name: data.xsmc,
+        /** 代码 */ code: data.xsdm,
+    }));
+export type CourseTagParsed = z.infer<typeof CourseTagSchema>;
+
+/** 课表元数据，原始数据存储在 `_ori` 中，解析后的英文键名存储在 `transformed` 中 */
 export const CourseScheduleSchema = z
     .object({
         bjmc: z.string(),
@@ -558,6 +575,25 @@ export const CourseScheduleSchema = z
         xqmmc: z.string(),
         xsxyxh: z.number(),
         rsdzjs: z.number(),
+        qsxqj: z.string(),
+        xsxx: z.any(),
+        sjfwkg: z.boolean(),
+        xqjmcMap: z.record(z.string(), z.string()),
+        xskbsfxstkzt: z.string(),
+        rqazcList: z.array(z.any()),
+        kbList: z.array(z.any()),
+        sjkList: z.array(PracticalCourseSchema),
+        xsbjList: z.array(CourseTagSchema),
+        zckbsfxssj: z.string(),
+        djdzList: z.array(z.any()),
+        kblx: z.number(),
+        sfxsd: z.string(),
+        jfckbkg: z.boolean(),
+        xqbzxxszList: z.array(z.any()),
+        xkkg: z.boolean(),
+        sxgykbbz: z.string(),
+        jxhjkcList: z.array(z.any()),
+        xnxqsfkz: z.string(),
     })
     .merge(QueryDateSchema)
     .merge(QueryDataModel.pick({pageTotal: true}))
@@ -579,8 +615,27 @@ export const CourseScheduleSchema = z
         /** 学期名 */ termNameAlt: data.xqmmc,
         /** 学生学院序号 */ studentCollegeOrder: data.xsxyxh,
         /** 意义不明 */ rsdzjs: data.rsdzjs,
-        ...QueryDateSchema.parse(data),
-        ...QueryDataModel.pick({pageTotal: true}).parse(data),
+        /** 学生信息 */ studentInfo: data.xsxx,
+        /** 学期起止周 */ termStartWeek: data.qsxqj,
+        /** 是否教务可控 */ isAdminControlled: data.sjfwkg,
+        /** 星期名称映射 */ weekdayNameMap: data.xqjmcMap,
+        /** 学生课表是否显示调课状态 */ showAdjustStatus: data.xskbsfxstkzt,
+        /** 日期安排列表 */ dateArrangeList: data.rqazcList,
+        /** 课表课程列表 */ kbList: data.kbList.map((c: Course) => new CourseClass(c)),
+        /** 实践课列表 */ sjkList: data.sjkList,
+        /** 课程标记列表 */ courseTagList: data.xsbjList,
+        /** 周次课表是否显示时间 */ showWeekTime: data.zckbsfxssj,
+        /** 调课短周列表 */ adjustShortWeekList: data.djdzList,
+        /** 课表类型 */ scheduleType: data.kblx,
+        /** 是否显示实践课 */ showPractice: data.sfxsd,
+        /** 加分课表是否可控 */ bonusControlled: data.jfckbkg,
+        /** 学期备注行政设置列表 */ termNoteList: data.xqbzxxszList,
+        /** 选课是否可控 */ selectionControlled: data.xkkg,
+        /** 实验课表备注 */ labNote: data.sxgykbbz,
+        /** 教学环节课程列表 */ teachingLinkList: data.jxhjkcList,
+        /** 学年学期是否控制 */ yearTermControlled: data.xnxqsfkz,
+        ...QueryDateSchema.safeParse(data).data!,
+        ...QueryDataModel.pick({pageTotal: true}).safeParse(data).data!,
     }));
 export type CourseScheduleParsed = z.infer<typeof CourseScheduleSchema>;
 
