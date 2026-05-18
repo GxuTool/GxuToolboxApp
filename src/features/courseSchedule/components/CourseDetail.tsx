@@ -223,7 +223,8 @@ function CourseInfoCard() {
                 {course.courseName}
             </UnText>
             <UnText size={12} color={theme.colors.grey1}>
-                {course.venueName}，{course.name}，{course.courseCategory}，{course.examMethod}，{course.courseFlag}，{course.weekdayName}
+                {course.venueName}，{course.name}，{course.courseCategory}，{course.examMethod}，{course.courseFlag}，
+                {course.weekdayName}
                 {course.periodCount}节，{course.weekRange}
             </UnText>
         </View>

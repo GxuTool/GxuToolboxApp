@@ -218,7 +218,12 @@ export function ScheduleCard() {
                         style={{flexDirection: "row", alignItems: "center", gap: 8}}>
                         {[JWauthState, unifiedAuthState, attendanceAuthState].map((i, idx) =>
                             i?.status !== "authenticated" ? (
-                                <Icon key={idx} name="account-network-off-outline" size={24} color={theme.colors.error} />
+                                <Icon
+                                    key={idx}
+                                    name="account-network-off-outline"
+                                    size={24}
+                                    color={theme.colors.error}
+                                />
                             ) : (
                                 <Icon key={idx} name="account-network-outline" size={24} color={theme.colors.success} />
                             ),
