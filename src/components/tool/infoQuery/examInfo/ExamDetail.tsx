@@ -49,7 +49,9 @@ export function ExamDetail(props: Props) {
                             const suffix = status === "past" ? "已结束" : diff === 0 ? "今天" : `${diff}天后`;
                             return (
                                 <Flex direction="column" gap={2} align="flex-start">
-                                    <UnText>{date}（{suffix}）</UnText>
+                                    <UnText>
+                                        {date}（{suffix}）
+                                    </UnText>
                                     <UnText>{time || "-"}</UnText>
                                 </Flex>
                             );
@@ -82,10 +84,10 @@ function ExamInfoCard() {
     return (
         <View style={styles.card}>
             <UnText weight="bold" size={16}>
-                {exam.kcmc}
+                {exam.kcmc} · {exam.ksmc}
             </UnText>
             <UnText size={12} color={theme.colors.grey1}>
-                {exam.ksmc}，{exam.kssj}，{exam.cdmc}，座位号{exam.zwh}
+                {exam.kssj}，{exam.cdmc}&lt;{exam.zwh ?? "-"}&gt;
             </UnText>
         </View>
     );

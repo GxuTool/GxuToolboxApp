@@ -13,11 +13,15 @@ import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts"
 import {Pos} from "@/js/pos.ts";
 import {SimpleTeacherInfo} from "@/type/api/teacherInfo/info.ts";
 import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
+import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {parseExamTime} from "@/features/examInfo/utils/timeParser.ts";
+import moment from "moment";
 
 const CourseContext = createContext<CourseParsed | null>(null);
 
 interface Props extends ViewProps {
     course: CourseClass;
+    examInfo?: ExamInfo[];
 }
 
 interface Info {
@@ -28,76 +32,6 @@ interface Info {
 function copy(value: string, tip: string) {
     Clipboard.setString(value);
     ToastAndroid.show(tip, ToastAndroid.SHORT);
-}
-
-function PropItem({item, ...props}: {item: Info}) {
-    const {theme} = useTheme();
-    const label = item.label;
-    const course = useContext(CourseContext)!;
-    const value = (course[item.key] ?? "").toString();
-    const style = StyleSheet.create({
-        infoIcon: {
-            width: 20,
-        },
-        infoLabel: {
-            fontSize: 20,
-            fontWeight: "bold",
-        },
-        infoData: {
-            fontSize: 16,
-        },
-    });
-    const info = {
-        label: <Text style={style.infoLabel}>{label}</Text>,
-        value: (
-            <UnPressable
-                onPress={function () {
-                    return copy(value, "复制" + item.label + "成功");
-                }}>
-                <Text style={style.infoData}>{value}</Text>
-            </UnPressable>
-        ),
-    };
-    switch (item.key) {
-        case "venueName":
-            info.label = (
-                <UnPressable
-                    onPress={function () {
-                        return Pos.parseAndSearchInMap(value);
-                    }}>
-                    <Flex gap={5} align="center">
-                        <Text style={style.infoLabel}>{label}</Text>
-                        <Icon
-                            type="Ionicon"
-                            name="navigate"
-                            style={{transform: [{translateY: 4}]}}
-                            color={Color.mix(theme.colors.primary, theme.colors.black).rgbaString}
-                            size={20}
-                        />
-                    </Flex>
-                </UnPressable>
-            );
-            break;
-        case "name":
-            info.label = (
-                <UnPressable
-                    onPress={function () {
-                        return props.onClick();
-                    }}>
-                    <Flex gap={5} align="center">
-                        <Text style={style.infoLabel}>{label}</Text>
-                    </Flex>
-                </UnPressable>
-            );
-    }
-    return (
-        <Flex justify="space-between" gap={30}>
-            <Flex gap={10} inline>
-                {info.label}
-            </Flex>
-            <Flex justify="flex-end">{info.value}</Flex>
-        </Flex>
-    );
 }
 
 export function CourseDetail(props: Props) {
@@ -122,6 +56,14 @@ export function CourseDetail(props: Props) {
         <CourseContext.Provider value={course}>
             <Flex {...props} gap={10} direction="column">
                 <CourseInfoCard />
+                {props.examInfo && (
+                    <Flex justify="center" direction="column" gap={6}>
+                        <Text>相关考试</Text>
+                        {props.examInfo.map(exam => (
+                            <CourseExamCard examInfo={exam} />
+                        ))}
+                    </Flex>
+                )}
                 <Flex justify="center">
                     <Text>点击属性，复制到剪切板</Text>
                 </Flex>
@@ -175,25 +117,34 @@ export function CourseDetail(props: Props) {
                     <CoursePropItem
                         prop="qqGroup"
                         label="QQ群"
-                        labelRender={() => (
-                            <Flex gap={5} align="center" inline>
+                        labelRender={qq =>
+                            qq.trim().length > 0 ? (
+                                <Flex gap={5} align="center" inline>
+                                    <UnText weight="bold" size={16}>
+                                        QQ群
+                                    </UnText>
+                                    <Icon
+                                        name="open-in-new"
+                                        color={Color.mix(theme.colors.primary, theme.colors.black).rgbaString}
+                                        size={16}
+                                    />
+                                </Flex>
+                            ) : (
                                 <UnText weight="bold" size={16}>
                                     QQ群
                                 </UnText>
-                                <Icon
-                                    name="open-in-new"
-                                    color={Color.mix(theme.colors.primary, theme.colors.black).rgbaString}
-                                    size={16}
-                                />
-                            </Flex>
-                        )}
+                            )
+                        }
+                        valueRender={qq => <UnText>{qq.trim() || "暂无"}</UnText>}
                         onClick={async qq => {
-                            const url = `mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${qq}&card_type=group&source=qrcode`;
-                            await Linking.openURL(url).catch(e => {
-                                console.error(e);
-                                ToastAndroid.show("无法直接跳转QQ，已将QQ群号复制至剪切板", ToastAndroid.SHORT);
-                                Clipboard.setString(qq);
-                            });
+                            if (qq.trim()) {
+                                const url = `mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${qq}&card_type=group&source=qrcode`;
+                                await Linking.openURL(url).catch(e => {
+                                    console.error(e);
+                                    ToastAndroid.show("无法直接跳转QQ，已将QQ群号复制至剪切板", ToastAndroid.SHORT);
+                                    Clipboard.setString(qq);
+                                });
+                            }
                         }}
                     />
                 </Flex>
@@ -231,6 +182,34 @@ function CourseInfoCard() {
                 {course.venueName}，{course.name}，{course.courseCategory}，{course.examMethod}，{course.courseFlag}，
                 {course.weekdayName}
                 {course.periodCount}节，{course.weekRange}
+            </UnText>
+        </View>
+    );
+}
+
+function CourseExamCard({examInfo}: {examInfo: ExamInfo}) {
+    const {theme} = useTheme();
+    const {status} = parseExamTime(examInfo.kssj);
+    const date = examInfo.kssj.slice(0, 10);
+    const time = examInfo.kssj.match(/(?<=\().*?(?=\))/)?.[0] ?? "";
+    const diff = moment(date).diff(moment(), "days");
+    const suffix = status === "past" ? "已结束" : diff === 0 ? "今天" : `${diff}天后`;
+
+    const styles = StyleSheet.create({
+        card: {
+            padding: 6,
+            borderRadius: 4,
+            width: "100%",
+            backgroundColor: Color(theme.colors.primary).setAlpha(theme.mode === "light" ? 0.2 : 0.12).rgbaString,
+        },
+    });
+    return (
+        <View style={styles.card}>
+            <UnText weight="bold" size={16}>
+                {examInfo.ksmc}
+            </UnText>
+            <UnText size={12} color={theme.colors.grey1}>
+                {date}（{suffix}）{time}，{examInfo.cdmc}&lt;{examInfo.zwh ?? "-"}&gt;
             </UnText>
         </View>
     );

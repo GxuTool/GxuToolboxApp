@@ -336,9 +336,15 @@ export function ScheduleCard() {
                     {sheet.type === "itemDetail" && sheet.item.kind === "exam" && sheet.item.raw && (
                         <ExamDetail examInfo={sheet.item.raw as ExamInfo} />
                     )}
-                    {sheet.type === "itemDetail" && sheet.item?.raw && sheet.item.kind !== "exam" && (
-                        <CourseDetail course={patchCourse(new CourseClass(sheet.item.raw), sheet.day)} />
-                    )}
+                    {sheet.type === "itemDetail" &&
+                        sheet.item?.raw &&
+                        sheet.item.kind !== "exam" &&
+                        (() => {
+                            const course = patchCourse(new CourseClass(sheet.item.raw), sheet.day);
+                            const courseName = course.transformed.courseName;
+                            const matchedExam = examItems.filter(e => e.raw?.kcmc === courseName)?.map(e => e.raw);
+                            return <CourseDetail course={course} examInfo={matchedExam} />;
+                        })()}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
                     )}
