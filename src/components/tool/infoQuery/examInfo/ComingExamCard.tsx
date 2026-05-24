@@ -8,11 +8,12 @@ import {store} from "@/core/store.ts";
 import {ExamInfoQueryRes} from "@/type/api/infoQuery/examInfoAPI.ts";
 import moment from "moment/moment";
 import {Row, Rows, Table} from "react-native-reanimated-table";
+import {ExamInfoClass} from "@/class/jw/exam.ts";
 
 export function ComingExamCard() {
     const {theme} = useTheme();
     const [apiRes, setApiRes] = useState<ExamInfoQueryRes>();
-    const [resList, setResList] = useState<string[]>([]);
+    const [resList, setResList] = useState<string[][]>([]);
     const tableHeaders = ["科目", "时间", "地点"];
     const tableWidths = [100, 150, 100];
 
@@ -28,11 +29,12 @@ export function ComingExamCard() {
     function format(examList: ExamInfo[]) {
         const res: any[] = [];
         examList.forEach(exam => {
-            if (moment.duration(moment().diff(moment(exam.kssj))).asDays() <= 15) {
-                res.push(exam);
+            const parsed = new ExamInfoClass(exam).transformed;
+            if (moment.duration(moment().diff(moment(parsed.examTime))).asDays() <= 15) {
+                res.push(parsed);
             }
         });
-        setResList(res.map((exam: ExamInfo) => [exam.kcmc, moment(exam.kssj).format(), exam.cdmc]));
+        setResList(res.map(exam => [exam.courseName, moment(exam.examTime).format(), exam.venueName]));
     }
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {ExamInfoParsed} from "@/type/infoQuery/exam/examInfo.ts";
 import {StyleSheet, ToastAndroid, View, ViewProps} from "react-native";
 import {useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
@@ -10,11 +10,12 @@ import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 import {Pos} from "@/js/pos.ts";
 import {parseExamTime} from "@/features/examInfo/utils/timeParser.ts";
 import moment from "moment";
+import {ExamInfoClass} from "@/class/jw/exam.ts";
 
-const ExamContext = createContext<ExamInfo | null>(null);
+const ExamContext = createContext<ExamInfoClass | null>(null);
 
 interface Props extends ViewProps {
-    examInfo: ExamInfo;
+    examInfo: ExamInfoClass;
 }
 
 function copy(value: string, tip: string) {
@@ -34,12 +35,12 @@ export function ExamDetail(props: Props) {
                     <UnText>点击属性，复制到剪切板</UnText>
                 </Flex>
                 <Flex gap={10}>
-                    <ExamPropItem prop="kcmc" label="课程名称" />
-                    <ExamPropItem prop="ksmc" label="考试名称" />
+                    <ExamPropItem prop="courseName" label="课程名称" />
+                    <ExamPropItem prop="examName" label="考试名称" />
                 </Flex>
                 <Flex gap={10}>
                     <ExamPropItem
-                        prop="kssj"
+                        prop="examTime"
                         label="考试时间"
                         valueRender={v => {
                             const date = v.slice(0, 10);
@@ -57,12 +58,12 @@ export function ExamDetail(props: Props) {
                             );
                         }}
                     />
-                    <ExamPropItem prop="cdmc" label="考试地点" />
+                    <ExamPropItem prop="venueName" label="考试地点" />
                 </Flex>
                 <Flex gap={10}>
-                    <ExamPropItem prop="zwh" label="座位号" />
-                    <ExamPropItem prop="khfs" label="考察方式" />
-                    <ExamPropItem prop="xf" label="学分" />
+                    <ExamPropItem prop="seat" label="座位号" />
+                    <ExamPropItem prop="examMethod" label="考察方式" />
+                    <ExamPropItem prop="credits" label="学分" />
                 </Flex>
                 {devMode && <ExamDebugCard />}
             </Flex>
@@ -84,10 +85,10 @@ function ExamInfoCard() {
     return (
         <View style={styles.card}>
             <UnText weight="bold" size={16}>
-                {exam.kcmc} · {exam.ksmc}
+                {exam.transformed.courseName} · {exam.transformed.examName}
             </UnText>
             <UnText size={12} color={theme.colors.grey1}>
-                {exam.kssj}，{exam.cdmc}&lt;{exam.zwh ?? "-"}&gt;
+                {exam.transformed.examTime}，{exam.transformed.venueName}&lt;{exam.transformed.seat || "-"}&gt;
             </UnText>
         </View>
     );
@@ -121,11 +122,11 @@ function ExamDebugCard() {
 }
 
 function ExamPropItem(props: {
-    prop: keyof ExamInfo;
+    prop: keyof ExamInfoParsed;
     label: string;
-    labelRender?: (value: string, item: ExamInfo) => React.ReactNode;
-    valueRender?: (value: string, item: ExamInfo) => React.ReactNode;
-    onClick?: (value: string, item: ExamInfo) => void;
+    labelRender?: (value: string, item: ExamInfoClass) => React.ReactNode;
+    valueRender?: (value: string, item: ExamInfoClass) => React.ReactNode;
+    onClick?: (value: string, item: ExamInfoClass) => void;
 }) {
     const exam = useContext(ExamContext)!;
     const {theme} = useTheme();
@@ -137,10 +138,10 @@ function ExamPropItem(props: {
             backgroundColor: Color(theme.colors.grey5).setAlpha(theme.mode === "light" ? 0.5 : 0.3).rgbaString,
         },
     });
-    const value = (exam[props.prop] ?? "").toString();
+    const value = (exam.transformed[props.prop] ?? "").toString();
     const labelNode = props.labelRender ? (
         props.labelRender(value, exam)
-    ) : props.prop === "cdmc" ? (
+    ) : props.prop === "venueName" ? (
         <UnPressable onPress={() => Pos.parseAndSearchInMap(value)}>
             <Flex gap={5} align="center" inline>
                 <UnText weight="bold" size={16}>

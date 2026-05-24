@@ -13,7 +13,7 @@ import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts"
 import {Pos} from "@/js/pos.ts";
 import {SimpleTeacherInfo} from "@/type/api/teacherInfo/info.ts";
 import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
-import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {ExamInfoClass} from "@/class/jw/exam.ts";
 import {parseExamTime} from "@/features/examInfo/utils/timeParser.ts";
 import moment from "moment";
 
@@ -21,7 +21,7 @@ const CourseContext = createContext<CourseParsed | null>(null);
 
 interface Props extends ViewProps {
     course: CourseClass;
-    examInfo?: ExamInfo[];
+    examInfo?: ExamInfoClass[];
 }
 
 interface Info {
@@ -56,7 +56,7 @@ export function CourseDetail(props: Props) {
         <CourseContext.Provider value={course}>
             <Flex {...props} gap={10} direction="column">
                 <CourseInfoCard />
-                {props.examInfo && (
+                {props.examInfo?.length > 0 && (
                     <Flex justify="center" direction="column" gap={6}>
                         <Text>相关考试</Text>
                         {props.examInfo.map(exam => (
@@ -187,11 +187,12 @@ function CourseInfoCard() {
     );
 }
 
-function CourseExamCard({examInfo}: {examInfo: ExamInfo}) {
+function CourseExamCard({examInfo}: {examInfo: ExamInfoClass}) {
+    const exam = examInfo.transformed;
     const {theme} = useTheme();
-    const {status} = parseExamTime(examInfo.kssj);
-    const date = examInfo.kssj.slice(0, 10);
-    const time = examInfo.kssj.match(/(?<=\().*?(?=\))/)?.[0] ?? "";
+    const {status} = parseExamTime(exam.examTime);
+    const date = exam.examTime.slice(0, 10);
+    const time = exam.examTime.match(/(?<=\().*?(?=\))/)?.[0] ?? "";
     const diff = moment(date).diff(moment(), "days");
     const suffix = status === "past" ? "已结束" : diff === 0 ? "今天" : `${diff}天后`;
 
@@ -206,10 +207,10 @@ function CourseExamCard({examInfo}: {examInfo: ExamInfo}) {
     return (
         <View style={styles.card}>
             <UnText weight="bold" size={16}>
-                {examInfo.ksmc}
+                {exam.examName}
             </UnText>
             <UnText size={12} color={theme.colors.grey1}>
-                {date}（{suffix}）{time}，{examInfo.cdmc}&lt;{examInfo.zwh ?? "-"}&gt;
+                {date}（{suffix}）{time}，{exam.venueName}&lt;{exam.seat || "-"}&gt;
             </UnText>
         </View>
     );

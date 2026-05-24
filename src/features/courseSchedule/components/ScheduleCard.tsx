@@ -37,6 +37,7 @@ import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseI
 import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
 import {ConflictCourseList} from "@/features/courseSchedule/components/ConflictCourseList.tsx";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {ExamInfoClass} from "@/class/jw/exam.ts";
 import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
 
 // 菜单的类型
@@ -334,7 +335,7 @@ export function ScheduleCard() {
                         />
                     )}
                     {sheet.type === "itemDetail" && sheet.item.kind === "exam" && sheet.item.raw && (
-                        <ExamDetail examInfo={sheet.item.raw as ExamInfo} />
+                        <ExamDetail examInfo={new ExamInfoClass(sheet.item.raw as ExamInfo)} />
                     )}
                     {sheet.type === "itemDetail" &&
                         sheet.item?.raw &&
@@ -342,7 +343,9 @@ export function ScheduleCard() {
                         (() => {
                             const course = patchCourse(new CourseClass(sheet.item.raw), sheet.day);
                             const courseName = course.transformed.courseName;
-                            const matchedExam = examItems.filter(e => e.raw?.kcmc === courseName)?.map(e => e.raw);
+                            const matchedExam = examItems
+                                .filter(e => e.raw?.kcmc === courseName)
+                                ?.map(e => new ExamInfoClass(e.raw as ExamInfo));
                             return <CourseDetail course={course} examInfo={matchedExam} />;
                         })()}
                     {sheet.type === "share" && (

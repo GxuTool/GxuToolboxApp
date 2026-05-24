@@ -5,13 +5,13 @@ import {UnPressable} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
-import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {ExamInfoClass} from "@/class/jw/exam.ts";
 import moment from "moment/moment";
 import {useCourseData} from "@/hooks/useCourseData.ts";
 
 interface Props {
-    examInfo: ExamInfo;
-    onPress?: (examInfo: ExamInfo) => void;
+    examInfo: ExamInfoClass;
+    onPress?: (examInfo: ExamInfoClass) => void;
 }
 
 export function CourseScheduleExamItem(props: Props) {
@@ -46,7 +46,7 @@ export function CourseScheduleExamItem(props: Props) {
         return res;
     }
 
-    const examTime = examInfo.kssj.match(/(?<=\().*?(?=\))/g)?.[0].split("-") as [string, string];
+    const examTime = examInfo.transformed.examTime.match(/(?<=\().*?(?=\))/g)?.[0].split("-") as [string, string];
     const y = timeToTimeSpan(examTime[0]);
     const span = timeToTimeSpan(examTime[1], true) - y + 1;
     const color = randomColor[Math.floor(Math.random() * randomColor.length)];
@@ -86,12 +86,12 @@ export function CourseScheduleExamItem(props: Props) {
             style={[itemStyle.course, courseScheduleStyle.courseItem]}>
             <Flex direction="column" gap={5}>
                 <Text style={itemStyle.text}>考试</Text>
-                <Text style={itemStyle.text}>{examInfo.kcmc}</Text>
+                <Text style={itemStyle.text}>{examInfo.transformed.courseName}</Text>
                 <Text style={itemStyle.text}>
                     <Icon name="map-marker" style={itemStyle.text} />
-                    {"\n" + examInfo.cdmc.replace("-", "\n")}
+                    {"\n" + examInfo.transformed.venueName.replace("-", "\n")}
                 </Text>
-                <Text style={itemStyle.text}>{`<${examInfo.zwh}>`}</Text>
+                <Text style={itemStyle.text}>{`<${examInfo.transformed.seat}>`}</Text>
             </Flex>
         </UnPressable>
     );
