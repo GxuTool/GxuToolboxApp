@@ -11,7 +11,7 @@ interface ConflictGroup {
 interface ConflictCourseState {
     conflictGroups: ConflictGroup[];
 
-    setActive: (courses: string[], active: string) => void;
+    setActive: (courses: string[], active: string) => Promise<void>;
     getActive: (courses: string[]) => string | undefined;
 }
 
@@ -22,7 +22,7 @@ const conflictCourseStore = create<
 >()((set, get) => ({
     conflictGroups: [],
 
-    setActive: (courses, active) => {
+    setActive: async (courses, active) => {
         const sorted = [...courses].sort();
         set(state => ({
             conflictGroups: [
@@ -30,7 +30,7 @@ const conflictCourseStore = create<
                 {courses: sorted, active},
             ],
         }));
-        storage.save({key: STORAGE_KEY, data: get().conflictGroups});
+        await storage.save({key: STORAGE_KEY, data: get().conflictGroups});
     },
 
     getActive: courses => {

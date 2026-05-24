@@ -176,7 +176,7 @@ export class AttendanceCourseScheduleClass
     }
 }
 
-export class AttendanceCourseClass extends BaseClass<AST.CourseItem>{
+export class AttendanceCourseClass extends BaseClass<AST.CourseItem> {
     constructor(ori: AST.CourseItem) {
         super(ori);
     }
