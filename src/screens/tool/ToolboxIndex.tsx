@@ -155,12 +155,12 @@ export function ToolboxIndex() {
                     type: "navigation",
                     navigation: "PositionListScreen",
                 },
-                {
-                    label: "测试页",
-                    icon: <Icon name="map" size={iconSize} />,
-                    type: "navigation",
-                    navigation: "TestPage",
-                },
+                // {
+                //     label: "测试页",
+                //     icon: <Icon name="map" size={iconSize} />,
+                //     type: "navigation",
+                //     navigation: "TestPage",
+                // },
                 {
                     label: "全校实时课表",
                     icon: <Icon name="calendar-search" size={iconSize} />,
@@ -173,24 +173,23 @@ export function ToolboxIndex() {
                 //     type: "navigation",
                 //     navigation: "WidgetPreviewScreen",
                 // },
+                // {
+                //     label: "校园网充值",
+                //     icon: <Icon name="wifi" size={iconSize} />,
+                //     type: "callback",
+                //     onClick: () => {
+                //         openInWeb("校园网充值", {
+                //             uri: "https://xywjf.gxu.edu.cn/WebPay/toRecharge",
+                //         });
+                //     },
+                // },
                 {
-                    label: "校园网充值",
-                    icon: <Icon name="wifi" size={iconSize} />,
-                    type: "callback",
-                    onClick: () => {
-                        openInWeb("校园网充值", {
-                            uri: "https://xywjf.gxu.edu.cn/WebPay/toRecharge",
-                        });
-                    },
-                },
-                {
-                    label:"教学楼平面图",
-                    icon:<Icon name="city-variant" size={iconSize}/>,
-                    type:"navigation",
-                    navigation:"TeachBuildingListScreen",
+                    label: "教学楼平面图",
+                    icon: <Icon name="city-variant" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "TeachBuildingListScreen",
                 },
             ],
-
         },
     ] as settingSection[];
     const data = {
@@ -258,7 +257,9 @@ export function ToolboxIndex() {
                             <UnPressable
                                 key={`tool-${section.title}-${tool.label}`}
                                 style={style.settingItem}
-                                onPress={function() { return itemClick(tool); }}>
+                                onPress={function () {
+                                    return itemClick(tool);
+                                }}>
                                 <Flex direction="column" inline>
                                     <View style={style.toolIcon}>{tool.icon}</View>
                                     <Text style={style.toolLabel}>{tool.label}</Text>
