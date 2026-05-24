@@ -45,8 +45,8 @@ export function AttendanceSystemAccountScreen() {
         setCaptchaLoading(true);
         setCaptchaCode("");
         try {
-            const res = await attendanceAuthApi.getCaptchaImage(code => setCaptchaCode(code));
-            setCaptchaUri(res.uri);
+            const uri = await attendanceAuthApi.getCaptchaImage();
+            setCaptchaUri(uri);
         } finally {
             setCaptchaLoading(false);
         }
@@ -175,7 +175,7 @@ export function AttendanceSystemAccountScreen() {
                     value={captchaCode}
                     onChangeText={v => setCaptchaCode(v)}
                     label="验证码"
-                    placeholder="自动OCR识别"
+                    placeholder="请输入验证码"
                     autoCapitalize="none"
                     autoCorrect={false}
                     maxLength={4}
@@ -213,7 +213,7 @@ export function AttendanceSystemAccountScreen() {
                 </View>
 
                 <Text style={styles.note}>
-                    仅用于工具获取考勤信息{"\n"}验证码已接入云端 OCR 服务自动识别{"\n"}识别失败时可手动修改
+                    仅用于工具获取考勤信息{"\n"}请输入图片中的验证码完成登录
                 </Text>
             </View>
         </View>

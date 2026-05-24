@@ -225,6 +225,7 @@ export const attendanceSystemApi = {
                 },
             },
         );
+        if (!res?.data?.data) return;
         return new AttendanceCourseScheduleClass(res.data.data);
     },
 };

@@ -8,27 +8,14 @@ const BASE_URL = "https://yktuipweb.gxu.edu.cn";
 
 // ─── 登录相关 ───
 
-async function getCaptchaCode(): Promise<{uri: string; code: string}> {
-    const res = await http.post("https://gxutool.unde.site/api/atd/mirror", {
-        id: 1,
-        method: "GET",
-        target: `https://yktuipweb.gxu.edu.cn/api/account/getVerify?num=${Date.now()}`,
-        params: {},
-        data: {},
+async function getCaptchaCode(): Promise<string> {
+    const res = await http.get("https://yktuipweb.gxu.edu.cn/api/account/getVerify?num=666", {
         responseType: "arraybuffer",
     });
 
-    const dataUri = `data:image/jpeg;base64,${res.data.data}`;
-
-    let code = "";
-    await http
-        .post("https://gxutool.unde.site/api/atd/captcha", {image_base64: dataUri})
-        .then(res2 => {
-            if (res2.data.data?.code) code = res2.data.data.code;
-        })
-        .catch(() => {});
-
-    return {uri: dataUri, code};
+    if (!res?.data) throw new Error("获取验证码失败");
+    const base64 = btoa(new Uint8Array(res.data).reduce((data, byte) => data + String.fromCharCode(byte), ""));
+    return `data:image/jpeg;base64,${base64}`;
 }
 
 async function login(username: string, password: string, captchaCode: string): Promise<AST.ResRoot<AST.LoginData>> {

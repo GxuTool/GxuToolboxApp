@@ -3,11 +3,12 @@ import {Button, Tab, TabView, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {TimeSchedule} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
-import {Icon, UnJsonEditor, UnPressable} from "@/components/un-ui";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {
     Flex,
+    Icon,
     NumberInput,
+    UnJsonEditor,
+    UnPressable,
     UnRefreshControl,
     UnTable,
     UnTableCols,
@@ -15,6 +16,7 @@ import {
     UnText,
     vw,
 } from "@/components/un-ui";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {AttendanceQuickLogin} from "@/components/tool/auth/AttendanceQuickLogin.tsx";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
@@ -169,7 +171,7 @@ function TableScreen(props: ScreenType) {
             </Flex>
             <TimeSchedule
                 currentWeek={week}
-                itemList={[
+                scheduleItems={[
                     {
                         data: courseList,
                         isItemShow: (item, day) => moment(item._ori.weekDay).isSame(day, "d"),

@@ -2,9 +2,9 @@ import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {Dialog, Image, Input, Text, useTheme} from "@rneui/themed";
 import {useEffect, useState} from "react";
 import {ActivityIndicator, StyleSheet, ToastAndroid, View} from "react-native";
-import {http} from "@/core/http.ts";
 import {userMgr} from "@/js/mgr/user.ts";
 import {authApi} from "@/js/auth/auth.ts";
+import {attendanceAuthApi} from "@/core/auth/attendance/attendanceAuthApi.ts";
 import {UnPressable} from "@/components/un-ui";
 
 export interface AttendanceQuickLoginProps {
@@ -22,11 +22,7 @@ export function AttendanceQuickLogin(props: AttendanceQuickLoginProps) {
     const [accountData, setAccountData] = useState<{username: string; password: string}>();
 
     async function refreshCaptchaCode() {
-        const res = await http.get("https://yktuipweb.gxu.edu.cn/api/account/getVerify?num=666", {
-            responseType: "arraybuffer",
-        });
-        const base64 = btoa(new Uint8Array(res.data).reduce((data, byte) => data + String.fromCharCode(byte), ""));
-        const dataUri = `data:image/jpeg;base64,${base64}`;
+        const dataUri = await attendanceAuthApi.getCaptchaImage();
         setCaptchaCodeUri(dataUri);
         return dataUri;
     }

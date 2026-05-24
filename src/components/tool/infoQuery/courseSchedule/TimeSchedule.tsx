@@ -66,7 +66,8 @@ export function TimeSchedule<T = any>(props: TimeScheduleProps<T>) {
         return {shiftMap: map, workDates: work, restDates: rest};
     }, [shiftRules]);
 
-    const startDay = moment(props.startDay ?? ucStore(s => s.jw.startDay));
+    const defaultStartDay = ucStore(s => s.jw.startDay);
+    const startDay = moment(props.startDay ?? defaultStartDay);
     const [currentTime, setCurrentTime] = useState(moment().format());
     const currentWeek = props.currentWeek ?? Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
     const currentTimeSpan = getCurrentTimeSpan();
