@@ -88,7 +88,7 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
             )}
             <Flex
                 direction="column"
-                gap={2}
+                gap={8}
                 style={{
                     padding: 4,
                     paddingTop: conflictCount && conflictCount > 1 ? 18 : 4,
@@ -108,7 +108,7 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     )}
                     {item.title}
                 </Text>
-                <Text style={styles.text}>{item.subtitle}</Text>
+                {item.subtitle && <Text style={styles.text}>{item.subtitle}</Text>}
 
                 {!!item.location && (
                     <Text style={styles.text}>

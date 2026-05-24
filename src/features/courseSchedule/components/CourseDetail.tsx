@@ -157,6 +157,11 @@ export function CourseDetail(props: Props) {
                             <UnPressable onPress={() => setVisible(true)}>
                                 <UnText weight="bold" size={16}>
                                     上课教师
+                                    <Icon
+                                        name="magnify"
+                                        color={Color.mix(theme.colors.primary, theme.colors.black).rgbaString}
+                                        size={16}
+                                    />
                                 </UnText>
                             </UnPressable>
                         )}
