@@ -19,7 +19,7 @@ const timeSpanList = [
     "21:20\n22:05",
 ];
 
-export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTableItem<ExamInfo>[] {
+export function normalizeExam(data: IExam, startDay: moment.Moment, rawItems?: ExamInfo[]): ScheduleTableItem<ExamInfo>[] {
     const items: ScheduleTableItem<ExamInfo>[] = [];
 
     function timeToTimeSpan(time: string, endTime: boolean = false) {
@@ -44,7 +44,7 @@ export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTab
         return (res + 1) as ScheduleTableItem["begin"];
     }
 
-    data.forEach(exam => {
+    data.forEach((exam, index) => {
         const [begin, end] = exam.time.match(/(?<=\().*?(?=\))/g)?.[0].split("-") as [string, string];
         const date = moment(exam.time.slice(0, 10));
         items.push({
@@ -57,6 +57,7 @@ export function normalizeExam(data: IExam, startDay: moment.Moment): ScheduleTab
             location: exam.classroom,
             seat: exam.seat || "未知",
             kind: "exam",
+            raw: rawItems?.[index],
         });
     });
 

@@ -37,6 +37,7 @@ import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseI
 import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
 import {ConflictCourseList} from "@/features/courseSchedule/components/ConflictCourseList.tsx";
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
 
 // 菜单的类型
 type SheetState =
@@ -332,7 +333,10 @@ export function ScheduleCard() {
                             onTermChange={setTerm}
                         />
                     )}
-                    {sheet.type === "itemDetail" && sheet.item?.raw && (
+                    {sheet.type === "itemDetail" && sheet.item.kind === "exam" && sheet.item.raw && (
+                        <ExamDetail examInfo={sheet.item.raw as ExamInfo} />
+                    )}
+                    {sheet.type === "itemDetail" && sheet.item?.raw && sheet.item.kind !== "exam" && (
                         <CourseDetail course={patchCourse(new CourseClass(sheet.item.raw), sheet.day)} />
                     )}
                     {sheet.type === "share" && (

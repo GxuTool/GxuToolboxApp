@@ -29,7 +29,7 @@ export const useExam = () => {
                 console.warn("解析原始数据失败", parsed.error);
                 return;
             }
-            const newModel = normalizeExam(parsed.data, startDay);
+            const newModel = normalizeExam(parsed.data, startDay, raw.items);
 
             if (shouldCache) {
                 store.save({key: "originalExamList", data: raw});
