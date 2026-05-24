@@ -110,9 +110,9 @@ export function ScheduleCard() {
                     ),
                     isItemStack: (a, b) => a.begin <= b.end && b.begin <= a.end,
                     stackRender: (items, day, _week, timeRange) => {
-                        const courses = items.map(i => patchCourse(i.raw as Course, day)).filter(Boolean);
+                        const courses = items.map(i => patchCourse(new CourseClass(i.raw), day)).filter(Boolean);
                         if (courses.length === 0) return null;
-                        const courseClasses = courses.map(c => new CourseClass(c));
+                        const courseClasses = courses;
                         const courseCodes = courseClasses.map(c => c.transformed.courseCode).sort();
                         const storedActive = conflictStore.getState().getActive(courseCodes);
                         const activeCourse = storedActive ?? courseClasses[0]?.transformed.courseCode;
@@ -333,7 +333,7 @@ export function ScheduleCard() {
                         />
                     )}
                     {sheet.type === "itemDetail" && sheet.item?.raw && (
-                        <CourseDetail course={new CourseClass(patchCourse(sheet.item.raw, sheet.day))} />
+                        <CourseDetail course={patchCourse(new CourseClass(sheet.item.raw), sheet.day)} />
                     )}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
