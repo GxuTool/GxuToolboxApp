@@ -1,9 +1,7 @@
-import React from "react";
+import React, {lazy} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {Color} from "@/shared/color.ts";
 import {useTheme} from "@rneui/themed";
-import {HomeScreen} from "@/screens/HomeScreen.tsx";
-import {ScheduleEdit} from "@/screens/home/schedule/ScheduleEdit.tsx";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
 const Stack = createNativeStackNavigator();
@@ -16,6 +14,7 @@ export function HomeStack() {
         <Stack.Navigator
             initialRouteName="HomeScreen"
             screenOptions={{
+                unmountOnBlur: true,
                 headerShadowVisible: false,
                 headerStyle: {
                     backgroundColor: Color(theme.colors.background).setAlpha(
@@ -35,11 +34,11 @@ export function HomeStack() {
                 options={{
                     headerShown: false,
                 }}
-                component={HomeScreen}
+                component={lazy(() => import("@/screens/HomeScreen.tsx").then(m => ({default: m.HomeScreen})))}
             />
             <Stack.Screen
                 name="ScheduleEdit"
-                component={ScheduleEdit}
+                component={lazy(() => import("@/screens/home/schedule/ScheduleEdit.tsx").then(m => ({default: m.ScheduleEdit})))}
                 options={{
                     title: "日程编辑",
                     headerStyle: {

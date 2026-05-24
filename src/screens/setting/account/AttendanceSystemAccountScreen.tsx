@@ -1,4 +1,5 @@
-import {ActivityIndicator, StyleSheet, View} from "react-native";
+import {ActivityIndicator, ScrollView, StyleSheet, View} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
 import {Button, Image, Input, Text} from "@rneui/themed";
 import React, {useEffect, useMemo, useState} from "react";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -103,7 +104,8 @@ export function AttendanceSystemAccountScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["bottom"]}>
+            <ScrollView>
             <View style={styles.card}>
                 {/* ── 状态指示器 ── */}
                 <View style={styles.cardTopRow}>
@@ -216,7 +218,8 @@ export function AttendanceSystemAccountScreen() {
                     仅用于工具获取考勤信息{"\n"}请输入图片中的验证码完成登录
                 </Text>
             </View>
-        </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
