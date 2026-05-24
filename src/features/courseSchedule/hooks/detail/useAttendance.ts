@@ -78,8 +78,19 @@ export const useAttendance = () => {
         } catch {}
     }
 
+    async function update(raw: AST.AttendanceData[], startDay: moment.Moment) {
+        await store.save({key: "originalAttendanceList", data: raw});
+        const current = useAttendanceStore.getState().attendanceList;
+        if (JSON.stringify(current) === JSON.stringify(raw)) return;
+        useAttendanceStore.setState({
+            attendanceList: raw,
+            normalizedList: normalizeAttendance(raw, startDay),
+        });
+    }
+
     return {
         store: useAttendanceStore,
         init,
+        update,
     };
 };
