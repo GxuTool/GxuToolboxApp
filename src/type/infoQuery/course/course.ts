@@ -366,10 +366,10 @@ export interface CourseSelectionListItem {
 /** 课程-教师，拼音键名→英文可读 */
 export const CourseTeacherSchema = z
     .object({
-        xm: z.string(),
-        zcmc: z.string(),
-        zfjmc: z.string(),
-        zzmm: z.string(),
+        xm: z.string().catch(''),
+        zcmc: z.string().catch(''),
+        zfjmc: z.string().catch(''),
+        zzmm: z.string().catch(''),
     })
     .transform(({xm, zcmc, zfjmc, zzmm}) => ({
         /** 教师姓名 */ name: xm,
@@ -399,7 +399,7 @@ export const CourseClassSchema = z
         cd_id: z.string(),
         cdbh: z.string(),
         cdlbmc: z.string(),
-        cdmc: z.string(),
+        cdmc: z.string().catch(''),
         cxbj: z.string().optional(),
         cxbjmc: z.string(),
         jc: z.string(),
