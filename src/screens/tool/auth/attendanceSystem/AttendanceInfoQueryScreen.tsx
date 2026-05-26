@@ -3,11 +3,12 @@ import {Button, Tab, TabView, Text, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
 import {Color} from "@/shared/color.ts";
 import {TimeSchedule} from "@/components/tool/infoQuery/courseSchedule/TimeSchedule.tsx";
-import {Icon, UnJsonEditor, UnPressable} from "@/components/un-ui";
-import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {
     Flex,
+    Icon,
     NumberInput,
+    UnJsonEditor,
+    UnPressable,
     UnRefreshControl,
     UnTable,
     UnTableCols,
@@ -15,6 +16,7 @@ import {
     UnText,
     vw,
 } from "@/components/un-ui";
+import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {AttendanceQuickLogin} from "@/components/tool/auth/AttendanceQuickLogin.tsx";
 import {AttendanceSystemType as AST} from "@/type/api/auth/attendanceSystem.ts";
 import {attendanceSystemApi} from "@/js/auth/attendanceSystem.ts";
@@ -25,6 +27,7 @@ import {useSchoolTerm} from "@/hooks/jw.ts";
 import {useWebView} from "@/hooks/app.ts";
 import {TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {AttendanceStateIcon} from "@/features/courseSchedule/components/AttendanceStateIcon.tsx";
+import {useAttendance} from "@/features/courseSchedule/hooks/detail/useAttendance.ts";
 
 const style = StyleSheet.create({
     container: {
@@ -119,6 +122,7 @@ function TableScreen(props: ScreenType) {
     );
     const [attendanceData, setAttendanceData] = useState<AttendanceDataClass>();
     const [courseList, setCourseList] = useState<AttendanceCourseClass[]>([]);
+    const {update: updateAttendance} = useAttendance();
 
     async function getData() {
         const res = await attendanceSystemApi.getAttendanceTable(week, props.calender?.calendarId);
@@ -132,7 +136,11 @@ function TableScreen(props: ScreenType) {
         const res = await attendanceSystemApi.getPersonalData(props.calender?.calendarId, {
             page_size: 1000,
         });
-        if (res) setAttendanceData(new AttendanceDataClass(res.data.records, props.calender));
+        if (res && props.calender) {
+            setAttendanceData(new AttendanceDataClass(res.data.records, props.calender));
+            // 同步更新全局考勤数据
+            updateAttendance(res.data.records, moment(props.calender.firstWeekBegin));
+        }
     }
 
     const [refreshing, setRefreshing] = useState(false);
@@ -169,7 +177,7 @@ function TableScreen(props: ScreenType) {
             </Flex>
             <TimeSchedule
                 currentWeek={week}
-                itemList={[
+                scheduleItems={[
                     {
                         data: courseList,
                         isItemShow: (item, day) => moment(item._ori.weekDay).isSame(day, "d"),

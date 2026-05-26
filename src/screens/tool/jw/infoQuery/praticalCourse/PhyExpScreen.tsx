@@ -3,24 +3,24 @@ import React, {useEffect, useState} from "react";
 import {Button, Text, useTheme} from "@rneui/themed";
 import "moment/locale/zh-cn";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {store} from "@/core/store.ts";
-import {PhyExp} from "@/type/infoQuery/course/course.ts";
-import {courseApi} from "@/js/jw/course.ts";
+import {PhyExpParsed} from "@/type/infoQuery/course/course.ts";
 import moment from "moment/moment";
 import {useWebView} from "@/hooks/app.ts";
 import {Icon, UnJsonEditor, UnPressable, UnTable, UnTableCols, UnText} from "@/components/un-ui";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {Color} from "@/shared/color.ts";
+import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 
 export function PhyExpScreen() {
     const {store} = useUserConfig();
     const devMode = store(s => s.devMode);
-    const [tableData, setTableData] = useState<PhyExp[]>([]);
+    const {store: phyExpStore, init} = usePhyExp();
+    const tableData = phyExpStore(s => s.phyExpList);
 
-    const cols: UnTableCols<PhyExp> = [
+    const cols: UnTableCols<PhyExpParsed> = [
         {
             title: "上课时间",
-            dataIndex: "skrq",
+            dataIndex: "classDate",
             render: v => (
                 <Text
                     style={{
@@ -34,44 +34,25 @@ export function PhyExpScreen() {
         },
         {
             title: "上课地点",
-            dataIndex: "fjbh",
+            dataIndex: "location",
             width: 190,
         },
         {
             title:"上课教师",
-            dataIndex:"zjjsxm",
+            dataIndex:"teacherName",
             width:120,
         },
         {
             title: "实验名称",
-            dataIndex: "xmmc",
+            dataIndex: "experimentName",
             width: 300,
         },
     ];
-
-    async function init() {
-        // 从内存中加载物理实验缓存
-        const phyExpList = await store.load({key: "phyExpList"}).catch(e => {
-            console.warn(e);
-            return [];
-        });
-        if (phyExpList) setTableData(phyExpList);
-        await getData();
-    }
 
     const {openInWeb} = useWebView();
     function openWeb() {
         openInWeb("物理实验教学中心", {
             uri: "https://pec.gxu.edu.cn/Customer/MasterPage/UserCenterPage.html",
-        });
-    }
-
-    async function getData() {
-        const {data} = await courseApi.getPhyExpList();
-        setTableData(data);
-        await store.save({
-            key: "phyExpList",
-            data,
         });
     }
 
@@ -86,7 +67,7 @@ export function PhyExpScreen() {
                     在物理实验中心查看
                 </Button>
                 {tableData.length > 0 ? (
-                    <UnTable<PhyExp> cols={cols} data={tableData} />
+                    <UnTable<PhyExpParsed> cols={cols} data={tableData} />
                 ) : (
                     <Text>当前学期没有实验课，无法查询过往学期的课程列表</Text>
                 )}

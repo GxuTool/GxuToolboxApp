@@ -10,12 +10,12 @@ import {CollapsedInfo} from "@/components/tool/infoQuery/courseSchedule/Collapse
 type Props = {
     isVisible: boolean;
     name: string;
+    infoList: SimpleTeacherInfo[];
     onClose: () => void;
 };
 
 export function TeacherInfoSheet(props: Props) {
     const {theme} = useTheme();
-    const [teacherInfoList, setTeacherInfoList] = useState<SimpleTeacherInfo[]>([]);
     const [tabIndex, setTabIndex] = useState(0);
     const [selectedTeacher, setSelectedTeacher] = useState<SimpleTeacherInfo>();
 
@@ -29,19 +29,6 @@ export function TeacherInfoSheet(props: Props) {
             borderWidth: 1,
         },
     });
-
-    async function getInfo() {
-        const res = await teacherInfoApi.getBaseInfo(props.name);
-        // @ts-ignore
-        const infoList = res.resData.list;
-        setTeacherInfoList(infoList);
-    }
-
-    useEffect(() => {
-        if (props.isVisible) {
-            getInfo();
-        }
-    }, [props.isVisible]);
 
     return (
         <BottomSheet
@@ -76,7 +63,7 @@ export function TeacherInfoSheet(props: Props) {
                                 setSelectedTeacher(teacher);
                                 setTabIndex(1);
                             }}
-                            list={teacherInfoList}
+                            list={props.infoList}
                         />
                     </TabView.Item>
                     <TabView.Item style={{width: "100%"}}>
@@ -101,29 +88,43 @@ type listProps = {
 
 function TeacherInfoList(props: listProps) {
     const iconUrl = "https://prof.gxu.edu.cn/images/icon-teacher.jpg";
+
     const {theme} = useTheme();
+    const style = StyleSheet.create({
+        press: {
+            backgroundColor: Color(theme.colors.primary).setAlpha(0.2).rgbaString,
+            width: "100%",
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: Color(theme.colors.primary).setAlpha(0.6).rgbaString,
+        },
+    });
 
     return (
         <View>
             <ScrollView>
                 {props.list ? (
-                    props.list.map(item => (
-                        <UnPressable
-                            style={{padding: 8, margin: 4}}
-                            onPress={() => {
-                                props.onSelect(item);
-                            }}>
-                            <Flex gap={16} style={{paddingHorizontal: 4}}>
-                                <Image
-                                    source={{uri: item.pic ? item.pic : iconUrl}}
-                                    style={{width: 60, height: 80, borderRadius: 4}}
-                                />
-                                <View style={{flexDirection: "column", gap: 6, flex: 1}}>
-                                    <UnText size={16}>{item.XM}</UnText>
-                                    <UnText size={12}>{item.dwmc}</UnText>
-                                </View>
-                            </Flex>
-                        </UnPressable>
+                    props.list.map((item, index) => (
+                        <View style={{marginTop: 8}}>
+                            <UnPressable
+                                style={style.press}
+                                onPress={() => {
+                                    props.onSelect(item);
+                                }}>
+                                <Flex gap={16} style={{paddingHorizontal: 4}}>
+                                    <Image
+                                        source={{uri: item.pic ? item.pic : iconUrl}}
+                                        style={{width: 60, height: 80, borderRadius: 4}}
+                                    />
+                                    <View style={{flexDirection: "column", gap: 6, flex: 1}}>
+                                        <UnText size={16}>{item.XM}</UnText>
+                                        <UnText size={12}>{item.dwmc}</UnText>
+                                    </View>
+                                </Flex>
+                            </UnPressable>
+                        </View>
                     ))
                 ) : (
                     <UnText size={16}>暂无信息</UnText>

@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from "react";
 import {ActivityIndicator, FlatList, Pressable, StyleSheet, ToastAndroid, View} from "react-native";
-import {Flex, UnText, vh, vw} from "@/components/un-ui";
+import {Flex, UnPressable, UnText, vh, vw} from "@/components/un-ui";
 import {Button, Divider, Image, Input, useTheme} from "@rneui/themed";
 import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
 import {SimpleTeacherInfo} from "@/type/api/teacherInfo/info.ts";
@@ -80,7 +80,7 @@ export function QueryInfoItem(props: ItemProps) {
     });
 
     return (
-        <Pressable
+        <UnPressable
             android_ripple={store(s => s.theme.ripple)}
             style={style.press}
             onPress={() => {
@@ -100,7 +100,7 @@ export function QueryInfoItem(props: ItemProps) {
                     <UnText size={12}>{props.item.dwmc}</UnText>
                 </View>
             </Flex>
-        </Pressable>
+        </UnPressable>
     );
 }
 

@@ -1,5 +1,6 @@
 import {store} from "@/core/store.ts";
 import {CourseScheduleQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
+import {CourseSchema} from "@/type/infoQuery/course/course.ts";
 import moment from "moment/moment";
 
 export function parseWeeks(weekStr: string): number[] {
@@ -76,10 +77,13 @@ export const nextCourses = async () => {
     let next: any = null;
     const startTimes = timeSpanList.map(span => span.split("\n")[0]);
     const endTimes = timeSpanList.map(span => span.split("\n")[1]);
-    list.forEach(course => {
-        const dayOfWeek = parseInt(course.xqj, 10);
-        const startSection = parseInt(course.jcs.split("-")[0], 10) - 1;
-        const endSection = parseInt(course.jcs.split("-")[1], 10) - 1;
+    list.forEach(raw => {
+        const result = CourseSchema.safeParse(raw);
+        if (!result.success) return;
+        const course = result.data;
+        const dayOfWeek = course.weekday;
+        const startSection = parseInt(course.periodCount.split("-")[0], 10) - 1;
+        const endSection = parseInt(course.periodCount.split("-")[1], 10) - 1;
         const courseTime = startTimes[startSection];
         const courseEndTime = endTimes[endSection];
         if (!courseTime) {
@@ -88,7 +92,7 @@ export const nextCourses = async () => {
 
         const [hour, minute] = courseTime.split(":").map(Number);
 
-        parseWeeks(course.zcd).forEach(week => {
+        parseWeeks(course.weekRange).forEach(week => {
             const courseDate = moment(startDay)
                 .add(week - 1, "weeks")
                 .day(dayOfWeek)
@@ -104,13 +108,13 @@ export const nextCourses = async () => {
 
             if (courseDate.isAfter(now)) {
                 const courseInfo = {
-                    name: course.kcmc,
+                    name: course.courseName,
                     beginTime: courseDate.format("HH:mm"),
                     endTime: courseEndDate.format("HH:mm"),
-                    index: course.jcs,
-                    teacher: course.xm,
-                    room: course.cdmc,
-                    date: courseDate, // 保留 moment 对象用于比较
+                    index: course.periodCount,
+                    teacher: course.name,
+                    room: course.venueName,
+                    date: courseDate,
                 };
 
                 if (!next || courseDate.isBefore(next.date)) {
@@ -118,25 +122,24 @@ export const nextCourses = async () => {
                 }
             }
 
-            // 判断今天还有什么课
             if (courseDate.isSame(now, "day") && courseDate.isAfter(now)) {
                 today.push({
-                    name: course.kcmc,
+                    name: course.courseName,
                     beginTime: courseDate.format("HH:mm"),
                     endTime: courseEndDate.format("HH:mm"),
-                    index: course.jcs,
-                    teacher: course.xm,
-                    room: course.cdmc,
+                    index: course.periodCount,
+                    teacher: course.name,
+                    room: course.venueName,
                 });
             }
             if (courseDate.isSame(tmr, "day")) {
                 tomorrow.push({
-                    name: course.kcmc,
+                    name: course.courseName,
                     beginTime: courseDate.format("HH:mm"),
                     endTime: courseEndDate.format("HH:mm"),
-                    index: course.jcs,
-                    teacher: course.xm,
-                    room: course.cdmc,
+                    index: course.periodCount,
+                    teacher: course.name,
+                    room: course.venueName,
                 });
             }
         });

@@ -192,7 +192,7 @@ async function randomCourseColor(courseList: (Course | PracticalCourse)[]) {
     if (hasChange) {
         await store.save({
             key: "courseScheduleStore",
-            data: { ...courseData, theme: { ...courseData?.theme, courseColor } },
+            data: {...courseData, theme: {...courseData?.theme, courseColor}},
         });
     }
 }

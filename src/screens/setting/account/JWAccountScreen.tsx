@@ -1,4 +1,5 @@
-import {ActivityIndicator, StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
 import {Button, Input, Text} from "@rneui/themed";
 import {useMemo, useState} from "react";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -41,7 +42,8 @@ export function JWAccountScreen() {
     }
 
     return (
-        <View style={style.container}>
+        <SafeAreaView style={style.container} edges={["bottom"]}>
+            <ScrollView>
             <View style={styles.card}>
                 <View style={styles.cardTopRow}>
                     <View style={styles.statusDotWrap}>
@@ -115,7 +117,8 @@ export function JWAccountScreen() {
                 </View>
                 <Text style={style.note}>仅供工具从教务系统获取信息{"\n"}23:00 至次日 7:30 请连接校园网</Text>
             </View>
-        </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 

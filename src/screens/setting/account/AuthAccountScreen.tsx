@@ -1,4 +1,5 @@
-import {ActivityIndicator, StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
 import {Button, Input, Text} from "@rneui/themed";
 import {useEffect, useMemo, useState} from "react";
 import {Icon} from "@/components/un-ui/Icon.tsx";
@@ -77,7 +78,8 @@ export function AuthAccountScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["bottom"]}>
+            <ScrollView>
             <View style={styles.card}>
                 <View style={styles.cardTopRow}>
                     <View style={styles.statusDotWrap}>
@@ -146,7 +148,8 @@ export function AuthAccountScreen() {
                 </View>
                 <Text style={styles.note}>仅用于工具通过统一认证系统获取西大其他网站信息{"\n"}凌晨请连接校园网</Text>
             </View>
-        </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 

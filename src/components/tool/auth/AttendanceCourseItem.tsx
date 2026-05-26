@@ -32,13 +32,13 @@ export function AttendanceCourseItem(props: Props) {
         [AST.AttendanceState.NoNeed]: theme.colors.primary,
     };
     const {course} = props;
-    const span = course._ori.periodArry!.reduceRight((pv, cv) => pv - cv) + 1;
-    const y = course._ori.periodArry![0];
+    const span = course._ori.periodArry.reduceRight((pv, cv) => pv - cv) + 1;
+    const y = course._ori.periodArry[0] - 1;
     const attendanceState = props.attendanceData?.getAttendanceStateByDate(
-        props.course._ori.weekDay!,
-        props.course._ori.periodArry![0],
+        props.course._ori.weekDay,
+        props.course._ori.periodArry[0],
     );
-    const color = ColorMap[attendanceState!];
+    const color = ColorMap[attendanceState];
     const itemStyle = useMemo(() => {
         return StyleSheet.create({
             course: {
@@ -46,29 +46,18 @@ export function AttendanceCourseItem(props: Props) {
                 position: "absolute",
                 backgroundColor: Color(color ?? theme.colors.primary).setAlpha(theme.mode === "light" ? 0.3 : 0.1)
                     .rgbaString,
-                top:
-                    weekdayHeight +
-                    y * timeSpanHeight +
-                    courseItemMargin,
+                top: y * timeSpanHeight + courseItemMargin,
             },
             text: {
                 textAlign: "center",
                 color: Color.mix(color ?? theme.colors.primary, theme.colors.black, 0.5).rgbaString,
             },
         });
-    }, [
-        courseItemMargin,
-        timeSpanHeight,
-        weekdayHeight,
-        span,
-        theme.colors.grey4,
-        theme.mode,
-        y,
-    ]);
+    }, [courseItemMargin, timeSpanHeight, weekdayHeight, span, theme.colors.grey4, theme.mode, y]);
     return (
         // 课程元素
         <UnPressable
-            onPress={function(e) {
+            onPress={function (e) {
                 props.onCoursePress?.(course);
             }}
             style={[props.style, itemStyle.course, courseScheduleStyle.courseItem]}>
@@ -85,7 +74,7 @@ export function AttendanceCourseItem(props: Props) {
                 {courseInfoVisible.position && (
                     <Text style={itemStyle.text}>
                         <Icon name="map-marker" style={itemStyle.text} />
-                        {"\n" + course._ori.roomName!.replace("-", "\n")}
+                        {"\n" + course._ori.roomName.replace("-", "\n")}
                     </Text>
                 )}
                 {courseInfoVisible.teacher && (

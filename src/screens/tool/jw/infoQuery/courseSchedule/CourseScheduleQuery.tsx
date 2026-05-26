@@ -12,7 +12,7 @@ import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeScheduleView.tsx";
 import {Color} from "@/shared/color.ts";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
-import {Course} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
@@ -180,7 +180,7 @@ export function CourseScheduleQuery() {
                         borderWidth: 1,
                         padding: "2.5%",
                     }}>
-                    {itemDetail?.raw && <CourseDetail course={itemDetail.raw as Course} />}
+                    {itemDetail?.raw && <CourseDetail course={new CourseClass(itemDetail.raw)} />}
                 </View>
             </BottomSheet>
         </ScrollView>

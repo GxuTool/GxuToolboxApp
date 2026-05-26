@@ -72,13 +72,15 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     fontWeight: "bold",
                 },
             }),
-        [span, y, store(useShallow(s => s.theme)), baseColor],
+        [span, y, store(useShallow(s => s.theme)), baseColor, theme.mode],
     );
 
     return (
         <UnPressable
             style={styles.container}
-            onPress={function() { return onPress?.(item); }}>
+            onPress={function () {
+                return onPress?.(item);
+            }}>
             {conflictCount && conflictCount > 1 && (
                 <View style={styles.badge}>
                     <Text style={styles.badgeText}>{conflictCount}</Text>
@@ -86,7 +88,7 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
             )}
             <Flex
                 direction="column"
-                gap={2}
+                gap={8}
                 style={{
                     padding: 4,
                     paddingTop: conflictCount && conflictCount > 1 ? 18 : 4,
@@ -106,7 +108,7 @@ export const NewCourseItem = memo(({item, onPress, conflictCount}: NewCourseItem
                     )}
                     {item.title}
                 </Text>
-                <Text style={styles.text}>{item.subtitle}</Text>
+                {item.subtitle && <Text style={styles.text}>{item.subtitle}</Text>}
 
                 {!!item.location && (
                     <Text style={styles.text}>

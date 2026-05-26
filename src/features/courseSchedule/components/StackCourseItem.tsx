@@ -8,17 +8,22 @@ import {Badge, Text, useTheme} from "@rneui/themed";
 import {Icon} from "@/components/un-ui/Icon.tsx";
 import {useBlocksColor} from "@/features/courseSchedule/hooks/useBlocksColor.ts";
 import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
-import {Course} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 import {useShallow} from "zustand/react/shallow";
 
 interface StackCourseItemProps {
-    course: Course[];
-    activeCourse: Course["kch"];
+    course: CourseClass[];
+    activeCourse: string;
     timeRange: [number, number];
-    onPress?: (courses: Course[]) => void;
+    onPress?: (courses: CourseClass[]) => void;
 }
 
 export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}: StackCourseItemProps) => {
+    const parsed = useMemo(() => course.map(c => c.transformed), [course]);
+    const activeParsed = useMemo(
+        () => parsed.find(c => c.courseCode === activeCourse) ?? parsed[0],
+        [parsed, activeCourse],
+    );
     const {store} = useCourseData();
     const {store: conflictStore} = useConflictCourseStore();
     const timeSpanHeight = store(s => s.theme.timeSpanHeight);
@@ -26,11 +31,11 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
 
-    const courseKchs = useMemo(() => course.map(c => c.kch).sort(), [course]);
-    const storedActive = conflictStore(s => s.getActive(courseKchs));
+    const courseCodes = useMemo(() => parsed.map(c => c.courseCode).sort(), [parsed]);
+    const storedActive = conflictStore(s => s.getActive(courseCodes));
     const effectiveActive = storedActive ?? activeCourse;
 
-    const active = course.find(c => c.kch === effectiveActive) ?? course[0];
+    const active = parsed.find(c => c.courseCode === effectiveActive) ?? parsed[0];
 
     const handlePress = () => {
         onPress?.(course);
@@ -39,7 +44,7 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
     const span = timeRange[1] - timeRange[0] + 1;
     const y = timeRange[0] - 1;
 
-    const baseColor = getColor({title: active.kcmc, kind: "course"}) ?? theme.colors.primary;
+    const baseColor = getColor({title: active.courseName, kind: "course"}) ?? theme.colors.primary;
     const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString;
     const textColor = Color.mix(baseColor, theme.colors.black, 0.5).rgbaString;
 
@@ -96,21 +101,21 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
                 }}
                 align="center">
                 <Text style={[styles.text, {fontWeight: "bold"}]} numberOfLines={5}>
-                    {active.jxbsftkbj === "1" && (
+                    {active.isAdjusted === "1" && (
                         <Text style={{color: theme.colors.warning, fontSize: 12, fontWeight: "bold"}}>(调) </Text>
                     )}
-                    {active.kcmc}
+                    {active.courseName}
                 </Text>
-                {!!active.cdmc && (
+                {!!active.venueName && (
                     <Text style={styles.text}>
                         <Icon name="map-marker" size={12} color={textColor} />
-                        {"\n" + active.cdmc.replace("-", "\n")}
+                        {"\n" + active.venueName.replace("-", "\n")}
                     </Text>
                 )}
-                {!!active.xm && (
+                {!!active.name && (
                     <Text style={styles.text} ellipsizeMode="tail" numberOfLines={5}>
                         <Icon name="account" style={styles.text} />
-                        {"\n" + active.xm}
+                        {"\n" + active.name}
                     </Text>
                 )}
             </Flex>

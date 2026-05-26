@@ -1,12 +1,14 @@
 import {store} from "@/core/store.ts";
 import {courseApi} from "@/js/jw/course.ts";
-import {Course, PhyExp} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
+import {PhyExpParsed, PhyExpSchema} from "@/type/infoQuery/course/course.ts";
+import {PhyExpQueryRes} from "@/type/api/infoQuery/classScheduleAPI.ts";
 import {create} from "zustand/react";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import moment from "moment/moment";
 
 interface PhyExpStoreState {
-    phyExpList: PhyExp[];
+    phyExpList: PhyExpParsed[];
 }
 
 const usePhyExpStore = create<PhyExpStoreState>()(() => ({
@@ -15,13 +17,17 @@ const usePhyExpStore = create<PhyExpStoreState>()(() => ({
 
 export const usePhyExp = () => {
     async function init() {
-        const setData = (raw: any, shouldCache: boolean): void => {
-            if (!raw) return;
-            const list = Array.isArray(raw.data) ? raw.data : raw;
-            if (!Array.isArray(list)) return;
+        const setData = (res: PhyExpQueryRes, shouldCache: boolean): void => {
+            const list = res.data
+                .map(i => PhyExpSchema.safeParse(i))
+                .filter(r => {
+                    if (!r.success) console.warn("物理实验数据解析失败", r.error);
+                    return r.success;
+                })
+                .map(r => r.data);
 
             if (shouldCache) {
-                store.save({key: "originalPhyExpList", data: raw});
+                store.save({key: "originalPhyExpList", data: res});
             }
 
             const current = usePhyExpStore.getState().phyExpList;
@@ -31,7 +37,7 @@ export const usePhyExp = () => {
 
         // 从内存中加载缓存
         try {
-            const cachedRaw = await store.load({key: "originalPhyExpList"}).catch(() => null);
+            const cachedRaw = await store.load<PhyExpQueryRes>({key: "originalPhyExpList"}).catch(() => null);
             if (cachedRaw) {
                 setData(cachedRaw, false);
             }
@@ -53,29 +59,29 @@ export const usePhyExp = () => {
         const list = usePhyExpStore.getState().phyExpList;
         if (list.length === 0) return item;
         const dateStr = day.format("YYYYMMDD");
-        const exp = list.find(e => e.skrq === dateStr);
+        const exp = list.find(e => e.classDate === dateStr);
         if (!exp) return item;
         return {
             ...item,
-            title: exp.xmmc || exp.kcmc,
-            location: exp.fjbh || exp.sysmc,
-            teacher: exp.zjjsxm || exp.zjjs,
+            title: exp.experimentName || exp.courseName,
+            location: exp.location || exp.labName,
+            teacher: exp.teacherName || exp.teacherFull,
         };
     }
 
-    function patchCourse(course: Course, day: moment.Moment): Course {
-        if (course.kcmc !== "大学物理实验") return course;
+    function patchCourse(course: CourseClass, day: moment.Moment): CourseClass {
+        if (course.transformed.courseName !== "大学物理实验") return course;
         const list = usePhyExpStore.getState().phyExpList;
         if (list.length === 0) return course;
         const dateStr = day.format("YYYYMMDD");
-        const exp = list.find(e => e.skrq === dateStr);
+        const exp = list.find(e => e.classDate === dateStr);
         if (!exp) return course;
-        return {
-            ...course,
-            kcmc: exp.xmmc || exp.kcmc,
-            cdmc: exp.fjbh || exp.sysmc,
-            xm: exp.zjjsxm || exp.zjjs,
-        };
+        return new CourseClass({
+            ...course._ori,
+            kcmc: exp.experimentName || exp.courseName,
+            cdmc: exp.location || exp.labName,
+            xm: exp.teacherName || exp.teacherFull,
+        });
     }
 
     return {

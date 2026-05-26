@@ -34,12 +34,23 @@ public class TimeTickService extends Service {
         }
     };
 
+    private boolean receiverRegistered = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Service created.");
         // 注册广播接收器
-        registerReceiver(timeTickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(timeTickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK), Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(timeTickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+            }
+            receiverRegistered = true;
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to register receiver", e);
+        }
     }
 
     @Override
@@ -53,7 +64,13 @@ public class TimeTickService extends Service {
             .setSmallIcon(R.mipmap.ic_launcher) // 重要：确保你有名为 ic_launcher 的图标资源
             .build();
 
-        startForeground(1, notification);
+        try {
+            startForeground(1, notification);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start foreground", e);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
 
         // 如果服务被系统杀死，不要自动重启
         return START_NOT_STICKY;
@@ -64,7 +81,14 @@ public class TimeTickService extends Service {
         super.onDestroy();
         Log.d(TAG, "Service destroyed.");
         // 注销广播接收器，防止内存泄漏
-        unregisterReceiver(timeTickReceiver);
+        if (receiverRegistered) {
+            try {
+                unregisterReceiver(timeTickReceiver);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to unregister receiver", e);
+            }
+            receiverRegistered = false;
+        }
     }
 
     @Nullable

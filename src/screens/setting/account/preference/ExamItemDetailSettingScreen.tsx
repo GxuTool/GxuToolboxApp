@@ -7,15 +7,16 @@ import {UnPicker} from "@/components/un-ui/UnPicker.tsx";
 import {Picker} from "@react-native-picker/picker";
 import {Row, Rows, Table} from "react-native-reanimated-table";
 import {Color} from "@/shared/color.ts";
-import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
+import {ExamInfoParsed} from "@/type/infoQuery/exam/examInfo.ts";
+import {ExamInfoClass} from "@/class/jw/exam.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 
-type ExamKeysType = keyof Omit<ExamInfo, "queryModel" | "userModel">;
+type ExamKeysType = keyof ExamInfoParsed;
 
 export function ExamItemDetailSettingScreen() {
     const {store: ucStore} = useUserConfig();
     const {theme} = useTheme();
-    const [examList, setExamList] = useState<ExamInfo[]>([]);
+    const [examList, setExamList] = useState<ExamInfoParsed[]>([]);
     const [activeExamIndex, setActiveExamIndex] = useState(0);
     const activeExam = examList[activeExamIndex];
 
@@ -108,7 +109,8 @@ export function ExamItemDetailSettingScreen() {
             console.warn(e);
             return {};
         });
-        setExamList(examRes?.items ?? []);
+        const rawItems = examRes?.items ?? [];
+        setExamList(rawItems.map((item: any) => new ExamInfoClass(item).transformed));
     }
 
     useEffect(() => {
@@ -123,7 +125,7 @@ export function ExamItemDetailSettingScreen() {
                     <View style={{flex: 1}}>
                         <UnPicker selectedValue={activeExamIndex} onValueChange={setActiveExamIndex}>
                             {examList.map((exam, index) => (
-                                <Picker.Item label={exam.kcmc} value={index} key={`exam-${index}`} />
+                                <Picker.Item label={exam.courseName} value={index} key={`exam-${index}`} />
                             ))}
                         </UnPicker>
                     </View>

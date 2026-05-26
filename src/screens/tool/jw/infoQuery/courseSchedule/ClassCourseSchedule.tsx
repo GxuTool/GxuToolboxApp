@@ -19,7 +19,7 @@ import moment from "moment/moment";
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
 import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
-import {Course} from "@/type/infoQuery/course/course.ts";
+import {CourseClass} from "@/class/jw/course.ts";
 import {Color} from "@/shared/color.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
@@ -199,7 +199,7 @@ export function ClassCourseSchedule() {
                         borderWidth: 1,
                         padding: "2.5%",
                     }}>
-                    {itemDetail?.raw && <CourseDetail course={itemDetail.raw as Course} />}
+                    {itemDetail?.raw && <CourseDetail course={new CourseClass(itemDetail.raw)} />}
                 </View>
             </BottomSheet>
         </ScrollView>

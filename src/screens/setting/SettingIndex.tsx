@@ -50,11 +50,11 @@ export function SettingIndex() {
                     type: "navigation",
                     value: "attendanceSystemAccount",
                 },
-                {
-                    label: "偏好设置",
-                    type: "navigation",
-                    value: "userPreferenceSetting",
-                },
+                // {
+                //     label: "偏好设置",
+                //     type: "navigation",
+                //     value: "userPreferenceSetting",
+                // },
             ],
         },
         {
@@ -160,8 +160,8 @@ export function SettingIndex() {
                 {
                     label: "公测群",
                     type: "link",
-                    value: "101974491",
-                    url: "https://qm.qq.com/q/n8l4zsvsGW",
+                    value: "580048805",
+                    url: "https://qm.qq.com/q/tVlQHwhwXu",
                 },
                 {
                     label: "软件信息",

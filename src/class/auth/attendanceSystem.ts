@@ -24,7 +24,7 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
      * @param week 目标周
      */
     getAttendanceRecord(course: CourseClass, week: number): AST.AttendanceData | undefined {
-        const weekSpans = course._ori.zcd.split(",");
+        const weekSpans = course.transformed.weekRange.split(",");
         let inTargetWeek = false;
         // 判断目标周是否有这节课
         weekSpans.forEach(weekSpan => {
@@ -43,12 +43,13 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
         if (!inTargetWeek) return; // 不在当周
         const day = moment(this._ori.calenderData.firstWeekBegin).add({
             w: week - 1,
-            day: +course._ori.xqj - 1,
+            day: course.transformed.weekday - 1,
         });
         const [startTime, endTime] = course.getAttendanceTimeSpan(day);
         return this._ori.recordList.find(
             record =>
-                moment(record.day).isSame(startTime, "D") && course._ori.jcs.split("-").join(",") === record.periodSplit,
+                moment(record.day).isSame(startTime, "D") &&
+                course.transformed.periodCount.split("-").join(",") === record.periodSplit,
         );
     }
 
@@ -65,7 +66,9 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
      */
     get getCurrentWeek(): number {
         return (
-            moment().startOf("isoWeek").diff(moment(this._ori.calenderData.firstWeekBegin).startOf("isoWeek"), "weeks") + 1
+            moment()
+                .startOf("isoWeek")
+                .diff(moment(this._ori.calenderData.firstWeekBegin).startOf("isoWeek"), "weeks") + 1
         );
     }
 
@@ -83,7 +86,7 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
         // 计算课程具体日期：从学期第一周开始日期加上周数和星期几的偏移量
         const day = moment(this._ori.calenderData.firstWeekBegin).add({
             w: week - 1,
-            day: +course._ori.xqj - 1,
+            day: course.transformed.weekday - 1,
         });
 
         if (!record) return day.isBefore(moment()) ? AST.AttendanceState.NoNeed : AST.AttendanceState.NotStarted;
@@ -108,14 +111,19 @@ export class AttendanceDataClass extends BaseClass<TermAttendanceData> implement
      */
     getAttendanceStateByDate(date: moment.MomentInput, targetPeriod: number): AST.AttendanceState | undefined {
         const records = this.getAttendanceRecordByDate(date);
-        return records.find(record => {
-            const period = record.periodSplit!.split(",").map(item=>+item);
-            return period[0] <= targetPeriod && period[1] >= targetPeriod;
-        })?.atdStateId || undefined;
+        return (
+            records.find(record => {
+                const period = record.periodSplit!.split(",").map(item => +item);
+                return period[0] <= targetPeriod && period[1] >= targetPeriod;
+            })?.atdStateId || undefined
+        );
     }
 }
 
-export class AttendanceCourseScheduleClass extends BaseClass<AST.AttendanceCourseSchedule> implements AST.AttendanceCourseSchedule {
+export class AttendanceCourseScheduleClass
+    extends BaseClass<AST.AttendanceCourseSchedule>
+    implements AST.AttendanceCourseSchedule
+{
     periodMax!: number;
     periodTime!: null;
     periodTimeAll!: AST.PeriodTimeItem[];
@@ -143,8 +151,9 @@ export class AttendanceCourseScheduleClass extends BaseClass<AST.AttendanceCours
             const item = this._ori.resTableRankList[timeSpan].courses[day];
             if (item.subjectName) {
                 if (item.connectCount > 0) {
-                    item.periodArry = new Array(2).fill(0).map((_, i) => timeSpan + i + 1);
+                    item.periodArry = new Array(item.connectCount + 1).fill(0).map((_, i) => timeSpan + i + 1);
                     res.push(new AttendanceCourseClass(item));
+                    timeSpan += item.connectCount;
                 }
             }
         }
@@ -157,8 +166,9 @@ export class AttendanceCourseScheduleClass extends BaseClass<AST.AttendanceCours
     get getCourseList() {
         const res: AttendanceCourseClass[][] = [];
         for (let day = 1; day <= 7; day++) {
-            if (this.getCourseListByDay(day)) {
-                res.push(this.getCourseListByDay(day));
+            const courseListByDay = this.getCourseListByDay(day);
+            if (courseListByDay) {
+                res.push(courseListByDay);
             }
         }
         this.courseList = res;
@@ -166,25 +176,7 @@ export class AttendanceCourseScheduleClass extends BaseClass<AST.AttendanceCours
     }
 }
 
-export class AttendanceCourseClass extends BaseClass<AST.CourseItem> implements AST.CourseItem {
-    connectCount!: number;
-    courseName!: string | null;
-    courseState!: number | null;
-    courseType!: number | null;
-    dayOfWeek!: number | null;
-    dayOfWeekStr!: string | null;
-    isConnect!: number;
-    period!: number | null;
-    periodArry!: number[] | null;
-    periodArryStr!: string | null;
-    reviseAtdResult!: number | null;
-    roomId!: number | null;
-    roomName!: string | null;
-    subjectId!: number | null;
-    subjectName!: string | null;
-    teacherName!: string | null;
-    weekDay!: string | null;
-
+export class AttendanceCourseClass extends BaseClass<AST.CourseItem> {
     constructor(ori: AST.CourseItem) {
         super(ori);
     }

@@ -73,13 +73,15 @@ export const NewExamItem = memo(({item, onPress}: NewExamItemProps) => {
                     fontSize: 11,
                 },
             }),
-        [span, y, store(useShallow(s => s.theme)), baseColor],
+        [span, y, store(useShallow(s => s.theme)), baseColor, theme.mode],
     );
 
     return (
         <UnPressable
             style={styles.container}
-            onPress={function() { return onPress?.(item); }}>
+            onPress={function () {
+                return onPress?.(item);
+            }}>
             <Flex direction="column" gap={2} style={{padding: 4, paddingTop: 10, height: "100%"}} align="center">
                 <Text style={styles.badge}>考试</Text>
                 <Text style={styles.title}>{item.title}</Text>
