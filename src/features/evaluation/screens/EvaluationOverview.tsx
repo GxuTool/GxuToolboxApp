@@ -85,8 +85,7 @@ export function EvaluationOverview() {
                     fontSize: 14,
                 },
                 opcontainer:{
-                    alignItems:"flex-start",
-                    justifyContent:"flex-start",
+
                     width:"100%",
                 },
                 opButton: {
@@ -96,6 +95,8 @@ export function EvaluationOverview() {
                     borderRadius: 8,
                     paddingHorizontal: 14,
                     paddingVertical: 8,
+                    justifyContent:"center",
+
                 },
                 buttoText:{
                     color: softPrimaryText,
@@ -320,7 +321,7 @@ export function EvaluationOverview() {
                 </View>
             })
             </Flex>
-            {evaList.length>0&&(
+            {evaList.length>=0&&(
                 <View style={styles.submitButtonContainer}>
                     <Button
                         buttonStyle={styles.opButton}
