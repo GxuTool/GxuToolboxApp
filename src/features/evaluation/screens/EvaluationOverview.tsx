@@ -32,7 +32,7 @@ export function EvaluationOverview() {
     const {theme} = useTheme();
     const [evaList, setEvaList] = useState<EvaTeacherList[]>([]);
     const navigation = useNavigation();
-    const colWidths = [9, 6, 5];
+    const colWidths = [8, 6, 5];
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const isCancelled = useRef(false);
@@ -46,7 +46,17 @@ export function EvaluationOverview() {
         Color(theme.colors.background),
         theme.mode === "dark" ? 0.1 : 0.4,
     ).setAlpha(theme.mode === "dark" ? 0.3 : 0.8).rgbaString;
-
+    const softPrimaryBg = Color(theme.colors.primary)
+        .setAlpha(theme.mode === "dark" ? 0.18 : 0.10)
+        .rgbaString;
+    const softPrimaryBorder = Color(theme.colors.primary)
+        .setAlpha(theme.mode === "dark" ? 0.45 : 0.28)
+        .rgbaString;
+    const softPrimaryText = Color.mix(
+        Color(theme.colors.primary),
+        Color(theme.colors.black),
+        theme.mode === "dark" ? 0.15 : 0.05,
+    ).hexString;
     const styles = useMemo(
         () =>
             StyleSheet.create({
@@ -74,6 +84,48 @@ export function EvaluationOverview() {
                     textAlign: "center",
                     fontSize: 14,
                 },
+                opcontainer:{
+
+                    width:"100%",
+                },
+                opButton: {
+                    backgroundColor: softPrimaryBg,
+                    borderColor: softPrimaryBorder,
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    justifyContent:"center",
+
+                },
+                buttoText:{
+                    color: softPrimaryText,
+                    fontSize: 16,
+                    fontWeight: "600",
+                },
+                submitButtonContainer: {
+                    alignSelf: "center",
+                    marginVertical: 4,
+                },
+                emptycontainer:{
+                    alignItems:"center",
+                    justifyContent:"center",
+                    paddingVertical:60,
+                    paddingHorizontal:24,
+                },
+                emptyTitle:{
+                    textAlign:"center",
+                    marginTop:12,
+                    fontSize:18,
+                    fontWeight:"bold",
+                },
+                emptyDoc:{
+                    marginTop:8,
+                    fontSize:14,
+                    color:theme.colors.grey3,
+                    textAlign:"center",
+                    lineHeight:22
+,                },
             }),
         [theme],
     );
@@ -221,32 +273,28 @@ export function EvaluationOverview() {
                         总计 {evaList.length} ~ 已评完 {statusCounts["已评完"]} ~ 未评 {statusCounts["未评"]} ~ 未评完{" "}
                         {statusCounts["未评完"]}{" "}
                     </Text>
-                    <Button
-                        containerStyle={{width: "10%"}}
-                        onPress={() => {
-                            navigation.navigate("EvaluationTemplate");
-                        }}>
-                        <Icon name={"cog"} size={20} color={"white"} />
-                    </Button>
                 </Flex>
-                <Flex>
-                    {statusCounts["已评完"] === evaList.length || evaList.length === 0 ? (
-                        <Button containerStyle={{width: "65%", paddingRight: 10}} onPress={submit}>
-                            提交（可清空评价反悔）
-                        </Button>
-                    ) : (
-                        <Button containerStyle={{width: "65%", paddingRight: 10}} onPress={handleOneKey}>
+                <View style={styles.opcontainer}>
+                    <Button
+                        buttonStyle={styles.opButton}
+                        onPress={() => {
+                          navigation.navigate("EvaluationTemplate");
+                      }}>
+                        <Text style={styles.buttoText}>自定义评价模板</Text>
+                    </Button>
+                        <Button buttonStyle={styles.opButton} onPress={handleOneKey}>
+                            <Text style={styles.buttoText}>
                             应用自定义模板一键评价
+                            </Text>
                         </Button>
-                    )}
-                    <Button
-                        containerStyle={{width: "25%"}}
-                        onPress={() => {
-                            handleClear();
-                        }}>
+                        <Button
+                            buttonStyle={styles.opButton}
+                            onPress={() => {handleClear();
+                        }}><Text style={styles.buttoText}>
                         清空评价
+                            </Text>
                     </Button>
-                </Flex>
+                </View>
                 <Table style={{width: "100%"}}>
                     <Row
                         data={["课程", "教师", "状态"]}
@@ -264,7 +312,26 @@ export function EvaluationOverview() {
                         />
                     ))}
                 </Table>
+                evalist.length===0&&({
+                <View style={styles.emptycontainer}>
+                <Text style={styles.emptyTitle}>暂无待评价课程</Text>
+                <Text style={styles.emptyDoc}>
+                    当前可能未到期末学生评价开放时间，或所有课程暂未发布评价任务。
+                </Text>
+                </View>
+            })
             </Flex>
+            {evaList.length>=0&&(
+                <View style={styles.submitButtonContainer}>
+                    <Button
+                        buttonStyle={styles.opButton}
+                        onPress={handleClear}>
+                        <Text style={styles.buttoText}>
+                            提交
+                        </Text>
+                    </Button>
+                </View>
+            )}
         </ScrollView>
     );
 }
