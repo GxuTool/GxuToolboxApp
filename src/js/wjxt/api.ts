@@ -2,8 +2,6 @@ import axios from "axios";
 import cheerio from "react-native-cheerio";
 import iconv from "iconv-lite";
 import {Buffer} from "buffer";
-import {userMgr} from "@/js/mgr/user.ts";
-
 export const wjxtHttp = axios.create({
     baseURL: "https://wjxt.gxu.edu.cn/",
     headers: {
@@ -32,32 +30,22 @@ export const wjxt = {
             loginsubmit: "%B5%C7+%C2%BC",
             myteip: "172.30.135.20--2",
         });
-        const cookie = res.headers["set-cookie"];
-        await userMgr.wjxt.storeLoginRes(cookie);
         const response = await wjxtHttp.post(
             "https://wjxt.gxu.edu.cn/Wjxt_UI/qstwj.aspx",
             {},
-            {
-                responseType: "arraybuffer",
-                headers: {
-                    Cookie: cookie,
-                },
-            },
+            {responseType: "arraybuffer"},
         );
+
         const htmlString = htmlParser(response.data);
         return !htmlString.includes("alert");
     },
 
-    testCookie: async (loginRes: string[] | null) => {
-        if (!loginRes) return;
+    testCookie: async () => {
         const response = await wjxtHttp.post(
             "https://wjxt.gxu.edu.cn/Wjxt_UI/qstwj.aspx",
             {},
             {
                 responseType: "arraybuffer",
-                headers: {
-                    Cookie: loginRes || "",
-                },
             },
         );
         const htmlString = htmlParser(response.data);
