@@ -2,13 +2,11 @@ import {http, urlWithParams} from "@/core/http.ts";
 import {AxiosResponse} from "axios";
 import {getEncryptedPassword} from "@/shared/rasPassword";
 import {SchoolTerms} from "@/type/global.ts";
-import CookieManager from "@preeternal/react-native-cookie-manager";
 import {UserInfo} from "@/type/infoQuery/base.ts";
 import {personalInfoParser} from "@/js/HTMLparser/personalInfoParser.ts";
 
 export const JwAuthClient = {
     async getPublicKey(): Promise<{modulus: string; exponent: string}> {
-        await CookieManager.clearAll();
         const res = await http.get(urlWithParams("/xtgl/login_getPublicKey.html", {time: Date.now()}));
         return res.data;
     },

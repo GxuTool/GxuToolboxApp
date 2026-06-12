@@ -9,7 +9,12 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 class MainActivity : ReactActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(null)
+    // react-native-screens 不支持 Fragment 恢复，需要在 super.onCreate 之前清除 fragment 状态
+    val stripped = savedInstanceState?.apply {
+      remove("android:support:fragments")
+      remove("androidx.lifecycle.BundlableSavedStateRegistry.key")
+    }
+    super.onCreate(stripped)
   }
 
   /**
