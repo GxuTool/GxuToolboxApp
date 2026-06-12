@@ -54,7 +54,7 @@ export interface CourseClass {
     jcor: string;
     /** 节次数 */
     jcs: string;
-    /** 机构号ID */
+    /** 教工号 */
     jgh_id: string;
     /** 机构排选制度 */
     jgpxzd: string;
@@ -457,7 +457,7 @@ export const CourseClassSchema = z
         /** 节次 */ period: data.jc,
         /** 节次（其它） */ periodOther: data.jcor,
         /** 节次数 */ periodCount: data.jcs,
-        /** 机构号ID */ orgId: data.jgh_id,
+        /** 教工号 */ staffId: data.jgh_id,
         /** 机构排选制度 */ orgSystem: data.jgpxzd,
         /** 教学班ID */ teachingClassId: data.jxb_id,
         /** 教学班名称 */ teachingClassName: data.jxbmc,
