@@ -1,7 +1,9 @@
 import {useEffect, useState} from "react";
-import {Button, Text, useTheme} from "@rneui/themed";
+import {Button, LinearProgress, Text, useTheme} from "@rneui/themed";
 import axios from "axios";
-import {Linking, PermissionsAndroid, StyleSheet} from "react-native";
+import {Alert, Linking, StyleSheet} from "react-native";
+import Clipboard from "@react-native-clipboard/clipboard";
+import ReactNativeBlobUtil from "react-native-blob-util";
 import Flex from "./un-ui/Flex";
 import {Color} from "@/shared/color.ts";
 import PackageJSON from "@/../package.json";
@@ -64,20 +66,30 @@ export function UpdateCard() {
     const [downloading, setDownloading] = useState(false);
     const [progress, setProgress] = useState<number>(0);
     const handleUpdate = async (url: string) => {
+        setDownloading(true);
+        setProgress(0);
         try {
-            try {
-                await PermissionsAndroid.requestMultiple([
-                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                    PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-                ]);
-            } catch {
-                // 权限请求失败不影响更新流程
-            }
-            if (await Linking.canOpenURL(url)) {
-                await Linking.openURL(url);
-            }
+            const res = await ReactNativeBlobUtil.config({
+                fileCache: true,
+                path: `${ReactNativeBlobUtil.fs.dirs.CacheDir}/gxu_tool_update.apk`,
+            })
+                .fetch("GET", url)
+                .progress((received, total) => {
+                    setProgress(Number(received) / Number(total));
+                });
+
+            await ReactNativeBlobUtil.android.actionViewIntent(res.path(), "application/vnd.android.package-archive");
         } catch (error) {
-            console.error("更新失败:", error);
+            console.error("应用内下载失败，尝试打开浏览器:", error);
+            try {
+                await Linking.openURL(url);
+            } catch {
+                console.error("打开浏览器也失败了");
+                Alert.alert("下载失败", `无法自动下载，请手动复制链接到浏览器打开：\n${url}`, [
+                    {text: "复制链接", onPress: () => Clipboard.setString(url)},
+                    {text: "确定"},
+                ]);
+            }
         } finally {
             setDownloading(false);
             setProgress(0);
@@ -88,20 +100,27 @@ export function UpdateCard() {
         <UnCard style={style.card} title="发现新版本~">
             <Flex direction="column" gap={10} align="flex-start" inline style={{paddingHorizontal: "2%"}}>
                 {/*<Text>可以在设置关闭更新提示</Text>*/}
-                <Text style={{fontSize: 14}}>版本号：{version?.versionName}</Text>
+                <Text style={{fontSize: 14}}>
+                    版本号：{version?.versionName}（{version?.versionCode}）
+                </Text>
                 <Text style={{fontSize: 14}}>更新信息：</Text>
                 <Text style={{fontSize: 14}}>{version?.desc}</Text>
+                {downloading && (
+                    <LinearProgress
+                        value={progress}
+                        variant="determinate"
+                        color={theme.colors.primary}
+                        style={{height: 6, borderRadius: 3, width: "100%"}}
+                    />
+                )}
                 <Flex gap={10} justify="flex-end" style={{width: "100%"}}>
                     <Button
                         size="sm"
                         loading={downloading}
                         disabled={downloading}
                         onPress={() => handleUpdate(version?.ori.official!)}>
-                        {downloading ? `下载中 ${progress.toFixed(1)}%` : "获取更新"}
+                        {downloading ? `下载中 ${(progress * 100).toFixed(1)}%` : "获取更新"}
                     </Button>
-                    {/*<Button type="clear" onPress={() => setVisible(false)} disabled={downloading}>*/}
-                    {/*    取消*/}
-                    {/*</Button>*/}
                 </Flex>
             </Flex>
         </UnCard>
