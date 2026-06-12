@@ -169,7 +169,7 @@ export function ClassCourseSchedule() {
                             <UnSlider
                                 step={1}
                                 minimumValue={1}
-                                maximumValue={Math.max(...(theorySchedule as ScheduleTableItem[]).map(i => i.week), 1)}
+                                maximumValue={20}
                                 allowTouchTrack
                                 value={pageView.activePage + 1}
                                 onValueChange={v => pageView.setPage(v - 1)}

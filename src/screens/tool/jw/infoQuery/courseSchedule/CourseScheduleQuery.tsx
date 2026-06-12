@@ -148,7 +148,7 @@ export function CourseScheduleQuery() {
                     <UnSlider
                         step={1}
                         minimumValue={1}
-                        maximumValue={courseItems.length > 0 ? Math.max(...courseItems.map(i => i.week)) : 20}
+                        maximumValue={20}
                         allowTouchTrack
                         value={pageView.activePage + 1}
                         onValueChange={v => pageView.setPage(v - 1)}
