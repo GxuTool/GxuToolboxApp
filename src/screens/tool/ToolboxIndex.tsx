@@ -53,6 +53,12 @@ export function ToolboxIndex() {
                     navigation: "classCourseSchedule",
                 },
                 {
+                    label: "导出课表",
+                    icon: <Icon name="file-export-outline" size={iconSize} />,
+                    type: "navigation",
+                    navigation: "ExportScheduleScreen",
+                },
+                {
                     label: "考试考场",
                     icon: <Icon name="information-box-outline" size={iconSize} />,
                     type: "navigation",

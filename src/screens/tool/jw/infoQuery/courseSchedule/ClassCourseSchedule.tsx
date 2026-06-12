@@ -1,5 +1,6 @@
 import React, {useCallback, useState} from "react";
 import {ActivityIndicator, ScrollView, StyleSheet, View} from "react-native";
+import {useNavigation} from "@react-navigation/native";
 import {BottomSheet, Button, Card, Divider, Text, useTheme} from "@rneui/themed";
 import Flex from "@/components/un-ui/Flex.tsx";
 import {Schools} from "@/type/global.ts";
@@ -25,6 +26,7 @@ import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {Icon, UnJsonEditor, UnPressable, UnText} from "@/components/un-ui";
 
 export function ClassCourseSchedule() {
+    const navigation = useNavigation();
     const {openInJw} = useWebView();
     const {theme} = useTheme();
     const {store} = useUserConfig();
@@ -125,6 +127,11 @@ export function ClassCourseSchedule() {
                             前往教务查询
                         </Button>
                     </Flex>
+                    <Button
+                        title="导出课表"
+                        onPress={() => navigation.navigate("ExportScheduleScreen", {tab: "class"})}
+                        containerStyle={{marginVertical: 8, width: "100%"}}
+                    />
                 </Flex>
                 <Divider />
                 <Text h4>课表查询结果</Text>
@@ -134,7 +141,7 @@ export function ClassCourseSchedule() {
                         <View style={{flex: 1}}>
                             <UnPicker selectedValue={index} onValueChange={setIndex}>
                                 {[...list].map((value, index) => {
-                                    return <Picker.Item value={index} label={value.tjkbmc} key={value.id} />;
+                                    return <Picker.Item value={index} label={value.className} key={value.id} />;
                                 })}
                             </UnPicker>
                         </View>

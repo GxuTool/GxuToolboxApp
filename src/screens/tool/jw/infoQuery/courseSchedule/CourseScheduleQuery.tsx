@@ -1,7 +1,8 @@
 import {ActivityIndicator, Linking, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {useNavigation} from "@react-navigation/native";
 import {Icon, UnJsonEditor, UnPressable, UnTable, UnTableCols, UnText} from "@/components/un-ui";
 import Flex from "@/components/un-ui/Flex.tsx";
-import {BottomSheet, Card, Divider, Text, useTheme} from "@rneui/themed";
+import {BottomSheet, Button, Card, Divider, Text, useTheme} from "@rneui/themed";
 import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {SchoolTermValue} from "@/type/global.ts";
 import {UnSlider} from "@/components/un-ui/UnSlider.tsx";
@@ -23,6 +24,7 @@ import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.
 import moment from "moment/moment";
 
 export function CourseScheduleQuery() {
+    const navigation = useNavigation();
     const {theme} = useTheme();
     const {store} = useUserConfig();
     const devMode = store(s => s.devMode);
@@ -91,7 +93,10 @@ export function CourseScheduleQuery() {
             dataIndex: "qq",
             render: qq =>
                 qq?.trim() ? (
-                    <UnPressable onPress={function() { return qqLink(qq); }}>
+                    <UnPressable
+                        onPress={function () {
+                            return qqLink(qq);
+                        }}>
                         <Text style={style.tableText}>{qq}</Text>
                     </UnPressable>
                 ) : (
@@ -123,6 +128,11 @@ export function CourseScheduleQuery() {
                 </View>
                 {loading && <ActivityIndicator size="large" />}
                 <Divider />
+                <Button
+                    title="导出课表"
+                    onPress={() => navigation.navigate("ExportScheduleScreen", {tab: "personal"})}
+                    containerStyle={{marginVertical: 8}}
+                />
                 <Text h4>预览</Text>
                 <Flex style={{padding: 10}} align="flex-start" direction="column" gap={10}>
                     <Text>课表周数</Text>

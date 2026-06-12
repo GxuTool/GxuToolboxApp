@@ -122,6 +122,7 @@ export function ToolboxStack() {
             <Stack.Screen name="TeachBuildingListScreen" component={lazy(() => import("@/screens/tool/other/TeachingBuildingMap/TeachBuildingListScreen.tsx").then(m => ({default: m.TeachBuildingListScreen})))} options={{title: "教学楼平面图"}}/>
             <Stack.Screen name="FloorListScreen" component={lazy(() => import("@/screens/tool/other/TeachingBuildingMap/FloorlistScreen.tsx").then(m => ({default: m.FloorlistScreen})))} options={{title: "楼层列表"}}/>
             <Stack.Screen name="FloorMapScreen" component={lazy(() => import("@/screens/tool/other/TeachingBuildingMap/FloorMapScreen.tsx").then(m => ({default: m.FloorMapScreen})))} options={{title: "楼层平面图"}}/>
+            <Stack.Screen name="ExportScheduleScreen" component={lazy(() => import("@/screens/tool/jw/infoQuery/courseSchedule/ExportScheduleScreen.tsx").then(m => ({default: m.ExportScheduleScreen})))} options={{title: "导出课表"}} />
         </Stack.Navigator>
     );
 }
