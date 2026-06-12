@@ -20,8 +20,9 @@ interface StackCourseItemProps {
 
 export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}: StackCourseItemProps) => {
     const parsed = useMemo(() => course.map(c => c.transformed), [course]);
+    const toKey = (c: typeof parsed[0]) => c.courseCode + "_" + c.staffId;
     const activeParsed = useMemo(
-        () => parsed.find(c => c.courseCode === activeCourse) ?? parsed[0],
+        () => parsed.find(c => toKey(c) === activeCourse) ?? parsed[0],
         [parsed, activeCourse],
     );
     const {store} = useCourseData();
@@ -31,11 +32,11 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
 
-    const courseCodes = useMemo(() => parsed.map(c => c.courseCode + "_" + c.staffId).sort(), [parsed]);
+    const courseCodes = useMemo(() => parsed.map(c => toKey(c)).sort(), [parsed]);
     const storedActive = conflictStore(s => s.getActive(courseCodes));
     const effectiveActive = storedActive ?? activeCourse;
 
-    const active = parsed.find(c => c.courseCode === effectiveActive) ?? parsed[0];
+    const active = parsed.find(c => toKey(c) === effectiveActive) ?? parsed[0];
 
     const handlePress = () => {
         onPress?.(course);

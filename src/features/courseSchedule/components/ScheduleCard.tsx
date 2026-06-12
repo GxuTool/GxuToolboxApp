@@ -116,7 +116,7 @@ export function ScheduleCard() {
                         if (courses.length === 0) return null;
                         const courseCodes = courses.map(c => c.transformed.courseCode + "_" + c.transformed.staffId).sort();
                         const storedActive = conflictStore.getState().getActive(courseCodes);
-                        const activeCourse = storedActive ?? courses[0]?.transformed.courseCode;
+                        const activeCourse = storedActive ?? (courses[0] ? courses[0].transformed.courseCode + "_" + courses[0].transformed.staffId : "");
                         return (
                             <StackCourseItem
                                 course={courses}

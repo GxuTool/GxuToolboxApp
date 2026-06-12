@@ -169,7 +169,7 @@ export function ClassCourseSchedule() {
                             <UnSlider
                                 step={1}
                                 minimumValue={1}
-                                maximumValue={20}
+                                maximumValue={Math.max(...(theorySchedule as ScheduleTableItem[]).map(i => i.week), 1)}
                                 allowTouchTrack
                                 value={pageView.activePage + 1}
                                 onValueChange={v => pageView.setPage(v - 1)}
@@ -194,7 +194,7 @@ export function ClassCourseSchedule() {
                                         if (courses.length === 0) return null;
                                         const courseCodes = courses.map(c => c.transformed.courseCode + "_" + c.transformed.staffId).sort();
                                         const storedActive = conflictStore.getState().getActive(courseCodes);
-                                        const activeCourse = storedActive ?? courses[0]?.transformed.courseCode;
+                                        const activeCourse = storedActive ?? (courses[0] ? courses[0].transformed.courseCode + "_" + courses[0].transformed.staffId : "");
                                         return (
                                             <StackCourseItem
                                                 course={courses}

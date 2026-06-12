@@ -13,7 +13,12 @@ interface ConflictCourseListProps {
     onPressActiveCourse: (course: CourseClass) => void;
 }
 
-export function ConflictCourseList({courses, activeCourseCode, onSelect, onPressActiveCourse}: ConflictCourseListProps) {
+export function ConflictCourseList({
+    courses,
+    activeCourseCode,
+    onSelect,
+    onPressActiveCourse,
+}: ConflictCourseListProps) {
     const {theme} = useTheme();
 
     return (
@@ -22,31 +27,33 @@ export function ConflictCourseList({courses, activeCourseCode, onSelect, onPress
                 冲突课程
             </Text>
             <ScrollView style={{maxHeight: 300}}>
-            {courses.map(c => {
-                const t = c.transformed;
-                const isActive = t.courseCode === activeCourseCode;
-                return (
-                    <UnPressable
-                        key={t.courseCode}
-                        onPress={function() { return isActive ? onPressActiveCourse(c) : onSelect(c); }}
-                        style={{
-                            paddingVertical: 12,
-                            paddingHorizontal: 8,
-                            borderLeftWidth: isActive ? 3 : 0,
-                            borderLeftColor: theme.colors.primary,
-                            backgroundColor: isActive
-                                ? Color(theme.colors.primary).setAlpha(0.08).rgbaString
-                                : "transparent",
-                            marginBottom: 4,
-                            borderRadius: 4,
-                        }}>
-                        <Text style={{fontWeight: isActive ? "bold" : "normal"}}>{t.courseName}</Text>
-                        <Text style={{fontSize: 12, color: theme.colors.grey3}}>
-                            {[t.name, t.venueName].filter(Boolean).join(" · ")}
-                        </Text>
-                    </UnPressable>
-                );
-            })}
+                {courses.map(c => {
+                    const t = c.transformed;
+                    const isActive = t.courseCode + "_" + t.staffId === activeCourseCode;
+                    return (
+                        <UnPressable
+                            key={t.courseCode + "_" + t.staffId}
+                            onPress={function () {
+                                return isActive ? onPressActiveCourse(c) : onSelect(c);
+                            }}
+                            style={{
+                                paddingVertical: 12,
+                                paddingHorizontal: 8,
+                                borderLeftWidth: isActive ? 3 : 0,
+                                borderLeftColor: theme.colors.primary,
+                                backgroundColor: isActive
+                                    ? Color(theme.colors.primary).setAlpha(0.08).rgbaString
+                                    : "transparent",
+                                marginBottom: 4,
+                                borderRadius: 4,
+                            }}>
+                            <Text style={{fontWeight: isActive ? "bold" : "normal"}}>{t.courseName}</Text>
+                            <Text style={{fontSize: 12, color: theme.colors.grey3}}>
+                                {[t.name, t.venueName].filter(Boolean).join(" · ")}
+                            </Text>
+                        </UnPressable>
+                    );
+                })}
             </ScrollView>
         </>
     );
@@ -62,14 +69,17 @@ export function ConflictCourseSheet({courses, onSelect, onPressActiveCourse}: Co
     const {store: conflictStore} = useConflictCourseStore();
     const courseCodes = courses.map(c => c.transformed.courseCode + "_" + c.transformed.staffId).sort();
     const storedActive = conflictStore.getState().getActive(courseCodes);
-    const activeCourseCode = storedActive ?? courses[0]?.transformed.courseCode;
+    const activeCourseCode =
+        storedActive ?? (courses[0] ? courses[0].transformed.courseCode + "_" + courses[0].transformed.staffId : "");
 
     return (
         <ConflictCourseList
             courses={courses}
             activeCourseCode={activeCourseCode}
             onSelect={course => {
-                conflictStore.getState().setActive(courseCodes, course.transformed.courseCode);
+                conflictStore
+                    .getState()
+                    .setActive(courseCodes, course.transformed.courseCode + "_" + course.transformed.staffId);
                 onSelect(course);
             }}
             onPressActiveCourse={onPressActiveCourse}
