@@ -31,7 +31,7 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
     const {theme} = useTheme();
     const {getColor} = useBlocksColor();
 
-    const courseCodes = useMemo(() => parsed.map(c => c.courseCode).sort(), [parsed]);
+    const courseCodes = useMemo(() => parsed.map(c => c.courseCode + "_" + c.staffId).sort(), [parsed]);
     const storedActive = conflictStore(s => s.getActive(courseCodes));
     const effectiveActive = storedActive ?? activeCourse;
 

@@ -14,14 +14,22 @@ import {TimeScheduleView} from "@/components/tool/infoQuery/courseSchedule/TimeS
 import {Color} from "@/shared/color.ts";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
 import {CourseClass} from "@/class/jw/course.ts";
-import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
+import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
 import {usePhyExp} from "@/features/courseSchedule/hooks/detail/usePhyExp.ts";
 import {ChooseTerm} from "@/components/tool/infoQuery/examInfo/ChooseTerm.tsx";
 import {NewCourseItem} from "@/features/courseSchedule/components/NewCourseItem.tsx";
+import {StackCourseItem} from "@/features/courseSchedule/components/StackCourseItem.tsx";
+import {useConflictCourseStore} from "@/features/courseSchedule/stores/useConflictCourseStore.ts";
+import {ConflictCourseSheet} from "@/features/courseSchedule/components/ConflictCourseList.tsx";
 import moment from "moment/moment";
+
+type SheetState =
+    | {type: "closed"}
+    | {type: "itemDetail"; item: ScheduleTableItem; day: moment.Moment}
+    | {type: "courseConflict"; courses: CourseClass[]; day: moment.Moment};
 
 export function CourseScheduleQuery() {
     const navigation = useNavigation();
@@ -29,13 +37,15 @@ export function CourseScheduleQuery() {
     const {store} = useUserConfig();
     const devMode = store(s => s.devMode);
 
+    const {store: conflictStore} = useConflictCourseStore();
+
     const [year, setYear] = useState(+store(s => s.jw.year));
     const [term, setTerm] = useState<SchoolTermValue>(store(s => s.jw.term));
     const pageView = usePagerView({pagesAmount: 20});
 
     const {items: courseItems = [], loading} = useCourse(year, term);
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
-    const {init: initPhyExp, patchItem} = usePhyExp();
+    const {init: initPhyExp, patchItem, patchCourse} = usePhyExp();
 
     // 不绑定全局的startDay，根据year和term动态计算，以免造成混乱
     const startDay = useStartDay(year, term);
@@ -105,13 +115,12 @@ export function CourseScheduleQuery() {
         },
     ];
 
-    const [itemDetailShow, setItemDetailShow] = useState(false);
-    const [itemDetail, setItemDetail] = useState<ScheduleTableItem>();
+    const [sheet, setSheet] = useState<SheetState>({type: "closed"});
 
-    const onItemPress = useCallback((item: ScheduleTableItem) => {
-        setItemDetail(item);
-        setItemDetailShow(true);
-    }, []);
+    const onItemPress = useCallback(
+        (item: ScheduleTableItem, day: moment.Moment) => setSheet({type: "itemDetail", item, day}),
+        [],
+    );
 
     return (
         <ScrollView>
@@ -155,10 +164,28 @@ export function CourseScheduleQuery() {
                                 isItemShow: (item: ScheduleTableItem, day: moment.Moment, week: number) => {
                                     return item.week === week && item.day === day.isoWeekday();
                                 },
-                                itemRender: (item, day, _week) => (
-                                    <NewCourseItem item={patchItem(item, day)} onPress={onItemPress} />
+                                itemRender: (item, day) => (
+                                    <NewCourseItem item={patchItem(item, day)} onPress={() => onItemPress(item, day)} />
                                 ),
-                            },
+                                isItemStack: (a, b) => a.begin <= b.end && b.begin <= a.end,
+                                stackRender: (items, day, _week, timeRange) => {
+                                    const courses = items
+                                        .map(i => patchCourse(new CourseClass(i.raw), day))
+                                        .filter(Boolean);
+                                    if (courses.length === 0) return null;
+                                    const courseCodes = courses.map(c => c.transformed.courseCode + "_" + c.transformed.staffId).sort();
+                                    const storedActive = conflictStore.getState().getActive(courseCodes);
+                                    const activeCourse = storedActive ?? courses[0]?.transformed.courseCode;
+                                    return (
+                                        <StackCourseItem
+                                            course={courses}
+                                            activeCourse={activeCourse}
+                                            timeRange={timeRange}
+                                            onPress={c => setSheet({type: "courseConflict", courses: c, day})}
+                                        />
+                                    );
+                                },
+                            } as TimeScheduleItemData,
                         ]}
                     />
                 </View>
@@ -180,7 +207,7 @@ export function CourseScheduleQuery() {
                     <UnTable<ScheduleTableItem> data={tableData} cols={cols} />
                 </ScrollView>
             </View>
-            <BottomSheet isVisible={itemDetailShow} onBackdropPress={() => setItemDetailShow(false)}>
+            <BottomSheet isVisible={sheet.type !== "closed"} onBackdropPress={() => setSheet({type: "closed"})}>
                 <View
                     style={{
                         backgroundColor: theme.colors.background,
@@ -190,7 +217,32 @@ export function CourseScheduleQuery() {
                         borderWidth: 1,
                         padding: "2.5%",
                     }}>
-                    {itemDetail?.raw && <CourseDetail course={new CourseClass(itemDetail.raw)} />}
+                    {sheet.type === "itemDetail" && sheet.item.raw && (
+                        <CourseDetail course={new CourseClass(sheet.item.raw)} />
+                    )}
+                    {sheet.type === "courseConflict" && (
+                        <ConflictCourseSheet
+                            courses={sheet.courses}
+                            onSelect={() => setSheet({type: "closed"})}
+                            onPressActiveCourse={course => {
+                                setSheet({
+                                    type: "itemDetail",
+                                    day: sheet.day,
+                                    item: {
+                                        id: course.transformed.courseCode,
+                                        week: 0,
+                                        day: 1 as ScheduleTableItem["day"],
+                                        begin: 1 as ScheduleTableItem["begin"],
+                                        end: 1 as ScheduleTableItem["begin"],
+                                        title: course.transformed.courseName,
+                                        location: course.transformed.venueName,
+                                        teacher: course.transformed.name,
+                                        raw: course,
+                                    },
+                                });
+                            }}
+                        />
+                    )}
                 </View>
             </BottomSheet>
         </ScrollView>
