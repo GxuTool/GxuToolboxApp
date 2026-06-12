@@ -1,7 +1,8 @@
 import {Dimensions, ScrollView, StyleSheet, View} from "react-native";
 import {teacherInfoApi} from "@/js/info/teacherInfo.ts";
-import {BottomSheet, Divider, Image, TabView, useTheme} from "@rneui/themed";
+import {BottomSheet, Divider, Image, useTheme} from "@rneui/themed";
 import React, {useEffect, useState} from "react";
+import {usePagerView} from "react-native-pager-view";
 import {DetailResData, SimpleTeacherInfo} from "@/type/api/teacherInfo/info.ts";
 import {Flex, UnPressable, UnText, vh} from "@/components/un-ui";
 import {Color} from "@/shared/color.ts";
@@ -16,8 +17,8 @@ type Props = {
 
 export function TeacherInfoSheet(props: Props) {
     const {theme} = useTheme();
-    const [tabIndex, setTabIndex] = useState(0);
     const [selectedTeacher, setSelectedTeacher] = useState<SimpleTeacherInfo>();
+    const pagerView = usePagerView({pagesAmount: 2});
 
     const style = StyleSheet.create({
         bottomSheetContainer: {
@@ -46,36 +47,41 @@ export function TeacherInfoSheet(props: Props) {
                         borderBottomColor: theme.colors.grey4,
                         borderBottomWidth: 1,
                     }}>
-                    <UnText size={18}>{tabIndex === 0 ? "检索到以下教师信息" : "教师个人信息"}</UnText>
-                    {tabIndex !== 0 && (
+                    <UnText size={18}>{pagerView.activePage === 0 ? "检索到以下教师信息" : "教师个人信息"}</UnText>
+                    {pagerView.activePage !== 0 && (
                         <UnPressable
                             onPress={function () {
-                                setTabIndex(0);
+                                pagerView.ref.current?.setPage(0);
                             }}>
                             <UnText size={16}>返回</UnText>
                         </UnPressable>
                     )}
                 </View>
-                <TabView value={tabIndex} animationType={"timing"}>
-                    <TabView.Item style={{width: "100%"}}>
+                <pagerView.AnimatedPagerView
+                    ref={pagerView.ref}
+                    style={{width: "100%", height: "100%"}}
+                    overScrollMode="never"
+                    orientation="horizontal"
+                    onPageSelected={pagerView.onPageSelected}>
+                    <View key="0" collapsable={false} style={{width: "100%"}}>
                         <TeacherInfoList
                             onSelect={teacher => {
                                 setSelectedTeacher(teacher);
-                                setTabIndex(1);
+                                pagerView.ref.current?.setPage(1);
                             }}
                             list={props.infoList}
                         />
-                    </TabView.Item>
-                    <TabView.Item style={{width: "100%"}}>
+                    </View>
+                    <View key="1" collapsable={false} style={{width: "100%"}}>
                         <TeacherDetailInfo
                             onBack={() => {
-                                setTabIndex(0);
+                                pagerView.ref.current?.setPage(0);
                             }}
                             name={selectedTeacher?.XM}
                             school={selectedTeacher?.dwmc}
                         />
-                    </TabView.Item>
-                </TabView>
+                    </View>
+                </pagerView.AnimatedPagerView>
             </View>
         </BottomSheet>
     );
