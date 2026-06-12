@@ -59,24 +59,20 @@ export function UpdateCard() {
             setVisible(true);
             setVersion(newVersion);
         }
-
-        const granted = await PermissionsAndroid.requestMultiple([
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        ]);
-        if (
-            granted["android.permission.READ_EXTERNAL_STORAGE"] === "granted" &&
-            granted["android.permission.WRITE_EXTERNAL_STORAGE"] === "granted"
-        ) {
-        } else {
-            // ToastAndroid.show("需要权限进行更新", ToastAndroid.SHORT);
-        }
     }
 
     const [downloading, setDownloading] = useState(false);
     const [progress, setProgress] = useState<number>(0);
     const handleUpdate = async (url: string) => {
         try {
+            try {
+                await PermissionsAndroid.requestMultiple([
+                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                    PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+                ]);
+            } catch {
+                // 权限请求失败不影响更新流程
+            }
             if (await Linking.canOpenURL(url)) {
                 await Linking.openURL(url);
             }
