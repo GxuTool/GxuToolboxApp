@@ -131,6 +131,11 @@ export function SettingIndex() {
             title: "软件",
             data: [
                 {
+                    label: "意见反馈",
+                    type: "navigation",
+                    value: "feedback",
+                },
+                {
                     label: "开发模式",
                     type: "any",
                     value: (

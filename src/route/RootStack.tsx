@@ -24,6 +24,17 @@ export function RootStack() {
                 }}
                 component={lazy(() => import("@/screens/WebViewScreen.tsx"))}
             />
+            <Stack.Screen
+                name="feedback"
+                options={{
+                    title: "意见反馈",
+                }}
+                component={lazy(() =>
+                    import("@/features/feedback/screens/FeedbackView.tsx").then(m => ({
+                        default: m.FeedbackView,
+                    })),
+                )}
+            />
         </Stack.Navigator>
     );
 }
