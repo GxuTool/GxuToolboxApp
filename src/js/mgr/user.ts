@@ -85,4 +85,28 @@ export const userMgr = {
             }
         },
     },
+    //文件系统相关
+    wjxt: {
+        storeAccount: (username: string, password: string) => {
+            return store.save({
+                key: "wjxtAccount",
+                data: {
+                    username,
+                    password,
+                },
+            });
+        },
+
+        getAccount: async () => {
+            try {
+                return await store.load<{username: string; password: string}>({
+                    key: "wjxtAccount",
+                });
+            } catch (e) {
+                console.log(e);
+                return null;
+            }
+        },
+
+    },
 };

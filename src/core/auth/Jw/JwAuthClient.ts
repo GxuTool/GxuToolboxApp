@@ -2,9 +2,9 @@ import {http, urlWithParams} from "@/core/http.ts";
 import {AxiosResponse} from "axios";
 import {getEncryptedPassword} from "@/shared/rasPassword";
 import {SchoolTerms} from "@/type/global.ts";
-import CookieManager from "@preeternal/react-native-cookie-manager";
 import {UserInfo} from "@/type/infoQuery/base.ts";
 import {personalInfoParser} from "@/js/HTMLparser/personalInfoParser.ts";
+import CookieManager from "@preeternal/react-native-cookie-manager";
 
 export const JwAuthClient = {
     async getPublicKey(): Promise<{modulus: string; exponent: string}> {
