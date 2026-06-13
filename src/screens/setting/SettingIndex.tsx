@@ -160,7 +160,7 @@ export function SettingIndex() {
                     label: "软件文档",
                     type: "link",
                     value: "Docs",
-                    url: "https://acm.gxu.edu.cn/docs/",
+                    url: "https://tooldoc.gxutech.xyz/",
                 },
                 {
                     label: "公测群",
