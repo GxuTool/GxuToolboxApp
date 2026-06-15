@@ -114,9 +114,15 @@ export function ScheduleCard() {
                     stackRender: (items, day, _week, timeRange) => {
                         const courses = items.map(i => patchCourse(new CourseClass(i.raw), day)).filter(Boolean);
                         if (courses.length === 0) return null;
-                        const courseCodes = courses.map(c => c.transformed.courseCode + "_" + c.transformed.staffId).sort();
+                        const courseCodes = courses
+                            .map(c => c.transformed.courseCode + "_" + c.transformed.staffId)
+                            .sort();
                         const storedActive = conflictStore.getState().getActive(courseCodes);
-                        const activeCourse = storedActive ?? (courses[0] ? courses[0].transformed.courseCode + "_" + courses[0].transformed.staffId : "");
+                        const activeCourse =
+                            storedActive ??
+                            (courses[0]
+                                ? courses[0].transformed.courseCode + "_" + courses[0].transformed.staffId
+                                : "");
                         return (
                             <StackCourseItem
                                 course={courses}
@@ -134,7 +140,7 @@ export function ScheduleCard() {
                 {
                     data: holidayItems,
                     needShift: false,
-                    itemRender: (item, day) => <HolidayItem item={item} onPress={() => onItemPress(item, day)} />,
+                    itemRender: (item, day) => <HolidayItem item={item} />,
                 },
                 {
                     data: defaultItem,
