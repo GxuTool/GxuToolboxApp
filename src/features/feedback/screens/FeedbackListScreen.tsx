@@ -1,9 +1,10 @@
-import {useEffect, useState, useCallback} from "react";
-import {FlatList, RefreshControl, Text, View, Pressable, ActivityIndicator} from "react-native";
+import {useCallback, useEffect, useState} from "react";
+import {ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View} from "react-native";
 import {useNavigation} from "@react-navigation/native";
-import {feedbackApi} from "@/features/feedback/api";
-import {FeedbackItemVM} from "@/api/schema/feedbackSchema.ts";
+import {feedbackApi} from "@/features/backend/api/feedback.ts";
+import {FeedbackItemVM} from "@/features/backend/api/feedbackSchema.ts";
 import {userMgr} from "@/js/mgr/user.ts";
+import dayjs from "dayjs";
 
 export function FeedbackListScreen() {
     const navigation = useNavigation<any>();
@@ -49,9 +50,7 @@ export function FeedbackListScreen() {
             keyExtractor={item => String(item.id)}
             contentContainerStyle={{padding: 16}}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            ListEmptyComponent={
-                <Text style={{textAlign: "center", color: "#999", marginTop: 40}}>暂无反馈</Text>
-            }
+            ListEmptyComponent={<Text style={{textAlign: "center", color: "#999", marginTop: 40}}>暂无提交的反馈</Text>}
             renderItem={({item}) => (
                 <Pressable
                     onPress={() => navigation.navigate("feedbackDetail", {item})}
@@ -65,16 +64,18 @@ export function FeedbackListScreen() {
                             paddingHorizontal: 8,
                             paddingVertical: 2,
                             borderRadius: 4,
-                            backgroundColor: item.status === "replied" ? "#52c41a" : "#ff7875",
+                            backgroundColor: item.status === "accept" ? "#52c41a" : "#ff7875",
                         }}>
-                        {item.status === "replied" ? "已回复" : "待回复"}
+                        {item.status === "accept" ? "已回复" : "待回复"}
                     </Text>
                     {/* 反馈内容预览（最多 2 行） */}
-                    <Text numberOfLines={2} style={{fontSize: 15, color: "#333", marginTop: 8}}>
+                    <Text numberOfLines={2} style={{fontSize: 18, color: "#333", marginTop: 8}}>
                         {item.content}
                     </Text>
                     {/* 时间 */}
-                    <Text style={{fontSize: 12, color: "#999", marginTop: 8}}>{item.createdAt}</Text>
+                    <Text style={{fontSize: 14, color: "#999", marginTop: 8}}>
+                        {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm")}
+                    </Text>
                 </Pressable>
             )}
         />

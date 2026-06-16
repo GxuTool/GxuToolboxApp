@@ -1,26 +1,25 @@
-import {useRef, useState, useLayoutEffect} from "react";
-import {Button, ScrollView, View, Platform, ToastAndroid, Text} from "react-native";
+import {useLayoutEffect, useRef, useState} from "react";
+import {Button, Platform, ScrollView, Text, ToastAndroid, View} from "react-native";
 import {FormProvider, useForm} from "react-hook-form";
 import {useNavigation} from "@react-navigation/native";
 import * as FormItem from "@/features/feedback/components/formItem";
-import {feedbackApi} from "@/features/feedback/api";
 import {userMgr} from "@/js/mgr/user.ts";
-import pkg from"../../../../package.json";
+import pkg from "../../../../package.json";
+import {feedbackApi} from "@/features/backend/api/feedback.ts";
 
-const APP_VERSION=pkg.version.split(" ")[0];
+const APP_VERSION = pkg.version.split(" ")[0];
 
-type CreateFeedback = {
+export class FeedbackForm {
     type: string;
     feature: string;
-    tags: string[];
     content: string;
     contactType: string;
     contact: string;
-};
+}
 
 export function FeedbackView() {
     const scrollRef = useRef<ScrollView>(null);
-    const form = useForm<CreateFeedback>({
+    const form = useForm<FeedbackForm>({
         defaultValues: {
             type: "",
             feature: "",
@@ -29,7 +28,7 @@ export function FeedbackView() {
             contact: "",
         },
     });
-    const [submitting,setSubmitting]=useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const navigation = useNavigation<any>();
 
     useLayoutEffect(() => {
@@ -44,35 +43,33 @@ export function FeedbackView() {
         });
     }, [navigation]);
 
-    const onSubmit=async (data:CreateFeedback)=>{
-        if(submitting)return ;
-        const account=await userMgr.jw.getAccount();
-        if(!account?.username){
-            ToastAndroid.show("请先前往设置登录教务账号",ToastAndroid.SHORT);
-            return ;
+    const onSubmit = async (data: FeedbackForm) => {
+        if (submitting) return;
+        const account = await userMgr.jw.getAccount();
+        if (!account?.username) {
+            ToastAndroid.show("请先前往设置登录教务账号", ToastAndroid.SHORT);
+            return;
         }
-        const body={
-            userId:account.username,
-            type:data.type,
-            feature:data.feature,
-            content:data.content,
-            contactType:data.contactType,
-            contact:data.contact,
-            deviceModel:(Platform.constants as{Model?:string}).Model??"unknown",
-            appVersion:APP_VERSION,
+        const body = {
+            userId: account.username,
+            type: data.type,
+            feature: data.feature,
+            content: data.content,
+            contactType: data.contactType,
+            contact: data.contact,
+            deviceModel: (Platform.constants as {Model?: string}).Model ?? "unknown",
+            appVersion: APP_VERSION,
         };
-        try{
+        try {
             setSubmitting(true);
-            const id=await feedbackApi.submit(body);
-            ToastAndroid.show("提交成功",ToastAndroid.SHORT);
-        }
-        catch(e: any){
+            const id = await feedbackApi.submit(body);
+            ToastAndroid.show("提交成功", ToastAndroid.SHORT);
+        } catch (e: any) {
             // 打印详细错误，便于定位：网络错误 vs 服务器返回错误
             console.warn("提交反馈失败:", e?.message, "status=", e?.response?.status, "data=", e?.response?.data);
             const msg = e?.response?.data?.message || e?.message || "网络错误";
             ToastAndroid.show("提交失败：" + msg, ToastAndroid.LONG);
-        }
-        finally {
+        } finally {
             setSubmitting(false);
         }
     };
@@ -98,7 +95,7 @@ export function FeedbackView() {
                             label="反馈类型"
                             placeholder="请选择"
                             units={[
-                                {label: "Bug 反馈", value: "bug"},
+                                {label: "报告 Bug", value: "bug"},
                                 {label: "功能建议", value: "suggestion"},
                                 {label: "体验问题", value: "experience"},
                                 {label: "其他", value: "other"},
@@ -140,7 +137,7 @@ export function FeedbackView() {
                         <FormItem.Pick
                             name="contactType"
                             label="联系方式类型"
-                            placeholder="请选择联系方式"
+                            placeholder="请选择"
                             units={[
                                 {label: "QQ", value: "qq"},
                                 {label: "微信", value: "wechat"},
@@ -154,7 +151,7 @@ export function FeedbackView() {
                         <FormItem.Input
                             name="contact"
                             label="联系方式"
-                            placeholder="请填写联系方式，方便我们联系你"
+                            placeholder="请填写，方便我们联系你"
                             rules={{
                                 required: "请填写联系方式",
                             }}
@@ -162,9 +159,11 @@ export function FeedbackView() {
                     </FormProvider>
 
                     <View style={{marginTop: 24}}>
-                        <Button title={submitting?"提交中...":"提交"}
-                                disabled={submitting}
-                                onPress={form.handleSubmit(onSubmit)} />
+                        <Button
+                            title={submitting ? "提交中..." : "提交"}
+                            disabled={submitting}
+                            onPress={form.handleSubmit(onSubmit)}
+                        />
                     </View>
                 </View>
             </ScrollView>
