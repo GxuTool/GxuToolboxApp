@@ -56,7 +56,7 @@ export const Pick = ({name, label, rules, placeholder, units, readonly}: PickPro
                     );
                 }}
             />
-            {errors.unit && <Text style={formStyles.error}>{errors.unit.message?.toString()}</Text>}
+            {errors[name] && <Text style={formStyles.error}>{errors[name]?.message?.toString()}</Text>}
         </View>
     );
 };
