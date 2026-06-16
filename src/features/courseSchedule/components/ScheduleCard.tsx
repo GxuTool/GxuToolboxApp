@@ -351,7 +351,32 @@ export function ScheduleCard() {
                             const matchedExam = examItems
                                 .filter(e => e.raw?.kcmc === courseName)
                                 ?.map(e => new ExamInfoClass(e.raw as ExamInfo));
-                            return <CourseDetail course={course} examInfo={matchedExam} />;
+                            return (
+                                <CourseDetail
+                                    course={course}
+                                    examInfo={matchedExam}
+                                    onExamPress={exam => {
+                                        const examDate = moment(exam.transformed.examTime.slice(0, 10));
+                                        const week = examDate.diff(startDay, "week") + 1;
+                                        rest.setPage(week - 1);
+                                        setSheet({
+                                            type: "itemDetail",
+                                            day: examDate,
+                                            item: {
+                                                id: exam.transformed.courseCode,
+                                                week,
+                                                day: examDate.isoWeekday() as ScheduleTableItem["day"],
+                                                begin: 1 as ScheduleTableItem["begin"],
+                                                end: 1 as ScheduleTableItem["begin"],
+                                                title: exam.transformed.courseName,
+                                                location: exam.transformed.venueName,
+                                                kind: "exam",
+                                                raw: exam._ori,
+                                            },
+                                        });
+                                    }}
+                                />
+                            );
                         })()}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
