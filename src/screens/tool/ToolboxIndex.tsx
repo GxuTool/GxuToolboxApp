@@ -139,6 +139,12 @@ export function ToolboxIndex() {
                     type: "navigation",
                     navigation: "HolidayScreen",
                 },
+                {
+                    label: "学校文件",
+                    icon: <Icon name={"file-document"} size={iconSize} />,
+                    type: "navigation",
+                    navigation: "MainScreen"
+                }
             ],
         },
         {

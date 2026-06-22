@@ -180,6 +180,13 @@ export function ToolboxStack() {
                 )}
                 options={{title: "假期安排"}}
             />
+            <Stack.Screen
+                name="MainScreen"
+                component={lazy(() =>
+                    import("@/features/documents/screen/MainScreen.tsx").then(m => ({default: m.MainScreen})),
+                )}
+                options={{title: "学校文件"}}
+            />
 
             <Stack.Screen
                 name="EvaluationOverview"
