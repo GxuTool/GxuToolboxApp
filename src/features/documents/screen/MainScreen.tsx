@@ -64,8 +64,8 @@ export function PendingFileListScreen() {
         setAccount({username, password});
 
         if (!username || !password) {
-            setIsLoginModel(true);
-            ToastAndroid.show("请设置账密", 500);
+            ToastAndroid.show("请先设置账密", 500);
+            setIsLoading(false);
             return;
         }
 
@@ -85,7 +85,7 @@ export function PendingFileListScreen() {
                 const toReadList = await wjxt.getPendingFiles();
                 if (toReadList.length) setPendingFiles(toReadList);
             } else {
-                ToastAndroid.show("登录失败,请检查账密", 500);
+                ToastAndroid.show("登录失败，请检查账密", 500);
             }
         }
         setIsLoading(false);
@@ -94,6 +94,7 @@ export function PendingFileListScreen() {
 
     async function handleLogin(username: string, password: string) {
         try {
+            setIsLogin(false);
             setIsBusy(true);
             setPendingFiles([]);
             const loginRes = await wjxt.login(username, password);
@@ -101,6 +102,7 @@ export function PendingFileListScreen() {
 
             if (loginRes) {
                 ToastAndroid.show("登录成功", 500);
+                setIsLogin(true);
                 setIsBusy(false);
                 setIsLoginModel(false);
                 await init();
@@ -126,7 +128,7 @@ export function PendingFileListScreen() {
                         <UnText size={20}>待阅文件</UnText>
                     </View>
                     <TouchableOpacity onPress={() => setIsLoginModel(true)}>
-                        <UnText size={18} color={theme.colors.primary}>设置</UnText>
+                        <UnText size={18} color={theme.colors.primary}>登录</UnText>
                     </TouchableOpacity>
                 </View>
                 <Divider orientation="horizontal"/>
