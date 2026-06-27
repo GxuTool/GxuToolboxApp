@@ -8,7 +8,6 @@ import Flex from "@/components/un-ui/Flex.tsx";
 import {EvaluationRow} from "@/features/evaluation/components/EvaluationRow.tsx";
 import {evaluationApi} from "@/features/evaluation/api";
 import {Evaluation} from "@/features/evaluation/types/evaluation.type.ts";
-import {Icon} from "@/components/un-ui";
 import {parseEvaluationHTML} from "@/features/evaluation/utils/parser.ts";
 import {createDefaultReq, fillReq} from "@/features/evaluation/utils/reqBuilder.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,6 +15,7 @@ import {useBatchProcessor} from "@/features/evaluation/hook/useBatchProcessor.ts
 import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
 import {AuthStateMap} from "@/core/auth/auth.type.ts";
+import {NumberCard} from "@/features/evaluation/components/NumberCard.tsx";
 
 const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
     const progressPercent = Math.round(progress * 100);
@@ -46,12 +46,8 @@ export function EvaluationOverview() {
         Color(theme.colors.background),
         theme.mode === "dark" ? 0.1 : 0.4,
     ).setAlpha(theme.mode === "dark" ? 0.3 : 0.8).rgbaString;
-    const softPrimaryBg = Color(theme.colors.primary)
-        .setAlpha(theme.mode === "dark" ? 0.18 : 0.10)
-        .rgbaString;
-    const softPrimaryBorder = Color(theme.colors.primary)
-        .setAlpha(theme.mode === "dark" ? 0.45 : 0.28)
-        .rgbaString;
+    const softPrimaryBg = Color(theme.colors.primary).setAlpha(theme.mode === "dark" ? 0.18 : 0.1).rgbaString;
+    const softPrimaryBorder = Color(theme.colors.primary).setAlpha(theme.mode === "dark" ? 0.45 : 0.28).rgbaString;
     const softPrimaryText = Color.mix(
         Color(theme.colors.primary),
         Color(theme.colors.black),
@@ -84,9 +80,11 @@ export function EvaluationOverview() {
                     textAlign: "center",
                     fontSize: 14,
                 },
-                opcontainer:{
-
-                    width:"100%",
+                buttonCard: {
+                    backgroundColor: theme.colors.background,
+                    borderRadius: 12,
+                    padding: 12,
+                    width: "100%",
                 },
                 opButton: {
                     backgroundColor: softPrimaryBg,
@@ -95,10 +93,9 @@ export function EvaluationOverview() {
                     borderRadius: 8,
                     paddingHorizontal: 14,
                     paddingVertical: 8,
-                    justifyContent:"center",
-
+                    justifyContent: "center",
                 },
-                buttoText:{
+                buttoText: {
                     color: softPrimaryText,
                     fontSize: 16,
                     fontWeight: "600",
@@ -107,25 +104,25 @@ export function EvaluationOverview() {
                     alignSelf: "center",
                     marginVertical: 4,
                 },
-                emptycontainer:{
-                    alignItems:"center",
-                    justifyContent:"center",
-                    paddingVertical:60,
-                    paddingHorizontal:24,
+                emptycontainer: {
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingVertical: 60,
+                    paddingHorizontal: 24,
                 },
-                emptyTitle:{
-                    textAlign:"center",
-                    marginTop:12,
-                    fontSize:18,
-                    fontWeight:"bold",
+                emptyTitle: {
+                    textAlign: "center",
+                    marginTop: 12,
+                    fontSize: 18,
+                    fontWeight: "bold",
                 },
-                emptyDoc:{
-                    marginTop:8,
-                    fontSize:14,
-                    color:theme.colors.grey3,
-                    textAlign:"center",
-                    lineHeight:22
-,                },
+                emptyDoc: {
+                    marginTop: 8,
+                    fontSize: 14,
+                    color: theme.colors.grey3,
+                    textAlign: "center",
+                    lineHeight: 22,
+                },
             }),
         [theme],
     );
@@ -136,16 +133,6 @@ export function EvaluationOverview() {
         未评: theme.colors.error,
     };
     const statusList = Object.keys(colorMap);
-
-    const statusCounts = useMemo(() => {
-        const cnt = {已评完: 0, 未评完: 0, 未评: 0};
-        evaList.forEach(item => {
-            if (cnt[item.submitStatus] !== undefined) {
-                cnt[item.submitStatus]++;
-            }
-        });
-        return cnt;
-    }, [evaList]);
 
     const {isRunning, progress, progressText, setProgress, setProgressText, run, cancel} =
         useBatchProcessor<Evaluation>();
@@ -268,31 +255,24 @@ export function EvaluationOverview() {
             </Dialog>
 
             <Flex direction="column" gap={10}>
-                <Flex direction="row" justify="space-between" gap={20}>
-                    <Text style={{fontSize: 16}}>
-                        总计 {evaList.length} ~ 已评完 {statusCounts["已评完"]} ~ 未评 {statusCounts["未评"]} ~ 未评完{" "}
-                        {statusCounts["未评完"]}{" "}
-                    </Text>
-                </Flex>
-                <View style={styles.opcontainer}>
+                <NumberCard evaList={evaList} />
+                <View style={styles.buttonCard}>
                     <Button
                         buttonStyle={styles.opButton}
                         onPress={() => {
-                          navigation.navigate("EvaluationTemplate");
-                      }}>
+                            navigation.navigate("EvaluationTemplate");
+                        }}>
                         <Text style={styles.buttoText}>自定义评价模板</Text>
                     </Button>
-                        <Button buttonStyle={styles.opButton} onPress={handleOneKey}>
-                            <Text style={styles.buttoText}>
-                            应用自定义模板一键评价
-                            </Text>
-                        </Button>
-                        <Button
-                            buttonStyle={styles.opButton}
-                            onPress={() => {handleClear();
-                        }}><Text style={styles.buttoText}>
-                        清空评价
-                            </Text>
+                    <Button buttonStyle={styles.opButton} onPress={handleOneKey}>
+                        <Text style={styles.buttoText}>应用自定义模板一键评价</Text>
+                    </Button>
+                    <Button
+                        buttonStyle={styles.opButton}
+                        onPress={() => {
+                            handleClear();
+                        }}>
+                        <Text style={styles.buttoText}>清空评价</Text>
                     </Button>
                 </View>
                 <Table style={{width: "100%"}}>
@@ -312,23 +292,19 @@ export function EvaluationOverview() {
                         />
                     ))}
                 </Table>
-                {evaList.length===0&&(
-                <View style={styles.emptycontainer}>
-                <Text style={styles.emptyTitle}>暂无待评价课程</Text>
-                <Text style={styles.emptyDoc}>
-                    当前可能未到期末学生评价开放时间，或所有课程暂未发布评价任务。
-                </Text>
-                </View>
-            )}
-            </Flex>
-            {evaList.length>=0&&(
-                <View style={styles.submitButtonContainer}>
-                    <Button
-                        buttonStyle={styles.opButton}
-                        onPress={handleClear}>
-                        <Text style={styles.buttoText}>
-                            提交
+                {evaList.length === 0 && (
+                    <View style={styles.emptycontainer}>
+                        <Text style={styles.emptyTitle}>暂无待评价课程</Text>
+                        <Text style={styles.emptyDoc}>
+                            当前可能未到期末学生评价开放时间，或所有课程暂未发布评价任务。
                         </Text>
+                    </View>
+                )}
+            </Flex>
+            {evaList.length >= 0 && (
+                <View style={styles.submitButtonContainer}>
+                    <Button buttonStyle={styles.opButton} onPress={handleClear}>
+                        <Text style={styles.buttoText}>提交</Text>
                     </Button>
                 </View>
             )}
