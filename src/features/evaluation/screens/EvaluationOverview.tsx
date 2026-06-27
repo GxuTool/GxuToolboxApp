@@ -27,7 +27,7 @@ const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
 };
 
 export function EvaluationOverview() {
-    const {JWauthState} = useJwAuth();
+    const {authState} = useJwAuth();
 
     const {theme} = useTheme();
     const [evaList, setEvaList] = useState<EvaTeacherList[]>([]);
@@ -231,7 +231,7 @@ export function EvaluationOverview() {
 
     async function init() {
         try {
-            if (JWauthState.status !== AuthStateMap.Authenticated) {
+            if (authState.status !== AuthStateMap.Authenticated) {
                 Alert.alert("需要登录", "此操作需要登录教务系统", [
                     {text: "知道了", onPress: () => navigation.goBack()},
                 ]);
@@ -312,14 +312,14 @@ export function EvaluationOverview() {
                         />
                     ))}
                 </Table>
-                evalist.length===0&&({
+                {evaList.length===0&&(
                 <View style={styles.emptycontainer}>
                 <Text style={styles.emptyTitle}>暂无待评价课程</Text>
                 <Text style={styles.emptyDoc}>
                     当前可能未到期末学生评价开放时间，或所有课程暂未发布评价任务。
                 </Text>
                 </View>
-            })
+            )}
             </Flex>
             {evaList.length>=0&&(
                 <View style={styles.submitButtonContainer}>

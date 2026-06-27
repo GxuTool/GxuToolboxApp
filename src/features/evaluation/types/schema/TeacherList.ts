@@ -10,7 +10,7 @@ const rawTeacherList = z.object({
     xsdm: z.string(),
     xsmc: z.string(),
     tjztmc: z.string(),
-    pjmbmcb_id:z.string(),
+    pjmbmcb_id:z.string().optional(),
 });
 
 export const TeacherList = rawTeacherList.transform(i => ({
