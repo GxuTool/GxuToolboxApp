@@ -15,7 +15,7 @@ import {useBatchProcessor} from "@/features/evaluation/hook/useBatchProcessor.ts
 import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
 import {AuthStateMap} from "@/core/auth/auth.type.ts";
-import {NumberCard} from "@/features/evaluation/components/NumberCard.tsx";
+import {HeaderCard} from "@/features/evaluation/components/HeaderCard.tsx";
 
 const ProgressBar = ({progress, color}: {progress: number; color: string}) => {
     const progressPercent = Math.round(progress * 100);
@@ -52,7 +52,7 @@ export function EvaluationOverview() {
         Color(theme.colors.primary),
         Color(theme.colors.black),
         theme.mode === "dark" ? 0.15 : 0.05,
-    ).hexString;
+    ).hexString();
     const styles = useMemo(
         () =>
             StyleSheet.create({
@@ -255,26 +255,14 @@ export function EvaluationOverview() {
             </Dialog>
 
             <Flex direction="column" gap={10}>
-                <NumberCard evaList={evaList} />
-                <View style={styles.buttonCard}>
-                    <Button
-                        buttonStyle={styles.opButton}
-                        onPress={() => {
-                            navigation.navigate("EvaluationTemplate");
-                        }}>
-                        <Text style={styles.buttoText}>自定义评价模板</Text>
-                    </Button>
-                    <Button buttonStyle={styles.opButton} onPress={handleOneKey}>
-                        <Text style={styles.buttoText}>应用自定义模板一键评价</Text>
-                    </Button>
-                    <Button
-                        buttonStyle={styles.opButton}
-                        onPress={() => {
-                            handleClear();
-                        }}>
-                        <Text style={styles.buttoText}>清空评价</Text>
-                    </Button>
-                </View>
+                <HeaderCard
+                    evaList={evaList}
+                    onTemplate={() => {
+                        navigation.navigate("EvaluationTemplate");
+                    }}
+                    onSubmit={submit}
+                    onClear={handleClear}
+                />
                 <Table style={{width: "100%"}}>
                     <Row
                         data={["课程", "教师", "状态"]}
@@ -303,7 +291,7 @@ export function EvaluationOverview() {
             </Flex>
             {evaList.length >= 0 && (
                 <View style={styles.submitButtonContainer}>
-                    <Button buttonStyle={styles.opButton} onPress={handleClear}>
+                    <Button buttonStyle={styles.opButton} onPress={submit}>
                         <Text style={styles.buttoText}>提交</Text>
                     </Button>
                 </View>
