@@ -64,16 +64,18 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
                 text: {
                     textAlign: "center",
                     color: textColor,
-                    fontSize: 12,
+                    fontSize: 10,
                 },
                 badge: {
                     backgroundColor: Color.mix(theme.colors.primary, theme.colors.background, 0.35).setAlpha(0.95)
                         .rgbaString,
-                    height: 14,
+                    height: 16,
+                    borderWidth: 1.5,
+                    borderColor: theme.colors.primary,
                 },
                 badgeContainer: {
                     position: "absolute",
-                    top: -6,
+                    top: -8,
                     right: -8,
                     zIndex: 1,
                 },
@@ -87,7 +89,7 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
                 <Badge
                     value={course.length}
                     status="primary"
-                    textStyle={{fontSize: 10}}
+                    textStyle={{fontSize: 11, fontWeight: "bold"}}
                     containerStyle={styles.badgeContainer}
                     badgeStyle={styles.badge}
                 />
@@ -103,13 +105,13 @@ export const StackCourseItem = memo(({course, activeCourse, timeRange, onPress}:
                 align="center">
                 <Text style={[styles.text, {fontWeight: "bold"}]} numberOfLines={5}>
                     {active.isAdjusted === "1" && (
-                        <Text style={{color: theme.colors.warning, fontSize: 12, fontWeight: "bold"}}>(调) </Text>
+                        <Text style={{color: theme.colors.warning, fontSize: 10, fontWeight: "bold"}}>(调) </Text>
                     )}
                     {active.courseName}
                 </Text>
                 {!!active.venueName && (
                     <Text style={styles.text}>
-                        <Icon name="map-marker" size={12} color={textColor} />
+                        <Icon name="map-marker" size={10} color={textColor} />
                         {"\n" + active.venueName.replace("-", "\n")}
                     </Text>
                 )}

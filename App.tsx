@@ -4,7 +4,6 @@ import {theme} from "@/shared/theme.ts";
 import {Root} from "./src/screens/Root.tsx";
 import {useColorScheme} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";
-import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 import {openAppEvent} from "@/features/feedback/api/event.ts";
 
 function App(): React.JSX.Element {
@@ -19,7 +18,6 @@ function App(): React.JSX.Element {
 
     async function init() {
         try {
-            await JwMachine.refreshToken();
             await openAppEvent();
         } catch (e) {
             console.warn(e);

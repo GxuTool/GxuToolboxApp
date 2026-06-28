@@ -39,6 +39,8 @@ import {ConflictCourseSheet} from "@/features/courseSchedule/components/Conflict
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import {ExamInfoClass} from "@/class/jw/exam.ts";
 import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
+import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
+import {AuthStateMap} from "@/core/auth/auth.type.ts";
 
 // 菜单的类型
 type SheetState =
@@ -65,7 +67,7 @@ export function ScheduleCard() {
 
     const {init: initPhyExp, patchItem, patchCourse} = usePhyExp();
 
-    const {authState: JWauthState} = useJwAuth();
+    const {authState: JWAuthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
     const {authState: attendanceAuthState} = useAttendanceAuth();
 
@@ -79,14 +81,22 @@ export function ScheduleCard() {
     const holidayItems = useHoliday(year, term) ?? [];
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
 
+    async function init() {
+        if (JWAuthState.status !== AuthStateMap.Authenticated) {
+            await JwMachine.refreshToken();
+        } else {
+            await initExam(year, term, startDay);
+            await initPhyExp();
+        }
+    }
+
     useEffect(() => {
-        initExam(year, term, startDay);
-        initPhyExp();
+        init();
     }, [year, term]);
 
     const defaultItem: ScheduleTableItem[] = useMemo(
-        () => (JWauthState.status !== "no_account" ? [] : defaultItems),
-        [JWauthState.status],
+        () => (JWAuthState.status !== "no_account" ? [] : defaultItems),
+        [JWAuthState.status],
     );
 
     const rawItems: ScheduleTableItem[] = useMemo(
@@ -156,9 +166,6 @@ export function ScheduleCard() {
                 })),
         [courseItems, examItems, holidayItems, defaultItem, onItemPress],
     );
-    useEffect(() => {
-        console.log("refreshed");
-    }, [scheduleItems]);
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 
@@ -223,7 +230,7 @@ export function ScheduleCard() {
                             return setSheet({type: "menu"});
                         }}
                         style={{flexDirection: "row", alignItems: "center", gap: 8}}>
-                        {[JWauthState, unifiedAuthState, attendanceAuthState].map((i, idx) =>
+                        {[JWAuthState, unifiedAuthState, attendanceAuthState].map((i, idx) =>
                             i?.status !== "authenticated" ? (
                                 <Icon
                                     key={idx}
@@ -295,7 +302,7 @@ export function ScheduleCard() {
                     {sheet.type === "menu" && (
                         <>
                             <AuthStatusSection
-                                jwAuth={JWauthState}
+                                jwAuth={JWAuthState}
                                 unifiedAuth={unifiedAuthState}
                                 attendanceAuth={attendanceAuthState}
                                 menuItemStyle={style.menuItem}
