@@ -1,6 +1,5 @@
 import {Row} from "react-native-reanimated-table";
 import {StyleSheet, TouchableOpacity} from "react-native";
-import {Color} from "@/shared/color.ts";
 import {useTheme} from "@rneui/themed";
 import React from "react";
 import {Evaluation} from "@/features/evaluation/types/evaluation.type.ts";
@@ -15,14 +14,14 @@ interface EvaluationRowProps {
 
 const EvaluationRowComponent = ({item, onPress, colorMap}: EvaluationRowProps) => {
     const {theme} = useTheme();
-    const colWidths = [10, 5, 5];
+    const colWidths = [12, 6, 5];
     const styles = StyleSheet.create({
         row: {
             height: "auto",
-            borderBottomWidth: 1,
-            borderBottomColor: Color(theme.colors.primary).setAlpha(0.3).rgbaString,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: theme.colors.divider,
             alignItems: "center",
-            paddingVertical: 12,
+            paddingVertical: 14,
         },
         rowText: {
             textAlign: "center",
