@@ -1,4 +1,3 @@
-// useEvaluationActions.ts
 import {useState} from "react";
 import {ToastAndroid} from "react-native";
 import {EvaTeacherList} from "@/features/evaluation/types/schema/TeacherList.ts";
