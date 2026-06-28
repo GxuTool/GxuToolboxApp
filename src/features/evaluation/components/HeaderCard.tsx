@@ -7,7 +7,7 @@ import {Icon} from "@/components/un-ui";
 export const HeaderCard = ({evaList, onTemplate, onSubmit, onClear}) => {
     const {theme} = useTheme();
 
-    const [header, setHeader] = useState<"status" | "function">("function");
+    const [header, setHeader] = useState<"status" | "function">("status");
 
     const styles = StyleSheet.create({
         statsCard: {

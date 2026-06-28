@@ -32,7 +32,7 @@ export function EvaluationOverview() {
     const {theme} = useTheme();
     const [evaList, setEvaList] = useState<EvaTeacherList[]>([]);
     const navigation = useNavigation();
-    const colWidths = [8, 6, 5];
+    const colWidths = [10, 5, 5];
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const isCancelled = useRef(false);
@@ -53,6 +53,7 @@ export function EvaluationOverview() {
         Color(theme.colors.black),
         theme.mode === "dark" ? 0.15 : 0.05,
     ).hexString();
+
     const styles = useMemo(
         () =>
             StyleSheet.create({
@@ -260,7 +261,7 @@ export function EvaluationOverview() {
                     onTemplate={() => {
                         navigation.navigate("EvaluationTemplate");
                     }}
-                    onSubmit={submit}
+                    onSubmit={handleOneKey}
                     onClear={handleClear}
                 />
                 <Table style={{width: "100%"}}>
@@ -275,7 +276,6 @@ export function EvaluationOverview() {
                             key={item.teachingClassId + item.securityToken}
                             item={item}
                             onPress={handleRowPress}
-                            colWidths={colWidths}
                             colorMap={colorMap}
                         />
                     ))}
