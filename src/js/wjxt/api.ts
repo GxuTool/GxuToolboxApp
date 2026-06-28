@@ -2,6 +2,12 @@ import axios from "axios";
 import cheerio from "react-native-cheerio";
 import iconv from "iconv-lite";
 import {Buffer} from "buffer";
+
+export interface PendingFile {
+    content: string;
+    id: string;
+}
+
 export const wjxtHttp = axios.create({
     baseURL: "https://wjxt.gxu.edu.cn/",
     headers: {
@@ -30,11 +36,7 @@ export const wjxt = {
             loginsubmit: "%B5%C7+%C2%BC",
             myteip: "172.30.135.20--2",
         });
-        const response = await wjxtHttp.post(
-            "https://wjxt.gxu.edu.cn/Wjxt_UI/qstwj.aspx",
-            {},
-            {responseType: "arraybuffer"},
-        );
+        const response = await wjxtHttp.post("Wjxt_UI/qstwj.aspx", {}, {responseType: "arraybuffer"});
 
         const htmlString = htmlParser(response.data);
         return !htmlString.includes("alert");
@@ -42,7 +44,7 @@ export const wjxt = {
 
     testCookie: async () => {
         const response = await wjxtHttp.post(
-            "https://wjxt.gxu.edu.cn/Wjxt_UI/qstwj.aspx",
+            "Wjxt_UI/qstwj.aspx",
             {},
             {
                 responseType: "arraybuffer",
@@ -53,18 +55,29 @@ export const wjxt = {
     },
 
     /**
-     * 未读文件标题
+     * 未读文件信息
      */
-    getPendingTitles: async (): Promise<string[]> => {
+    getPendingFiles: async (): Promise<PendingFile[]> => {
         const response = await wjxtHttp.post("Wjxt_UI/qstwj.aspx", {}, {responseType: "arraybuffer"});
-        const $ = cheerio.load(htmlParser(response.data));
-        const items = $("span")
-            .map((_, el) => $(el).text().trim())
+        const parser = cheerio.load(htmlParser(response.data));
+
+        const spans = parser("span")
+            .map((_, el) => parser(el).text().trim())
+            .get()
+            .filter((item: string) => item.length > 0);
+
+        const links = parser("span a")
+            .map((_, el) => {
+                const href = parser(el).attr("href") ?? "";
+                const match = href.match(/id=(\d+)/);
+                return match ? match[1] : "";
+            })
             .get();
-        const list = items.filter((item: string) => item.length > 0);
-        let res = [];
-        for (let i = 0; i < list.length; i += 3) {
-            res.push(list.slice(i, i + 3).join("-"));
+        const res: PendingFile[] = [];
+        for (let i = 0; i < spans.length; i += 3) {
+            const content = spans.slice(i, i + 3).join("-");
+            const id = links[Math.floor(i / 3)] ?? "";
+            res.push({content, id});
         }
         return res;
     },

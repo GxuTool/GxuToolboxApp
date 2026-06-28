@@ -45,30 +45,30 @@ export const TimeScheduleView = memo(function TimeScheduleView(props: TimeSchedu
 
     return (
         <ColorMapContext.Provider value={colorMap}>
-            <Pressable style={{width: "100%"}} onLongPress={handleLongPress}>
-                <AnimatedPagerView
-                    ref={ref}
-                    style={style.pagerView}
-                    initialPage={realCurrentWeek - 1}
-                    layoutDirection="ltr"
-                    scrollEnabled={rest.scrollEnabled}
-                    pageMargin={10}
-                    onPageSelected={rest.onPageSelected}
-                    onPageScrollStateChanged={rest.onPageScrollStateChanged}
-                    offscreenPageLimit={2}
-                    overScrollMode="never"
-                    orientation="horizontal">
-                    {useMemo(
-                        () =>
-                            rest.pages.map((_, index) => (
+            <AnimatedPagerView
+                ref={ref}
+                style={style.pagerView}
+                initialPage={realCurrentWeek - 1}
+                layoutDirection="ltr"
+                scrollEnabled={rest.scrollEnabled}
+                pageMargin={10}
+                onPageSelected={rest.onPageSelected}
+                onPageScrollStateChanged={rest.onPageScrollStateChanged}
+                offscreenPageLimit={2}
+                overScrollMode="never"
+                orientation="horizontal">
+                {useMemo(
+                    () =>
+                        rest.pages.map((_, index) => (
+                            <Pressable style={{width: "100%"}} onLongPress={handleLongPress}>
                                 <View key={index} collapsable={false}>
                                     <TimeSchedule {...props} currentWeek={index + 1} />
                                 </View>
-                            )),
-                        [rest.pages.length, props.scheduleItems, props.startDay],
-                    )}
-                </AnimatedPagerView>
-            </Pressable>
+                            </Pressable>
+                        )),
+                    [rest.pages.length, props.scheduleItems, props.startDay],
+                )}
+            </AnimatedPagerView>
         </ColorMapContext.Provider>
     );
 });

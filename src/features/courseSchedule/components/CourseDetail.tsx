@@ -22,6 +22,7 @@ const CourseContext = createContext<CourseParsed | null>(null);
 interface Props extends ViewProps {
     course: CourseClass;
     examInfo?: ExamInfoClass[];
+    onExamPress?: (exam: ExamInfoClass) => void;
 }
 
 interface Info {
@@ -60,7 +61,7 @@ export function CourseDetail(props: Props) {
                     <Flex justify="center" direction="column" gap={6}>
                         <Text>相关考试</Text>
                         {props.examInfo.map(exam => (
-                            <CourseExamCard examInfo={exam} />
+                            <CourseExamCard examInfo={exam} onPress={() => props.onExamPress?.(exam)} />
                         ))}
                     </Flex>
                 )}
@@ -187,7 +188,7 @@ function CourseInfoCard() {
     );
 }
 
-function CourseExamCard({examInfo}: {examInfo: ExamInfoClass}) {
+function CourseExamCard({examInfo, onPress}: {examInfo: ExamInfoClass; onPress?: () => void}) {
     const exam = examInfo.transformed;
     const {theme} = useTheme();
     const {status} = parseExamTime(exam.examTime);
@@ -205,14 +206,14 @@ function CourseExamCard({examInfo}: {examInfo: ExamInfoClass}) {
         },
     });
     return (
-        <View style={styles.card}>
+        <UnPressable onPress={onPress} style={styles.card}>
             <UnText weight="bold" size={16}>
                 {exam.examName}
             </UnText>
             <UnText size={12} color={theme.colors.grey1}>
                 {date}（{suffix}）{time}，{exam.venueName}&lt;{exam.seat || "-"}&gt;
             </UnText>
-        </View>
+        </UnPressable>
     );
 }
 

@@ -39,6 +39,8 @@ import {ConflictCourseSheet} from "@/features/courseSchedule/components/Conflict
 import {ExamInfo} from "@/type/infoQuery/exam/examInfo.ts";
 import {ExamInfoClass} from "@/class/jw/exam.ts";
 import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
+import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
+import {AuthStateMap} from "@/core/auth/auth.type.ts";
 
 // 菜单的类型
 type SheetState =
@@ -65,7 +67,7 @@ export function ScheduleCard() {
 
     const {init: initPhyExp, patchItem, patchCourse} = usePhyExp();
 
-    const {authState: JWauthState} = useJwAuth();
+    const {authState: JWAuthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
     const {authState: attendanceAuthState} = useAttendanceAuth();
 
@@ -79,14 +81,22 @@ export function ScheduleCard() {
     const holidayItems = useHoliday(year, term) ?? [];
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
 
+    async function init() {
+        if (JWAuthState.status !== AuthStateMap.Authenticated) {
+            await JwMachine.refreshToken();
+        } else {
+            await initExam(year, term, startDay);
+            await initPhyExp();
+        }
+    }
+
     useEffect(() => {
-        initExam(year, term, startDay);
-        initPhyExp();
+        init();
     }, [year, term]);
 
     const defaultItem: ScheduleTableItem[] = useMemo(
-        () => (JWauthState.status !== "no_account" ? [] : defaultItems),
-        [JWauthState.status],
+        () => (JWAuthState.status !== "no_account" ? [] : defaultItems),
+        [JWAuthState.status],
     );
 
     const rawItems: ScheduleTableItem[] = useMemo(
@@ -114,9 +124,15 @@ export function ScheduleCard() {
                     stackRender: (items, day, _week, timeRange) => {
                         const courses = items.map(i => patchCourse(new CourseClass(i.raw), day)).filter(Boolean);
                         if (courses.length === 0) return null;
-                        const courseCodes = courses.map(c => c.transformed.courseCode + "_" + c.transformed.staffId).sort();
+                        const courseCodes = courses
+                            .map(c => c.transformed.courseCode + "_" + c.transformed.staffId)
+                            .sort();
                         const storedActive = conflictStore.getState().getActive(courseCodes);
-                        const activeCourse = storedActive ?? (courses[0] ? courses[0].transformed.courseCode + "_" + courses[0].transformed.staffId : "");
+                        const activeCourse =
+                            storedActive ??
+                            (courses[0]
+                                ? courses[0].transformed.courseCode + "_" + courses[0].transformed.staffId
+                                : "");
                         return (
                             <StackCourseItem
                                 course={courses}
@@ -134,7 +150,7 @@ export function ScheduleCard() {
                 {
                     data: holidayItems,
                     needShift: false,
-                    itemRender: (item, day) => <HolidayItem item={item} onPress={() => onItemPress(item, day)} />,
+                    itemRender: (item, day) => <HolidayItem item={item} />,
                 },
                 {
                     data: defaultItem,
@@ -150,9 +166,6 @@ export function ScheduleCard() {
                 })),
         [courseItems, examItems, holidayItems, defaultItem, onItemPress],
     );
-    useEffect(() => {
-        console.log("refreshed");
-    }, [scheduleItems]);
 
     const realCurrentWeek = Math.ceil(moment.duration(moment().diff(startDay)).asWeeks());
 
@@ -217,7 +230,7 @@ export function ScheduleCard() {
                             return setSheet({type: "menu"});
                         }}
                         style={{flexDirection: "row", alignItems: "center", gap: 8}}>
-                        {[JWauthState, unifiedAuthState, attendanceAuthState].map((i, idx) =>
+                        {[JWAuthState, unifiedAuthState, attendanceAuthState].map((i, idx) =>
                             i?.status !== "authenticated" ? (
                                 <Icon
                                     key={idx}
@@ -289,7 +302,7 @@ export function ScheduleCard() {
                     {sheet.type === "menu" && (
                         <>
                             <AuthStatusSection
-                                jwAuth={JWauthState}
+                                jwAuth={JWAuthState}
                                 unifiedAuth={unifiedAuthState}
                                 attendanceAuth={attendanceAuthState}
                                 menuItemStyle={style.menuItem}
@@ -345,7 +358,32 @@ export function ScheduleCard() {
                             const matchedExam = examItems
                                 .filter(e => e.raw?.kcmc === courseName)
                                 ?.map(e => new ExamInfoClass(e.raw as ExamInfo));
-                            return <CourseDetail course={course} examInfo={matchedExam} />;
+                            return (
+                                <CourseDetail
+                                    course={course}
+                                    examInfo={matchedExam}
+                                    onExamPress={exam => {
+                                        const examDate = moment(exam.transformed.examTime.slice(0, 10));
+                                        const week = examDate.diff(startDay, "week") + 1;
+                                        rest.setPage(week - 1);
+                                        setSheet({
+                                            type: "itemDetail",
+                                            day: examDate,
+                                            item: {
+                                                id: exam.transformed.courseCode,
+                                                week,
+                                                day: examDate.isoWeekday() as ScheduleTableItem["day"],
+                                                begin: 1 as ScheduleTableItem["begin"],
+                                                end: 1 as ScheduleTableItem["begin"],
+                                                title: exam.transformed.courseName,
+                                                location: exam.transformed.venueName,
+                                                kind: "exam",
+                                                raw: exam._ori,
+                                            },
+                                        });
+                                    }}
+                                />
+                            );
                         })()}
                     {sheet.type === "share" && (
                         <ScheduleShareSheet week={rest.activePage + 1} onClose={() => setSheet({type: "closed"})} />
