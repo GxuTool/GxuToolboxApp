@@ -9,6 +9,7 @@ import {UnListSection, UnSectionList} from "@/components/un-ui/UnSectionList.tsx
 import {ToastAndroid} from "react-native";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import {useCourseData} from "@/hooks/useCourseData.ts";
+import {Color} from "@/shared/color.ts";
 
 export function SettingIndex() {
     const {store: ucStore} = useUserConfig();
@@ -68,7 +69,11 @@ export function SettingIndex() {
                             color={ucStore(s => s.theme.primaryColor)}
                             onColorChange={v => {
                                 const s = ucStore.getState();
-                                ucStore.getState().update("theme", {...s.theme, primaryColor: v});
+                                ucStore.getState().update("theme", {
+                                    ...s.theme,
+                                    primaryColor: v,
+                                    ripple: {color: Color(v).setAlpha(0.5).rgbaString},
+                                });
                             }}
                         />
                     ),

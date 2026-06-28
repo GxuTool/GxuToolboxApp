@@ -143,8 +143,8 @@ export function ToolboxIndex() {
                     label: "学校文件",
                     icon: <Icon name={"file-document"} size={iconSize} />,
                     type: "navigation",
-                    navigation: "MainScreen"
-                }
+                    navigation: "MainScreen",
+                },
             ],
         },
         {
@@ -259,7 +259,6 @@ export function ToolboxIndex() {
         <ScrollView contentContainerStyle={style.settingContainer}>
             {toolList.map(section => (
                 <UnCard
-                    color={theme.colors.grey5}
                     titleColor={theme.colors.black}
                     style={style.settingSectionContainer}
                     title={section.title}

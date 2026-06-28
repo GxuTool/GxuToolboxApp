@@ -29,10 +29,9 @@ export function ToolboxStack() {
         <Stack.Navigator
             initialRouteName="toolboxIndex"
             screenOptions={{
-                unmountOnBlur: true,
                 headerShadowVisible: false,
                 headerStyle: {
-                    backgroundColor: Color(theme.colors.background).setAlpha(
+                    backgroundColor: Color.mix(theme.colors.background, theme.colors.primary, 0.2).setAlpha(
                         ((theme.mode === "dark" ? 0.7 : 0.9) * bgOpacity) / 100,
                     ).rgbaString,
                 },
@@ -50,11 +49,6 @@ export function ToolboxStack() {
                 component={lazy(() => import("@/screens/tool/ToolboxIndex.tsx").then(m => ({default: m.ToolboxIndex})))}
                 options={{
                     title: "工具箱",
-                    headerStyle: {
-                        backgroundColor: Color(theme.colors.background).setAlpha(
-                            ((theme.mode === "dark" ? 0.5 : 0.4) * bgOpacity) / 100,
-                        ).rgbaString,
-                    },
                     contentStyle: {
                         backgroundColor: "transparent",
                     },
