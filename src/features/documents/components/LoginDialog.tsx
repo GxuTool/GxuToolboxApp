@@ -45,7 +45,7 @@ export function LoginDialog(props: Props) {
                 props.onBackdropPress();
             }}>
             <Dialog.Title title="登录文件系统" />
-            <UnText>注：登录后将自动保存账号，使用请连接校园网</UnText>
+            <UnText>注：登录成功后会自动保存账号</UnText>
             <View style={styles.inputView}>
                 <Input
                     label="账号（学号）"
