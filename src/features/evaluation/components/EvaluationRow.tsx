@@ -13,14 +13,16 @@ interface EvaluationRowProps {
     colorMap: Record<string, string>;
 }
 
-const EvaluationRowComponent = ({item, onPress, colWidths, colorMap}: EvaluationRowProps) => {
+const EvaluationRowComponent = ({item, onPress, colorMap}: EvaluationRowProps) => {
     const {theme} = useTheme();
+    const colWidths = [10, 5, 5];
     const styles = StyleSheet.create({
         row: {
-            height: 45,
+            height: "auto",
             borderBottomWidth: 1,
             borderBottomColor: Color(theme.colors.primary).setAlpha(0.3).rgbaString,
             alignItems: "center",
+            paddingVertical: 12,
         },
         rowText: {
             textAlign: "center",
@@ -32,7 +34,7 @@ const EvaluationRowComponent = ({item, onPress, colWidths, colorMap}: Evaluation
         <TouchableOpacity onPress={() => onPress(item)}>
             <Row
                 cellTextStyle={cell => ({color: colorMap[cell] ?? theme.colors.black})}
-                data={[`${item.courseName} - ${item.courseTypeName}`, item.teacherName, item.submitStatus]}
+                data={[`${item.courseName}(${item.courseTypeName})`, item.teacherName, item.submitStatus]}
                 style={styles.row}
                 flexArr={colWidths}
                 textStyle={styles.rowText}
