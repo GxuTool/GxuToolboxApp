@@ -20,6 +20,7 @@ export interface AuthMachine<A> {
     clearAccount: () => Promise<AuthState<A>>;
     loginWithAccount: (account: A) => Promise<AuthState<A>>;
     loginWithStoredAccount: () => Promise<AuthState<A>>;
+    setState: (state: AuthState<A>) => AuthState<A>;
     subscribe:(listener:(state:AuthState<A>)=>void)=>()=>void;
 }
 
@@ -101,6 +102,7 @@ export function createAuthCore<A>(adapter: AuthAdapter<A>): AuthMachine<A> {
         clearAccount,
         loginWithAccount,
         loginWithStoredAccount,
+        setState,
         subscribe,
     };
 }

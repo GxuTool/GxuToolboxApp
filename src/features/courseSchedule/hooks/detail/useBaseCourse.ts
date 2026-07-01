@@ -23,33 +23,37 @@ const useBaseCourseStore = create<BaseCourseStoreState>()(() => ({
 export const useBaseCourse = () => {
     async function init(year: number, term: SchoolTermValue) {
         useBaseCourseStore.setState({loading: true});
+        const cacheKey = `originalCourseList:${year}:${term}`;
+        const legacyCacheKey = "originalCourseList";
 
-        const setData = (raw: CourseScheduleQueryRes, shouldCache: boolean) => {
-            if (!raw) return;
+        const setData = (raw: CourseScheduleQueryRes | null, shouldCache: boolean) => {
+            if (!raw) return false;
 
             const parsed = ICourse.safeParse(raw);
             if (!parsed.success) {
                 console.warn("解析原始数据失败", parsed.error);
-                return;
+                return false;
             }
 
             const newModel = normalizeCourse(parsed.data);
 
             if (shouldCache) {
-                store.save({key: "originalCourseList", data: raw});
+                store.save({key: cacheKey, data: raw});
             }
             const current = useBaseCourseStore.getState().courseList;
-            if (JSON.stringify(current) === JSON.stringify(newModel)) return;
+            if (JSON.stringify(current) === JSON.stringify(newModel)) return true;
             useBaseCourseStore.setState({
                 rawCourseList: raw.kbList,
                 courseList: newModel,
             });
+            return true;
         };
 
         try {
-            const cachedRaw = await store.load<CourseScheduleQueryRes>({key: "originalCourseList"}).catch(() => null);
-            if (cachedRaw) {
-                setData(cachedRaw, false);
+            const cachedRaw = await store.load<CourseScheduleQueryRes>({key: cacheKey}).catch(() => null);
+            if (!setData(cachedRaw, false)) {
+                const legacyCachedRaw = await store.load<CourseScheduleQueryRes>({key: legacyCacheKey}).catch(() => null);
+                setData(legacyCachedRaw, false);
             }
         } catch {}
 

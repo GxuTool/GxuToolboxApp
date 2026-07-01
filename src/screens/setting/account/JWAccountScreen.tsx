@@ -8,6 +8,7 @@ import {useWebView} from "@/hooks/app.ts";
 import {useJwAccount} from "@/core/auth/Jw/hooks/useJwAccount.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
 import {AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
+import {loginJwEvent} from "@/features/feedback/api/event.ts";
 
 function statusMeta(state: AuthState) {
     switch (state.status) {
@@ -37,86 +38,98 @@ export function JWAccountScreen() {
         clearResult();
         await saveAccount(username, password);
         const r = await login(username, password);
-        if (r.ok) return;
+        if (r.ok) {
+            await loginJwEvent();
+            return;
+        }
         ToastAndroid.show("登录失败", ToastAndroid.SHORT);
     }
 
     return (
         <SafeAreaView style={style.container} edges={["bottom"]}>
             <ScrollView>
-            <View style={styles.card}>
-                <View style={styles.cardTopRow}>
-                    <View style={styles.statusDotWrap}>
-                        <View style={[styles.statusDot, {backgroundColor: meta.color}]} />
-                    </View>
-                    <View style={styles.statusTextWrap}>
-                        <Text style={styles.statusLabel}>当前状态</Text>
-                        <Text style={[styles.statusValue, {color: meta.color}]}>{meta.label}</Text>
+                <View style={styles.card}>
+                    <View style={styles.cardTopRow}>
+                        <View style={styles.statusDotWrap}>
+                            <View style={[styles.statusDot, {backgroundColor: meta.color}]} />
+                        </View>
+                        <View style={styles.statusTextWrap}>
+                            <Text style={styles.statusLabel}>当前状态</Text>
+                            <Text style={[styles.statusValue, {color: meta.color}]}>{meta.label}</Text>
+                        </View>
+
+                        {busy && (
+                            <View style={styles.spinnerWrap}>
+                                <ActivityIndicator size="small" />
+                            </View>
+                        )}
                     </View>
 
-                    {busy && (
-                        <View style={styles.spinnerWrap}>
-                            <ActivityIndicator size="small" />
+                    {result.kind !== "idle" && (
+                        <View
+                            style={[
+                                styles.banner,
+                                result.kind === "success" ? styles.bannerSuccess : styles.bannerError,
+                            ]}>
+                            <Text style={styles.bannerTitle}>{result.title}</Text>
+                            {!!result.message && <Text style={styles.bannerMsg}>{result.message}</Text>}
                         </View>
                     )}
-                </View>
 
-                {result.kind !== "idle" && (
-                    <View
-                        style={[styles.banner, result.kind === "success" ? styles.bannerSuccess : styles.bannerError]}>
-                        <Text style={styles.bannerTitle}>{result.title}</Text>
-                        {!!result.message && <Text style={styles.bannerMsg}>{result.message}</Text>}
+                    <Input
+                        value={username}
+                        onChangeText={v => setUsername(v)}
+                        label="学号"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        disabled={busy}
+                        inputStyle={styles.inputText}
+                        labelStyle={styles.inputLabel}
+                        containerStyle={styles.inputContainer}
+                        leftIcon={<Icon type="fontawesome" name="user" size={16} style={styles.leftIcon} />}
+                    />
+
+                    <Input
+                        value={password}
+                        onChangeText={v => setPassword(v)}
+                        label="密码"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        secureTextEntry={!showPwd}
+                        disabled={busy}
+                        inputStyle={styles.inputText}
+                        labelStyle={styles.inputLabel}
+                        containerStyle={styles.inputContainer}
+                        leftIcon={<Icon name="lock" size={16} style={styles.leftIcon} />}
+                        rightIcon={
+                            <UnPressable
+                                onPress={function () {
+                                    return setShowPwd(function (s) {
+                                        return !s;
+                                    });
+                                }}
+                                disabled={busy}>
+                                <Icon
+                                    type="fontawesome"
+                                    name={showPwd ? "eye-slash" : "eye"}
+                                    size={18}
+                                    style={styles.rightIcon}
+                                />
+                            </UnPressable>
+                        }
+                    />
+
+                    <View style={styles.actions}>
+                        <Button onPress={handleLogin} disabled={busy} loading={busy}>
+                            登录
+                        </Button>
+
+                        <Button type="outline" disabled={busy} onPress={() => openInJw("/xtgl/login_slogin.html")}>
+                            打开教务登录页
+                        </Button>
                     </View>
-                )}
-
-                <Input
-                    value={username}
-                    onChangeText={v => setUsername(v)}
-                    label="学号"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    disabled={busy}
-                    inputStyle={styles.inputText}
-                    labelStyle={styles.inputLabel}
-                    containerStyle={styles.inputContainer}
-                    leftIcon={<Icon type="fontawesome" name="user" size={16} style={styles.leftIcon} />}
-                />
-
-                <Input
-                    value={password}
-                    onChangeText={v => setPassword(v)}
-                    label="密码"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry={!showPwd}
-                    disabled={busy}
-                    inputStyle={styles.inputText}
-                    labelStyle={styles.inputLabel}
-                    containerStyle={styles.inputContainer}
-                    leftIcon={<Icon name="lock" size={16} style={styles.leftIcon} />}
-                    rightIcon={
-                        <UnPressable onPress={function() { return setShowPwd(function(s) { return !s; }); }} disabled={busy}>
-                            <Icon
-                                type="fontawesome"
-                                name={showPwd ? "eye-slash" : "eye"}
-                                size={18}
-                                style={styles.rightIcon}
-                            />
-                        </UnPressable>
-                    }
-                />
-
-                <View style={styles.actions}>
-                    <Button onPress={handleLogin} disabled={busy} loading={busy}>
-                        登录
-                    </Button>
-
-                    <Button type="outline" disabled={busy} onPress={() => openInJw("/xtgl/login_slogin.html")}>
-                        打开教务登录页
-                    </Button>
+                    <Text style={style.note}>仅供工具从教务系统获取信息{"\n"}23:00 至次日 7:30 请连接校园网</Text>
                 </View>
-                <Text style={style.note}>仅供工具从教务系统获取信息{"\n"}23:00 至次日 7:30 请连接校园网</Text>
-            </View>
             </ScrollView>
         </SafeAreaView>
     );
