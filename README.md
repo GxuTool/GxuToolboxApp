@@ -1,187 +1,44 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 「西大工具箱-移动教务」App
+> *这是一个由广西大学XCPC技术组开发的非官方工具箱。*
+- 公测群号：580048805（入群获取安装包，暂无ios端，GitHub Release推进中）
+- 使用文档：[点我查看](https://tooldoc.gxutech.xyz)
 
-## 常用文档
-- [RN doc](https://reactnative.dev/docs/components-and-apis)
-- [react native elements ui](https://reactnativeelements.com/docs/customizing)
-- [icon](https://oblador.github.io/react-native-vector-icons/)
-- [react navigation](https://reactnavigation.org/docs/getting-started/)
-- [RN库市场](https://reactnative.directory/)
-- [moment](https://momentjs.com/docs/)
-- []()
+## 目录
+1. [开发背景](#开发背景)
+2. [主要优势](#工具箱的优势)
+3. [技术栈](#技术栈)
 
-# Getting Started
+## 开发背景
+> 为什么要开发这么一个工具箱呢？
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+**原因如下**：
+- GXU目前有三种常用的学生业务——**教务平台、官网（文件系统，学校公告等）、考勤系统**。但是这三个业务分别**使用了不同的登录系统**，且三种系统的登录鉴权有区别。学生在查询课表、考勤等信息时需要在不同平台间来回切换。
 
-## Step 1: Start Metro
+- 教务平台查询某些信息需要翻来翻去，而且大部分学生目前上教务平台的方法还是通过微信公众号和浏览器访问教务平台地址，**过程麻烦**。
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- 考勤系统还需要专门登录小程序或学校网址查看，考勤本就应该是打开课表时可以直观看见的东西，但由于第三方课表App出于兼容多所高校需要，并没有适配。使得学生查看考勤情况的操作变得**繁琐**。
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- 第三方课表App更新后开始**内置广告**，极大影响使用体验。
 
-```sh
-# Using npm
-npm start
+> 因此，我们决定开发一个属于西大人自己的教务App，旨在将这些繁琐的操作和糟糕的体验一一优化。
 
-# OR using Yarn
-yarn start
-```
+## 工具箱的优势
+- **西大专供**：作为西大专属，不需要考虑兼容问题，因而能够实现第三方工具为保障兼容无法实现的功能。
+- **一款App，打通三个平台**：工具箱整合了三个网站的登录接口，实现只用一个app便可登录三种平台。且登录后，工具箱会自动导入你的课表、自动同步信息，大大简化了操作流程。
+- **开源免费**：基于TypeScript语言编写，轻量高效，对比第三方课程软件功能更丰富，且完全免费开源，纯净无广，支持导出到wakeup。
+- **信息获取**：工具箱内置**自动获取考试信息**、**课表**、**考勤记录（需要校园网）**、**学分统计**、**绩点计算**等实用功能
+- **一键评教**：每学期末的评教，操作繁琐重复。使用工具箱，只需一个模板和几条短视频的时间，工具箱便可自动帮您完成教评任务。  
 
-## Step 2: Build and run your app
+> *「西大工具箱-移动教务」* 让繁琐的校园事务化繁为简，让每一位西大学子把更多精力投入到真正的学习中去。**纯净、高效、一站式**——这才是西大人该有的学习体验。
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## 技术栈
 
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
-
-### 项目结构说明
-
-本项目是一个使用 React Native 构建的跨平台移动应用。以下是项目根目录下主要文件和文件夹的用途说明：
-
-*   `android/`: 包含原生 Android 项目的所有文件。如果您需要进行 Android 平台的特定配置或编写原生模块，将会在此目录下操作。
-*   `ios/`: 包含原生 iOS 项目的所有文件（Xcode 项目）。如果您需要进行 iOS 平台的特定配置或编写原生模块，将会在此目录下操作。
-*   `src/`: 存放应用的所有源代码，包括组件（Components）、页面（Screens）、状态管理（State Management）、工具函数（Utils）等。这是项目开发的主要工作目录。
-*   `node_modules/`: 存放项目的所有第三方依赖库。这个目录由 `npm` 或 `yarn` 自动管理，通常不直接修改。
-*   `__tests__/`: 包含应用的单元测试和集成测试文件。项目使用 Jest 作为测试框架。
-*   `App.tsx`: 应用的根组件，是整个 React Native 应用的入口界面。
-*   `index.js`: React Native 应用的注册入口文件。它使用 `AppRegistry` 来注册根组件 `App.tsx`，是应用的启动点。
-*   `package.json`: 定义了项目的基本信息、依赖库、以及可执行的脚本命令（如 `npm start`, `npm test` 等）。
-*   `yarn.lock` 或 `package-lock.json`: 锁定项目依赖库的确切版本，以保证团队成员和不同环境中安装的依赖版本一致。
-*   `README.md`: 项目的说明文档，您现在正在阅读的就是这个文件。
-*   `metro.config.js`: React Native 打包工具 Metro 的配置文件。
-*   `babel.config.js`: Babel 编译器的配置文件，用于将现代 JavaScript (ES6+) 和 JSX 语法转换为兼容性更好的代码。
-*   `tsconfig.json`: TypeScript 编译器的配置文件。
-*   `.eslintrc.js`: ESLint 的配置文件，用于代码规范和质量检查。
-*   `.prettierrc.js`: Prettier 的配置文件，用于代码格式化，保证代码风格统一。
-*   `.gitignore`: 指定了 Git 版本控制系统需要忽略的文件和目录，例如 `node_modules`、`build` 产物等。
-*   `app.json`: 应用的配置文件，通常包含应用名称 `displayName` 等信息。
-
-### `src` 目录结构
-
-`src` 目录是项目应用逻辑的核心，包含了所有的源代码。
-
-*   `components/`: 存放可复用的 UI 组件。这些组件被设计成独立的、可组合的单元，可以在应用的不同页面中重复使用，例如按钮、输入框、卡片等。
-*   `screens/`: 存放应用的各个页面或屏幕。每个文件或文件夹通常代表一个完整的用户界面，例如登录页、首页、设置页等。
-*   `route/`: 包含应用的导航和路由逻辑。这里定义了页面之间的跳转关系和导航栈的结构，通常会使用像 React Navigation 这样的库。
-*   `js/`: 存放通用的 JavaScript 模块和工具函数。这些函数不与特定的 UI 组件或页面绑定，可以在整个应用中被调用，例如数据处理、API 请求封装等。
-*   `type/`: 存放 TypeScript 的类型定义（interfaces and types）。通过在这里集中管理类型，可以提高代码的可维护性和类型安全性。
-
-#### `components` - 可复用组件
-
-此目录存放了应用中可以被多个页面复用的UI组件。
-
--   `CheckUpdate.tsx`: 用于检查应用是否有新版本并提示用户更新的组件。
--   `header/`: 存放页面头部相关的组件。
--   `tool/`: 存放与“工具”功能相关的可复用组件。
--   `un-ui/`: 一套自定义的UI组件库，用于构建应用的基础界面元素。
-
-#### `js` - 通用逻辑与工具函数
-
-此目录包含了项目通用的业务逻辑和辅助函数。
-
--   `color.ts`: 定义了应用的主题颜色和色彩规范。
--   `theme.ts`: 应用的主题管理，可能包括浅色模式和深色模式的切换逻辑。
--   `http.ts`: 封装了网络请求（如 `fetch` 或 `axios`），提供了统一的API调用方式和错误处理。
--   `domParser.ts`: 用于解析HTML/XML文档，可能用于爬取和解析网页数据。
--   `permission.ts`: 封装了Android和iOS平台的权限请求逻辑，如请求存储、相机权限等。
--   `DownloadAndInstallApk.ts`: 提供了在Android上下载并安装新版APK的功能。
--   `rasPassword.js`: 应该是 `rsaPassword.js` 的笔误，用于对密码等敏感信息进行RSA加密。
--   `store.ts`: 封装了本地持久化存储（如 `AsyncStorage`），用于保存用户数据或应用状态。
--   `jw/`: 存放与“教务”系统相关的逻辑。
--   `mgr/`: 存放“管理器”相关的逻辑。
-
-#### `route` - 导航与路由
-
-此目录定义了应用的页面导航结构。
-
--   `RootStack.tsx`: 应用的根导航栈，是所有页面的容器。
--   `screens/`: 定义了各个页面的路由配置。
-
-#### `screens` - 应用页面
-
-此目录存放了应用的各个功能页面。
-
--   `Root.tsx`: 应用的根页面，可能会处理一些初始化逻辑，如检查登录状态、引导页等。
--   `MainTab.tsx`: 应用的主导航栏，包含了首页、工具、设置等主要功能入口。
--   `HomeScreen.tsx`: 应用的首页。
--   `setting/`: 存放设置相关的页面。
--   `tool/`: 存放“工具”功能集合的页面。
-
-#### `type` - TypeScript 类型定义
-
-此目录集中管理了项目所有的TypeScript类型，以增强代码的健壮性。
-
--   `global.ts`: 全局通用的类型定义。
--   `api/`: 定义了与后端API交互时请求和响应的数据结构。
--   `infoQuery/`: 定义了信息查询功能相关的数据类型。
+| 类别 | 技术 |
+|------|------|
+| **核心框架** | React Native 0.84 + React 19 |
+| **开发语言** | TypeScript / Kotlin (Android Widget) |
+| **状态管理** | Zustand 5 + React useReducer |
+| **网络请求** | Axios (3 个独立实例，分别对接教务系统 / 统一认证 / 考勤系统) |
+| **数据校验** | Zod 4 |
+| **构建工具** | Gradle (Android SDK 36) / CocoaPods (iOS) / Metro Bundler |
+| **部署** | Docker (Node 20 + JDK 17) |
