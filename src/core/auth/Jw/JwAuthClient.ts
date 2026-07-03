@@ -8,7 +8,7 @@ import CookieManager from "@preeternal/react-native-cookie-manager";
 
 export const JwAuthClient = {
     async getPublicKey(): Promise<{modulus: string; exponent: string}> {
-        await CookieManager.clearAll();
+        // await CookieManager.clearAll();
         const res = await http.get(urlWithParams("/xtgl/login_getPublicKey.html", {time: Date.now()}));
         return res.data;
     },
@@ -64,5 +64,8 @@ export const JwAuthClient = {
             subject: pick("专业名称")?.replace(/\(\d+\)/, ""),
             subject_id: pick("专业名称")?.match(/(?<=\()\d+(?=\))/)![0],
         } as UserInfo;
+    },
+    async clearSession() {
+        await CookieManager.clearAll();
     },
 };

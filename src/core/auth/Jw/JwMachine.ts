@@ -5,6 +5,7 @@ import {userMgr} from "@/js/mgr/user.ts";
 
 async function loginJw(account: Account): Promise<boolean> {
     const {username, password} = account;
+    await JwAuthClient.clearSession();
     const keys = await JwAuthClient.getPublicKey();
 
     let ok = false;
@@ -23,7 +24,6 @@ async function loginJw(account: Account): Promise<boolean> {
 }
 
 export const JwMachine = createAuthCore<Account>({
-
     async loadAccount() {
         const account = await userMgr.jw.getAccount();
         if (!account?.username || !account?.password) return null;
@@ -42,3 +42,8 @@ export const JwMachine = createAuthCore<Account>({
         return loginJw(account);
     },
 });
+
+export async function ensureJwAuthenticated(): Promise<boolean> {
+    const state = await JwMachine.refreshToken();
+    return state.status === AuthStateMap.Authenticated;
+}
