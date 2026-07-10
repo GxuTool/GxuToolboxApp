@@ -5,22 +5,7 @@ import {userMgr} from "@/js/mgr/user.ts";
 
 async function loginJw(account: Account): Promise<boolean> {
     const {username, password} = account;
-    await JwAuthClient.clearSession();
-    const keys = await JwAuthClient.getPublicKey();
-
-    let ok = false;
-
-    if (keys.modulus && keys.exponent) {
-        await JwAuthClient.loginWithRSA(username, password, keys.modulus, keys.exponent);
-        ok = await JwAuthClient.testTokenRaw();
-    }
-
-    if (!ok) {
-        await JwAuthClient.loginNormal(username, password);
-        ok = await JwAuthClient.testTokenRaw();
-    }
-
-    return ok;
+    return JwAuthClient.login(username, password);
 }
 
 export const JwMachine = createAuthCore<Account>({
