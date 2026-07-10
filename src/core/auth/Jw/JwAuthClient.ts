@@ -24,22 +24,12 @@ async function local(username: string, password: string): Promise<boolean> {
         ok = await JwAuthClient.testTokenRaw();
     }
 
-    const urls = [
-        "https://jwxt2018.gxu.edu.cn",
-        "https://jwxt2018.gxu.edu.cn/jwglxt",
-        "https://jwxt2018.gxu.edu.cn/jwglxt/kbcx/xskbcx_cxXsgrkb.html",
-    ];
-
-    for (const url of urls) {
-        const cookies = await CookieManager.get(url);
-        console.log(url, cookies);
-    }
-
     return ok;
 }
 
 async function remote(username: string, password: string): Promise<boolean> {
     const JW_COOKIE_URL = "https://jwxt2018.gxu.edu.cn/jwglxt";
+    const BACKEND_COOKIE_URL = "http://api.tool.gxutech.xyz";
 
     await CookieManager.clearAll();
 
@@ -62,6 +52,15 @@ async function remote(username: string, password: string): Promise<boolean> {
         name: "route",
         value: route,
     });
+    await CookieManager.set(BACKEND_COOKIE_URL, {
+        name: "JSESSIONID",
+        value: session,
+    });
+
+    await CookieManager.set(BACKEND_COOKIE_URL, {
+        name: "route",
+        value: route,
+    });
 
     const saved = await CookieManager.get(JW_COOKIE_URL);
 
@@ -77,7 +76,6 @@ export const JwAuthClient = {
     },
 
     async getPublicKey(): Promise<{modulus: string; exponent: string}> {
-        // await CookieManager.clearAll();
         const res = await http.get(urlWithParams("/xtgl/login_getPublicKey.html", {time: Date.now()}));
         return res.data;
     },
@@ -123,15 +121,15 @@ export const JwAuthClient = {
         const res = await http.post("/xsxxxggl/xsgrxxwh_cxXsgrxx.html?gnmkdm=N100801");
         const html = res.data;
         const i = personalInfoParser(html);
-        const pick = (l: string) => i.find((it: {label: string}) => it.label === l)?.value ?? "";
+        const picky = (l: string) => i.find((it: {label: string}) => it.label === l)?.value ?? "";
 
         return {
-            name: pick("姓名"),
-            school: pick("学院名称"),
-            grade: Number(pick("年级")),
-            class: pick("班级名称"),
-            subject: pick("专业名称")?.replace(/\(\d+\)/, ""),
-            subject_id: pick("专业名称")?.match(/(?<=\()\d+(?=\))/)![0],
+            name: picky("姓名"),
+            school: picky("学院名称"),
+            grade: Number(picky("年级")),
+            class: picky("班级名称"),
+            subject: picky("专业名称")?.replace(/\(\d+\)/, ""),
+            subject_id: picky("专业名称")?.match(/(?<=\()\d+(?=\))/)![0],
         } as UserInfo;
     },
     async clearSession() {

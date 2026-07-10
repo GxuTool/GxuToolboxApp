@@ -10,9 +10,11 @@
         "start": "adb reverse tcp:8081 tcp:8400 && react-native start --port 8400",
         "test": "jest",
         "check-dependencies": "rnx-align-deps",
-        "fix-dependencies": "rnx-align-deps --write"
+        "fix-dependencies": "rnx-align-deps --write",
+        "pull-db": "powershell -ExecutionPolicy Bypass -File ./scripts/pull-db.ps1"
     },
     "dependencies": {
+        "@op-engineering/op-sqlite": "^17.1.1",
         "@preeternal/react-native-cookie-manager": "^6.3.0",
         "@react-native-async-storage/async-storage": "^2.2.0",
         "@react-native-camera-roll/camera-roll": "^7.10.2",
