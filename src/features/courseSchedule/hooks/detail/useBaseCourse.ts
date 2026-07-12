@@ -1,4 +1,4 @@
-import {store} from "@/core/store.ts";
+import {mmkv} from "@/store/mmkv";
 import {ICourse} from "@/features/courseSchedule/type/schema/course.ts";
 import {courseApi} from "@/js/jw/course.ts";
 import {SchoolTermValue} from "@/type/global.ts";
@@ -14,17 +14,31 @@ interface BaseCourseStoreState {
     loading: boolean;
 }
 
-const useBaseCourseStore = create<BaseCourseStoreState>()(() => ({
-    rawCourseList: [],
-    courseList: [],
-    loading: false,
-}));
+const useBaseCourseStore = create<BaseCourseStoreState>()(() => {
+    // 同步加载MMKV缓存，避免首次渲染空白
+    const cached = mmkv.getObject<CourseScheduleQueryRes>("originalCourseList");
+    const parsed = cached ? ICourse.safeParse(cached) : undefined;
+    if (parsed?.success) {
+        return {
+            rawCourseList: cached!.kbList,
+            courseList: normalizeCourse(parsed.data),
+            loading: false,
+        };
+    }
+    return {rawCourseList: [], courseList: [], loading: false};
+});
 
 export const useBaseCourse = () => {
+    function loadCache(): CourseScheduleQueryRes | undefined {
+        return mmkv.getObject<CourseScheduleQueryRes>("originalCourseList");
+    }
+
+    function saveCache(data: CourseScheduleQueryRes) {
+        mmkv.set("originalCourseList", data);
+    }
+
     async function init(year: number, term: SchoolTermValue) {
         useBaseCourseStore.setState({loading: true});
-        const cacheKey = `originalCourseList:${year}:${term}`;
-        const legacyCacheKey = "originalCourseList";
 
         const setData = (raw: CourseScheduleQueryRes | null, shouldCache: boolean) => {
             if (!raw) return false;
@@ -38,7 +52,7 @@ export const useBaseCourse = () => {
             const newModel = normalizeCourse(parsed.data);
 
             if (shouldCache) {
-                store.save({key: cacheKey, data: raw});
+                saveCache(raw);
             }
             const current = useBaseCourseStore.getState().courseList;
             if (JSON.stringify(current) === JSON.stringify(newModel)) return true;
@@ -49,14 +63,13 @@ export const useBaseCourse = () => {
             return true;
         };
 
+        // 先从MMKV读取缓存快速渲染
         try {
-            const cachedRaw = await store.load<CourseScheduleQueryRes>({key: cacheKey}).catch(() => null);
-            if (!setData(cachedRaw, false)) {
-                const legacyCachedRaw = await store.load<CourseScheduleQueryRes>({key: legacyCacheKey}).catch(() => null);
-                setData(legacyCachedRaw, false);
-            }
+            const cachedRaw = loadCache();
+            setData(cachedRaw, false);
         } catch {}
 
+        // 网络请求获取最新数据，成功后覆盖MMKV缓存
         try {
             const classInstance = await courseApi.getCourseSchedule(year, term);
             if (classInstance) {
@@ -72,5 +85,7 @@ export const useBaseCourse = () => {
     return {
         store: useBaseCourseStore,
         init,
+        loadCache,
+        saveCache,
     };
 };

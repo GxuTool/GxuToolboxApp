@@ -65,7 +65,7 @@ export function ScheduleCard() {
 
     const {store: conflictStore} = useConflictCourseStore();
 
-    const {init: initPhyExp, patchItem, patchCourse} = usePhyExp();
+    const {init: initPhyExp, loadCache: loadPhyExpCache, patchItem, patchCourse} = usePhyExp();
 
     const {authState: JWAuthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
@@ -76,15 +76,19 @@ export function ScheduleCard() {
     const startDay = useStartDay(year, term);
 
     const {items: courseItems = [], refresh: refreshCourse} = useCourse(year, term);
-    const {store: examStore, init: initExam} = useExam();
+    const {store: examStore, init: initExam, loadCache: loadExamCache} = useExam();
     const examItems = examStore(s => s.examList) || [];
     const holidayItems = useHoliday(year, term) ?? [];
     const {items: practiceItems = [], refresh: refreshPractice} = usePractice(year, term);
 
     async function init() {
+        // 同步加载MMKV缓存到store，避免等待网络时页面空白
+        loadExamCache();
+
         if (JWAuthState.status !== AuthStateMap.Authenticated) {
             await JwMachine.refreshToken();
         } else {
+            // 异步拉取最新考试和物理实验数据
             await initExam(year, term, startDay);
             await initPhyExp();
         }
