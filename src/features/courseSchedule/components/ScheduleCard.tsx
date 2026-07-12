@@ -17,7 +17,7 @@ import {ScheduleTableItem, TimeScheduleItemData} from "@/features/courseSchedule
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {useExam} from "@/features/courseSchedule/hooks/detail/useExam.ts";
-import {useNextCourse} from "@/features/courseSchedule/hooks/detail/useNextCourse.ts";
+import {useNextEvent} from "@/features/courseSchedule/hooks/detail/useNextCourse.ts";
 import {usePractice} from "@/features/courseSchedule/hooks/detail/usePractice.ts";
 import {PracticalCourseList} from "@/features/courseSchedule/components/PracticalCourseList.tsx";
 import {CourseDetail} from "@/features/courseSchedule/components/CourseDetail.tsx";
@@ -41,6 +41,7 @@ import {ExamInfoClass} from "@/class/jw/exam.ts";
 import {ExamDetail} from "@/components/tool/infoQuery/examInfo/ExamDetail.tsx";
 import {JwMachine} from "@/core/auth/Jw/JwMachine.ts";
 import {AuthStateMap} from "@/core/auth/auth.type.ts";
+import {switchByField} from "@/utils/objectUtils.ts";
 
 // 菜单的类型
 type SheetState =
@@ -65,7 +66,7 @@ export function ScheduleCard() {
 
     const {store: conflictStore} = useConflictCourseStore();
 
-    const {init: initPhyExp, loadCache: loadPhyExpCache, patchItem, patchCourse} = usePhyExp();
+    const {init: initPhyExp, patchItem, patchCourse} = usePhyExp();
 
     const {authState: JWAuthState} = useJwAuth();
     const {authState: unifiedAuthState} = useUnifiedAuth();
@@ -107,8 +108,6 @@ export function ScheduleCard() {
         () => [...courseItems, ...examItems, ...holidayItems, ...defaultItem],
         [courseItems, examItems, holidayItems, defaultItem],
     );
-    const nextCourse = useNextCourse(rawItems, startDay);
-
     const [sheet, setSheet] = useState<SheetState>({type: "closed"});
 
     const onItemPress = useCallback(
@@ -273,18 +272,7 @@ export function ScheduleCard() {
                 </Flex>
             </Flex>
             <Divider />
-            {nextCourse !== null ? (
-                <View style={style.nextCourse}>
-                    <Text style={{fontSize: 18, color: textColor}}>
-                        下一节课：{nextCourse.item.title}
-                        {nextCourse.item.location ? ` · ${nextCourse.item.location}` : ""}
-                    </Text>
-                </View>
-            ) : (
-                <View style={style.nextCourse}>
-                    <Text style={{fontSize: 18, color: textColor}}>下一节课：高等数学{` · 6A-102`}（示例）</Text>
-                </View>
-            )}
+            <NextEventBanner />
             <TimeScheduleView
                 showDate
                 showTimeSpanHighlight
@@ -417,6 +405,57 @@ export function ScheduleCard() {
                     )}
                 </View>
             </BottomSheet>
+        </View>
+    );
+}
+
+function NextEventBanner() {
+    const nextEvent = useNextEvent();
+    const {store: ucStore} = useUserConfig();
+    const year = +ucStore(s => s.jw.year);
+    const term = ucStore(s => s.jw.term);
+    const startDay = useStartDay(year, term);
+    const {theme} = useTheme();
+    const baseColor = theme.colors.primary;
+    const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString;
+    const textColor = Color.mix(baseColor, theme.colors.black, 0.5).rgbaString;
+
+    if (!nextEvent) return null;
+
+    const daysFromNow = (item: {week: number; day: number}) => {
+        const eventDay = startDay
+            .clone()
+            .add(item.week - 1, "weeks")
+            .add(item.day - 1, "days")
+            .startOf("day");
+        const diff = eventDay.diff(moment().startOf("day"), "days");
+        if (diff <= 0) return "今天";
+        if (diff === 1) return "明天";
+        return `${diff}天后`;
+    };
+
+    const style = StyleSheet.create({
+        container: {
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            borderRadius: 8,
+            marginHorizontal: 6,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: backgroundColor,
+        },
+    });
+
+    return (
+        <View style={style.container}>
+            <Text style={{fontSize: 18, color: textColor}}>
+                {switchByField(nextEvent, "kind", {
+                    course: ev => `下一节课：${ev.title}${ev.location ? ` · ${ev.location}` : ""}`,
+                    exam: ev =>
+                        `下一场考试：${ev.title}${ev.location ? ` · ${ev.location}` : ""}（${daysFromNow(ev)}）`,
+                    holiday: ev => `下一个假期：${ev.title}（${daysFromNow(ev)}）`,
+                })}
+            </Text>
         </View>
     );
 }
