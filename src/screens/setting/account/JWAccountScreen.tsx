@@ -1,4 +1,4 @@
-import {ActivityIndicator, ScrollView, StyleSheet, ToastAndroid, View} from "react-native";
+import {ActivityIndicator, ScrollView, StyleSheet, View} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Button, Input, Text} from "@rneui/themed";
 import {useMemo, useState} from "react";
@@ -9,6 +9,7 @@ import {useJwAccount} from "@/core/auth/Jw/hooks/useJwAccount.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
 import {AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
 import {loginJwEvent} from "@/features/feedback/api/event.ts";
+import {syncIfStale} from "@/core/repo/userProfileServer.ts";
 
 function statusMeta(state: AuthState) {
     switch (state.status) {
@@ -38,11 +39,17 @@ export function JWAccountScreen() {
         clearResult();
         await saveAccount(username, password);
         const r = await login(username, password);
+
+        // 登录成功后，记录登录事件，并把基础的用户信息写入数据库
         if (r.ok) {
             await loginJwEvent();
+            syncIfStale(username).catch(err => {
+                console.warn(err);
+            });
             return;
         }
-        ToastAndroid.show("登录失败", ToastAndroid.SHORT);
+
+        // 登录失败的情况都被login函数抛出了，不会到这里
     }
 
     return (

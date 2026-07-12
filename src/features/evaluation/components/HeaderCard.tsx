@@ -25,6 +25,7 @@ export const HeaderCard = ({evaList, onTemplate, onSubmit, onClear}) => {
             width: 1,
             backgroundColor: theme.colors.divider,
             height: "100%",
+            flex: 0,
         },
         statNumber: {
             fontSize: 24,
@@ -91,7 +92,6 @@ export const HeaderCard = ({evaList, onTemplate, onSubmit, onClear}) => {
                         />
                         <Text style={styles.statLabel}>清空评价</Text>
                     </View>
-                    <View style={styles.statDivider} />
                     <View style={styles.statItem}>
                         <Icon
                             name="swap-horizontal"
@@ -119,7 +119,6 @@ export const HeaderCard = ({evaList, onTemplate, onSubmit, onClear}) => {
                         <Text style={[styles.statNumber, {color: theme.colors.error}]}>{statusCounts.undo}</Text>
                         <Text style={styles.statLabel}>未评</Text>
                     </View>
-                    <View style={styles.statDivider} />
                     <View style={styles.statItem}>
                         <Icon
                             name="swap-horizontal"

@@ -5,6 +5,8 @@ import {Root} from "./src/screens/Root.tsx";
 import {useColorScheme} from "react-native";
 import {SafeAreaProvider} from "react-native-safe-area-context";
 import {openAppEvent} from "@/features/feedback/api/event.ts";
+import {migrateTemplates} from "@/features/evaluation/store/defaultTemplate.ts";
+import {initDB} from "@/core/db.ts";
 
 function App(): React.JSX.Element {
     const colorScheme = useColorScheme();
@@ -27,6 +29,8 @@ function App(): React.JSX.Element {
     // 应用初始化
     useEffect(() => {
         init();
+        initDB();
+        migrateTemplates();
     }, []);
 
     return (
