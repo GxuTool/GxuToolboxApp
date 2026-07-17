@@ -8,8 +8,7 @@ import {useWebView} from "@/hooks/app.ts";
 import {useJwAccount} from "@/core/auth/Jw/hooks/useJwAccount.ts";
 import {useJwAuth} from "@/core/auth/Jw/hooks/useJwAuth.ts";
 import {AuthState, AuthStateMap} from "@/core/auth/auth.type.ts";
-import {loginJwEvent} from "@/features/feedback/api/event.ts";
-import {syncIfStale} from "@/core/repo/userProfileServer.ts";
+import {syncInfo} from "@/core/repo/userProfileServer.ts";
 
 function statusMeta(state: AuthState) {
     switch (state.status) {
@@ -42,8 +41,8 @@ export function JWAccountScreen() {
 
         // 登录成功后，记录登录事件，并把基础的用户信息写入数据库
         if (r.ok) {
-            await loginJwEvent();
-            syncIfStale(username).catch(err => {
+            // await loginJwEvent();
+            syncInfo(username).catch(err => {
                 console.warn(err);
             });
             return;

@@ -11,7 +11,7 @@ export const backendHttp = axios.create({
 
 backendHttp.interceptors.response.use(
     response => {
-        return response.data;
+        return response;
     },
     (error: AxiosError) => {
         // 关键：必须返回一个 rejected Promise，以便调用方可以 catch 错误

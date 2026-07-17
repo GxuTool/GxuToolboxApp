@@ -458,10 +458,9 @@ function NextEventBanner() {
         <View style={style.container}>
             <Text style={{fontSize: 18, color: textColor}}>
                 {switchByField(nextEvent, "kind", {
-                    course: ev => `下一节课：${ev.title}${ev.location ? ` · ${ev.location}` : ""}`,
-                    exam: ev =>
-                        `下一场考试：${ev.title}${ev.location ? ` · ${ev.location}` : ""}（${daysFromNow(ev)}）`,
-                    holiday: ev => `下一个假期：${ev.title}（${daysFromNow(ev)}）`,
+                    course: ev => `下节课：${ev.title}${ev.location ? ` · ${ev.location}` : ""}`,
+                    exam: ev => `下场考试：${ev.title}${ev.location ? ` · ${ev.location}` : ""}（${daysFromNow(ev)}）`,
+                    holiday: ev => `下个假期：${ev.title}（${daysFromNow(ev)}）`,
                 })}
             </Text>
         </View>

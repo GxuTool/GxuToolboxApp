@@ -13,8 +13,7 @@ let memoryStartDay: TermStartDay | null = null;
 
 export async function fetchStartDay(): Promise<TermStartDay[]> {
     const res = await backendHttp.get("/jw/profile/startDay");
-    console.log(res);
-    return res.data;
+    return res.data.data;
 }
 
 export async function saveToDB(terms: TermStartDay[]) {
