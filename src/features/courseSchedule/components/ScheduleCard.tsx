@@ -445,7 +445,7 @@ function NextEventBanner() {
         },
     });
 
-    if (!nextEvent) {
+    if (!nextEvent && startDay) {
         const updateTime = startDay.add(20, "week").format("MM月DD日");
         return (
             <View style={style.container}>

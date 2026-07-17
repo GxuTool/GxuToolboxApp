@@ -9,6 +9,8 @@ interface TermStartDay {
     is_current: boolean;
 }
 
+let memoryStartDay: TermStartDay | null = null;
+
 export async function fetchStartDay(): Promise<TermStartDay[]> {
     const res = await backendHttp.get("/jw/profile/startDay");
     console.log(res);
@@ -32,9 +34,12 @@ export async function saveToDB(terms: TermStartDay[]) {
             );
         }
     });
+    memoryStartDay = null;
 }
 
 export async function getCurrentStartDay(): Promise<TermStartDay | null> {
+    if (memoryStartDay) return memoryStartDay;
+
     const db = getDB();
     const result = await db.execute("SELECT * FROM term_start_day WHERE is_current = 1 LIMIT 1");
 
@@ -42,4 +47,9 @@ export async function getCurrentStartDay(): Promise<TermStartDay | null> {
         return result.rows[0] as unknown as TermStartDay;
     }
     return null;
+}
+
+// 从内存中获取
+export function getSyncStartDay(): TermStartDay | null {
+    return memoryStartDay;
 }

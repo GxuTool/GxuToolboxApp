@@ -1,6 +1,6 @@
 import {SchoolTermValue} from "@/type/global.ts";
 import {useEffect, useState} from "react";
-import {fetchStartDay, getCurrentStartDay, saveToDB} from "@/features/courseSchedule/repo/startDay.ts";
+import {fetchStartDay, getCurrentStartDay, getSyncStartDay, saveToDB} from "@/features/courseSchedule/repo/startDay.ts";
 import dayjs, {Dayjs} from "dayjs";
 import moment from "moment";
 
@@ -9,7 +9,9 @@ let isSyncing = false;
 // 这次打开APP时已经刷新过
 let hasSynced = false;
 export function useStartDay(year: number, term: SchoolTermValue) {
-    const [startDay, setStartDay] = useState<Dayjs | null>(dayjs("2025-09-08"));
+    const cachedTerm = getSyncStartDay();
+
+    const [startDay, setStartDay] = useState((): Dayjs => (cachedTerm ? dayjs(cachedTerm.day) : dayjs("2025-09-08")));
     const fetch = async () => {
         if (isSyncing || hasSynced) return;
 
@@ -64,7 +66,7 @@ export function useStartDay(year: number, term: SchoolTermValue) {
                 const needFetch =
                     !currentTerm || dayjs().isAfter(dayjs(currentTerm.day).add(currentTerm.week, "week"), "day");
 
-                if (currentTerm) {
+                if (currentTerm && !cachedTerm) {
                     setStartDay(dayjs(currentTerm.day));
                 }
 
@@ -86,5 +88,5 @@ export function useStartDay(year: number, term: SchoolTermValue) {
     }, []);
 
     // 暂时兼容一下moment
-    return startDay ? moment(startDay.format()) : null;
+    return moment(startDay.format());
 }
