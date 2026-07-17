@@ -3,7 +3,7 @@ import moment from "moment";
 import {ScheduleTableItem} from "@/features/courseSchedule/type/schedule.ts";
 import {useCourse} from "@/features/courseSchedule/hooks/detail/useCourse.ts";
 import {useExam} from "@/features/courseSchedule/hooks/detail/useExam.ts";
-import {useHoliday, type HolidayRange} from "@/features/courseSchedule/hooks/detail/useHoliday.ts";
+import {type HolidayRange, useHoliday} from "@/features/courseSchedule/hooks/detail/useHoliday.ts";
 import {useStartDay} from "@/features/courseSchedule/hooks/detail/useStartDay.ts";
 import {useUserConfig} from "@/hooks/useUserConfig.ts";
 import type {Course} from "@/type/infoQuery/course/course.ts";
@@ -26,9 +26,9 @@ const TIME_SPAN_START = [
 ];
 
 export type NextEventItem =
-    | ScheduleTableItem<Course, 'course'>
-    | ScheduleTableItem<ExamInfo, 'exam'>
-    | ScheduleTableItem<HolidayRange, 'holiday'>;
+    | ScheduleTableItem<Course, "course">
+    | ScheduleTableItem<ExamInfo, "exam">
+    | ScheduleTableItem<HolidayRange, "holiday">;
 
 export function useNextEvent(): NextEventItem | null {
     const {store: ucStore} = useUserConfig();
@@ -48,6 +48,8 @@ export function useNextEvent(): NextEventItem | null {
     );
 
     return useMemo(() => {
+        if (!startDay) return null;
+
         const now = moment();
         let best: {item: NextEventItem; date: moment.Moment} | null = null;
 

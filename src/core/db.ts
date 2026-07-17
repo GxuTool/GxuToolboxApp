@@ -17,6 +17,7 @@ export async function initDB() {
             updated_at  INTEGER DEFAULT (strftime('%s', 'now'))
         )
     `);
+    // 用户信息表
     await db.execute(`
         CREATE TABLE IF NOT EXISTS user_profiles (
             student_id  TEXT                                    NOT NULL PRIMARY KEY,
@@ -29,5 +30,16 @@ export async function initDB() {
             study_years INTEGER,
             updated_at  INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL
         );
+    `);
+    await db.execute(`
+        CREATE TABLE IF NOT EXISTS term_start_day
+        (
+            year       INTEGER  NOT NULL,
+            term       INTEGER  NOT NULL,
+            day        DATETIME NOT NULL,
+            week       INTEGER  NOT NULL,
+            is_current BOOLEAN  NOT NULL,
+            PRIMARY KEY (year, term)
+        )
     `);
 }

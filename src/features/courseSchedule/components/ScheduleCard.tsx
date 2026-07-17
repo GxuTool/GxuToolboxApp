@@ -420,9 +420,8 @@ function NextEventBanner() {
     const backgroundColor = Color(baseColor).setAlpha(theme.mode === "light" ? 0.3 : 0.1).rgbaString;
     const textColor = Color.mix(baseColor, theme.colors.black, 0.5).rgbaString;
 
-    if (!nextEvent) return null;
-
     const daysFromNow = (item: {week: number; day: number}) => {
+        if (!startDay) return "未知时间";
         const eventDay = startDay
             .clone()
             .add(item.week - 1, "weeks")
@@ -445,6 +444,15 @@ function NextEventBanner() {
             backgroundColor: backgroundColor,
         },
     });
+
+    if (!nextEvent) {
+        const updateTime = startDay.add(20, "week").format("MM月DD日");
+        return (
+            <View style={style.container}>
+                <Text style={{fontSize: 16, color: textColor}}>所有活动已结束，将在{updateTime}更新至下个学期</Text>
+            </View>
+        );
+    }
 
     return (
         <View style={style.container}>
