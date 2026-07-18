@@ -1,7 +1,8 @@
 import {ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {useEffect, useMemo, useState} from "react";
 import {useTheme} from "@rneui/themed";
-import {userProfile} from "@/core/user/profile.ts";
+import {useJwAccount} from "@/core/auth/Jw/hooks/useJwAccount.ts";
+import {userProfileRepo} from "@/core/repo/userProfileRepo.ts";
 
 interface ChooseTermProps {
     // 保持原有接口定义，支持 year 传空字符串
@@ -17,6 +18,10 @@ export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeY
     const {theme} = useTheme();
     // 入学年份
     const [enrollmentYear, setEnrollmentYear] = useState<number>(2023);
+
+    // 学习年限
+    const [studyYear, setStudyYear] = useState<number>(4);
+    const {username} = useJwAccount();
 
     // 状态：显示范围过滤器
     const [filterType, setFilterType] = useState<FilterType>("no_future");
@@ -34,7 +39,7 @@ export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeY
         const yearNames = ["大一", "大二", "大三", "大四", "大五"];
         const years = [];
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < studyYear; i++) {
             const startYear = enrollmentYear + i;
             years.push({
                 name: yearNames[i] || `第${i + 1}年`,
@@ -53,21 +58,24 @@ export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeY
             default:
                 return years;
         }
-    }, [enrollmentYear, filterType, realAcademicYear]);
+    }, [enrollmentYear, filterType, realAcademicYear, studyYear]);
 
-    const init = async () => {
-        const info = await userProfile.loadUserInfo();
-        setEnrollmentYear(info.grade);
+    const init = async (account: string) => {
+        if (!account) return;
+
+        const info = await userProfileRepo.get(account);
+        setEnrollmentYear(+info.grade);
+        setStudyYear(info.study_years);
     };
 
     useEffect(() => {
-        init();
+        init(username);
         // 默认当前学年和当前学期，3到8月算下半学期
         const initTerm = currentMonth >= 3 && currentMonth < 9 ? "12" : "3";
         const initYear = Math.max(realAcademicYear, enrollmentYear);
         setSelected({year: initYear, term: initTerm});
         onTermSelect?.(initYear, initTerm);
-    }, []);
+    }, [username]);
 
     // --- 2. 交互处理 ---
 
