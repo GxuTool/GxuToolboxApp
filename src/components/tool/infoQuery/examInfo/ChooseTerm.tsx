@@ -177,7 +177,7 @@ export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeY
         yearItem: {
             paddingHorizontal: 16,
             paddingVertical: 8,
-            borderRadius: 20,
+            borderRadius: 8,
             borderWidth: 1,
             borderColor: theme.colors.grey4,
             marginRight: 8,
@@ -188,7 +188,7 @@ export function ChooseTerm({onTermSelect, includeWholeLife = true, includeWholeY
             borderColor: theme.colors.primary,
         },
         yearText: {
-            fontSize: 14,
+            fontSize: 15,
             color: theme.colors.grey2,
         },
         yearTextSelected: {
