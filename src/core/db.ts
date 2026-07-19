@@ -31,6 +31,7 @@ export async function initDB() {
             updated_at  INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL
         );
     `);
+    // 记录学期的开始时间
     await db.execute(`
         CREATE TABLE IF NOT EXISTS term_start_day
         (
@@ -40,6 +41,24 @@ export async function initDB() {
             week       INTEGER  NOT NULL,
             is_current BOOLEAN  NOT NULL,
             PRIMARY KEY (year, term)
+        )
+    `);
+    // await db.execute("DROP TABLE IF EXISTS exam_score;");
+    // 记录学期的成绩
+    await db.execute(`
+        CREATE TABLE IF NOT EXISTS exam_score
+        (
+            id           TEXT                                    NOT NULL PRIMARY KEY,
+            year         INTEGER                                 NOT NULL,
+            term         INTEGER                                 NOT NULL,
+            course_name  TEXT                                    NOT NULL,
+            credit       INTEGER                                 NOT NULL,
+            score        INTEGER                                 NOT NULL,
+            teacher_name TEXT                                    NOT NULL,
+--          提交时间
+            upload_at    TEXT                                    NOT NULL,
+            usual_score  TEXT                                    NOT NULL,
+            updated_at   INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL
         )
     `);
 }
